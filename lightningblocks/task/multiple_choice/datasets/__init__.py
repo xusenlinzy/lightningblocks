@@ -1,0 +1,2 @@
+from lightningblocks.task.multiple_choice.datasets.swag import SwagMultipleChoiceDataModule
+from lightningblocks.task.multiple_choice.datasets.race import RaceMultipleChoiceDataModule

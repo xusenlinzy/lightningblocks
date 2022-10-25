@@ -1,0 +1,4 @@
+from lightningblocks.task.named_entity_recognition.cnn.data import CNNNerDataModule
+from lightningblocks.task.named_entity_recognition.cnn.data import DataCollatorForCNNNer
+from lightningblocks.task.named_entity_recognition.cnn.model import get_auto_cnn_ner_model
+from lightningblocks.task.named_entity_recognition.cnn.model import get_cnn_model_config

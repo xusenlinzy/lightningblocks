@@ -1,0 +1,22 @@
+/.idea/
+/.vscode/
+
+# Python:
+*.py[cod]
+*.so
+*.egg
+*.egg-info
+dist
+build
+__pycache__/
+.pytest_cache/
+.ipynb_checkpoints
+
+/applications/paper_information_extraction/data/
+/applications/named_entity_recognition/datasets/
+/applications/relation_extraction/datasets/
+/applications/sentence_embedding/docker/
+/applications/text_search/
+/commodity_classification/
+/knowledge_graph/ownthink/data/
+/knowledge_graph/medical/dict/

@@ -1,0 +1,1 @@
+from lightningblocks.task.sentence_embedding.predictor import SentenceEmbeddings

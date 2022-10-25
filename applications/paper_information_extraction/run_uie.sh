@@ -1,0 +1,11 @@
+python uie_finetune.py \
+  --batch_size 32 \
+  --train_path data/train.txt \
+  --dev_path data/dev.txt \
+  --max_seq_len 256 \
+  --num_epochs 12 \
+  --logging_steps 1000 \
+  --valid_steps 2000 \
+  --model uie_base_pytorch \
+  --max_model_num 3 \
+  --early_stopping

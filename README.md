@@ -1,0 +1,369 @@
+<div align="center">
+
+**基于 [`pytorch-lightning`](https://github.com/Lightning-AI/lightning) 和 [`transformers`](https://github.com/huggingface/transformers) 框架实现各类 `NLP` 任务**
+
+</div>
+
+---
+
+## 文本分类
+
+### 1. 数据转换
+
+<details>
+<summary>训练数据示例</summary>
+
+```json
+{
+  "text": "以色列大规模空袭开始！伊朗多个军事目标遭遇打击，誓言对等反击",
+  "label": "news_military"
+}
+```
+
+</details>
+
+**训练数据包含两个文件**：`train.json` 和 `dev.json`。
+
+### 2. 模型
+
+
+| 模型                                                                 | 论文                                                                                                           | 备注                              |
+|--------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------|---------------------------------|
+| [FC](./lightningblocks/task/text_classification/fc/model.py)       |                                                                                                              | 全连接层分类                          |
+| [MDP](./lightningblocks/task/text_classification/mdp/model.py)     | [Multi-Sample Dropout for Accelerated Training and Better Generalization.](https://arxiv.org/abs/1905.09788) | 使用 `MultiSampleDropout`，类似于模型融合 |
+| [RDROP](./lightningblocks/task/text_classification/rdrop/model.py) | [R-Drop: Regularized Dropout for Neural Networks.](https://arxiv.org/abs/2106.14448)                         | 全连接层分类并使用 `R-Drop` 正则化损失        |
+
+<details>
+<summary>训练代码示例</summary>
+
+```python
+import pytorch_lightning as pl
+from pytorch_lightning.loggers import WandbLogger
+from transformers import BertTokenizerFast
+
+from lightningblocks.callbacks import LoggingCallback
+from lightningblocks.task.text_classification import (
+    TextClassificationDataModule,
+    TextClassificationTransformer,
+)
+
+pl.seed_everything(seed=42)
+pretrained_model_name_or_path = "hfl/chinese-roberta-wwm-ext"  # 预训练模型
+tokenizer = BertTokenizerFast.from_pretrained(pretrained_model_name_or_path)
+
+dm = TextClassificationDataModule(
+    tokenizer=tokenizer,
+    train_batch_size=16,  # 训练集batch_size
+    validation_batch_size=16,  # 验证集batch_size
+    num_workers=16,  # 多进程加载数据
+    dataset_name="datasets/sentiment",  # 训练数据所在目录
+    train_file="train.json",  # 训练集文件名
+    validation_file="dev.json",  # 验证集文件名
+    max_length=256,  # 序列最大长度
+    cache_dir="datasets/sentiment",  # 数据缓存路径
+    is_chinese=True,
+)
+
+model = TextClassificationTransformer(
+    downstream_model_name="fc",  # 模型名称
+    downstream_model_type="bert",  # 预训练模型类型
+    pretrained_model_name_or_path=pretrained_model_name_or_path,
+    tokenizer=tokenizer,
+    label_map=dm.num_classes,
+    learning_rate=2e-5,
+    output_dir="outputs/sentiment/fc",  # 模型保存路径
+)
+
+model_ckpt = pl.callbacks.ModelCheckpoint(
+    dirpath="outputs/sentiment/fc",
+    filename="best_model",
+    monitor="val_accuracy",
+    save_top_k=1,
+    mode="max",
+)
+
+wandb_logger = WandbLogger(project="Text Classification", name="fc")
+
+trainer = pl.Trainer(
+    logger=wandb_logger,
+    accelerator="gpu",
+    devices=1,
+    max_epochs=12,
+    val_check_interval=0.5,
+    gradient_clip_val=1.0,
+    callbacks=[model_ckpt, LoggingCallback()]
+)
+
+trainer.fit(model, dm)
+```
+
+</details>
+
+### 3. 预测
+
+```python
+from lightningblocks.task.text_classification import TextClassificationTransformer
+
+model = TextClassificationTransformer.load_from_checkpoint("my_bert_model_path")
+text = "以色列大规模空袭开始！伊朗多个军事目标遭遇打击，誓言对等反击"
+print(model.predict(text))
+```
+
+---
+
+## 命名实体识别
+
+### 1. 数据转换
+
+<details>
+<summary>训练数据示例</summary>
+
+```json
+{
+  "text": "结果上周六他们主场0：3惨败给了中游球队瓦拉多利德，近7个多月以来西甲首次输球。", 
+  "entities": [
+    {
+      "id": 0, 
+      "entity": "瓦拉多利德", 
+      "start_offset": 20, 
+      "end_offset": 25, 
+      "label": "organization"
+    }, 
+    {
+      "id": 1, 
+      "entity": "西甲", 
+      "start_offset": 33, 
+      "end_offset": 35, 
+      "label": "organization"
+    }
+  ]
+}
+```
+</details>
+
+**训练数据包含两个文件**：`train.json` 和 `dev.json`。
+
+### 2. 模型
+
+
+| 模型                                                                                        | 论文                                                                                                                                                 | 备注                                                                                                                                            |
+|-------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| [SOFTMAX](./lightningblocks/task/named_entity_recognition/crf/model.py)                   |                                                                                                                                                    | 全连接层序列标注并使用 `BIO` 解码                                                                                                                          |
+| [CRF](./lightningblocks/task/named_entity_recognition/crf/model.py)                       |                                                                                                                                                    | 全连接层+条件随机场，并使用 `BIO` 解码                                                                                                                       |
+| [CASCADE-CRF](./lightningblocks/task/named_entity_recognition/crf/model.py)               |                                                                                                                                                    | 先预测实体再预测实体类型                                                                                                                                  |
+| [SPAN](./lightningblocks/task/named_entity_recognition/span/model.py)                     |                                                                                                                                                    | 使用两个指针网络预测实体起始位置                                                                                                                              |
+| [GLOBAL-POINTER](./lightningblocks/task/named_entity_recognition/global_pointer/model.py) |                                                                                                                                                    | [GlobalPointer：用统一的方式处理嵌套和非嵌套NER](https://spaces.ac.cn/archives/8373)、[Efficient GlobalPointer：少点参数，多点效果](https://spaces.ac.cn/archives/8877) |
+| [MRC](./lightningblocks/task/named_entity_recognition/mrc/model.py)                       | [A Unified MRC Framework for Named Entity Recognition.](https://aclanthology.org/2020.acl-main.519.pdf)                                            |                                                                                                                                               |
+| [TPLINKER](./lightningblocks/task/named_entity_recognition/tplinker/model.py)             | [TPLinker: Single-stage Joint Extraction of Entities and Relations Through Token Pair Linking.](https://aclanthology.org/2020.coling-main.138.pdf) |                                                                                                                                               |
+| [LEAR](./lightningblocks/task/named_entity_recognition/lear/model.py)                     | [Enhanced Language Representation with Label Knowledge for Span Extraction.](https://aclanthology.org/2021.emnlp-main.379.pdf)                     |                                                                                                                                               |
+| [W2NER](./lightningblocks/task/named_entity_recognition/w2ner/model.py)                   | [Unified Named Entity Recognition as Word-Word Relation Classification.](https://arxiv.org/pdf/2112.10070.pdf)                                     |                                                                                                                                               |
+
+
+<details>
+<summary>训练代码示例</summary>
+
+```python
+import pytorch_lightning as pl
+from pytorch_lightning.loggers import WandbLogger
+from transformers import BertTokenizerFast
+
+from lightningblocks.callbacks import LoggingCallback
+from lightningblocks.task.named_entity_recognition import (
+    CRFNerDataModule,
+    NamedEntityRecognitionTransformer,
+)
+
+pl.seed_everything(seed=42)
+pretrained_model_name_or_path = "hfl/chinese-roberta-wwm-ext"  # 预训练模型
+tokenizer = BertTokenizerFast.from_pretrained(pretrained_model_name_or_path)
+
+dm = CRFNerDataModule(
+    tokenizer=tokenizer,
+    train_batch_size=16,  # 训练集batch_size
+    validation_batch_size=16,  # 验证集batch_size
+    num_workers=16,  # 多进程加载数据
+    dataset_name="datasets/cmeee",  # 训练数据所在目录
+    train_file="train.json",  # 训练集文件名
+    validation_file="dev.json",  # 验证集文件名
+    max_length=128,  # 序列最大长度
+    cache_dir="datasets/cmeee",  # 数据缓存路径
+    task_name="cmeee-bert-crf",  # 自定义任务名称
+    is_chinese=True,
+)
+
+model = NamedEntityRecognitionTransformer(
+    downstream_model_name="crf",  # 模型名称
+    downstream_model_type="bert",  # 预训练模型类型
+    pretrained_model_name_or_path=pretrained_model_name_or_path,
+    tokenizer=tokenizer,
+    labels=dm.label_list,
+    learning_rate=2e-5,
+    average="micro",
+    output_dir="outputs/cmeee/crf",  # 模型保存路径
+)
+
+model_ckpt = pl.callbacks.ModelCheckpoint(
+    dirpath="outputs/cmeee/crf",
+    filename="best_model",
+    monitor="val_f1_micro",
+    save_top_k=1,
+    mode="max",
+)
+
+wandb_logger = WandbLogger(project="Named Entity Recognition", name="cmeee-bert-crf")
+
+trainer = pl.Trainer(
+    logger=wandb_logger,
+    accelerator="gpu",
+    devices=1,
+    max_epochs=12,
+    val_check_interval=0.5,
+    gradient_clip_val=1.0,
+    callbacks=[model_ckpt, LoggingCallback()]
+)
+
+trainer.fit(model, dm)
+```
+
+</details>
+
+### 3. 预测
+
+```python
+from pprint import pprint
+from lightningblocks.task.named_entity_recognition import NerPipeline
+
+pipline = NerPipeline(model_name_or_path="my_bert_model_path", model_name="crf", model_type="bert")
+text = "结果上周六他们主场0：3惨败给了中游球队瓦拉多利德，近7个多月以来西甲首次输球。"
+pprint(pipline(text))
+```
+
+---
+
+## 实体关系抽取
+
+### 1. 数据转换
+
+<details>
+<summary>训练数据示例</summary>
+
+```json
+{
+  "text": "查尔斯·阿兰基斯（Charles Aránguiz），1989年4月17日出生于智利圣地亚哥，智利职业足球运动员，司职中场，效力于德国足球甲级联赛勒沃库森足球俱乐部", 
+  "spo_list": [
+    {
+      "predicate": "出生地", 
+      "object_type": "地点", 
+      "subject_type": "人物", 
+      "object": "圣地亚哥", 
+      "subject": "查尔斯·阿兰基斯"
+    }, 
+    {
+      "predicate": "出生日期", 
+      "object_type": "Date", 
+      "subject_type": "人物", 
+      "object": "1989年4月17日",
+      "subject": "查尔斯·阿兰基斯"
+    }
+  ]
+}
+```
+
+</details>
+
+**训练数据包含两个文件**：`train.json` 和 `dev.json`。
+
+### 2. 模型
+
+| 模型                                                                       | 论文                                                                                                                                                 | 备注                                                                  |
+|--------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
+| [CASREL](./lightningblocks/task/relation_extraction/casrel/model.py)     | [A Novel Cascade Binary Tagging Framework for Relational Triple Extraction.](https://aclanthology.org/2020.acl-main.136.pdf)                       |                                                                     |
+| [TPLINKER](./lightningblocks/task/relation_extraction/tplinker/model.py) | [TPLinker: Single-stage Joint Extraction of Entities and Relations Through Token Pair Linking.](https://aclanthology.org/2020.coling-main.138.pdf) |                                                                     |
+| [SPN](./lightningblocks/task/relation_extraction/spn/model.py)           | [Joint Entity and Relation Extraction with Set Prediction Networks.](http://xxx.itp.ac.cn/pdf/2011.01675v2)                                        |                                                                     |
+| [PRGC](./lightningblocks/task/relation_extraction/prgc/model.py)         | [PRGC: Potential Relation and Global Correspondence Based Joint Relational Triple Extraction.](https://aclanthology.org/2021.acl-long.486.pdf)     |                                                                     |
+| [PFN](./lightningblocks/task/relation_extraction/pfn/model.py)           | [A Partition Filter Network for Joint Entity and Relation Extraction.](https://aclanthology.org/2021.emnlp-main.17.pdf)                            |                                                                     |
+| [GRTE](./lightningblocks/task/relation_extraction/grte/model.py)         | [A Novel Global Feature-Oriented Relational Triple Extraction Model based on Table Filling.](https://aclanthology.org/2021.emnlp-main.208.pdf)     |                                                                     |
+| [GPLINKER](./lightningblocks/task/relation_extraction/gplinker/model.py) |                                                                                                                                                    | [GPLinker：基于GlobalPointer的实体关系联合抽取](https://kexue.fm/archives/8888) |
+
+
+<details>
+<summary>训练代码示例</summary>
+
+```python
+import pytorch_lightning as pl
+from pytorch_lightning.loggers import WandbLogger
+from transformers import BertTokenizerFast
+
+from lightningblocks.callbacks import LoggingCallback
+from lightningblocks.task.relation_extraction import (
+    GPLinkerDataModule,
+    RelationExtractionTransformer,
+)
+
+pl.seed_everything(seed=42)
+pretrained_model_name_or_path = "hfl/chinese-roberta-wwm-ext"  # 预训练模型
+tokenizer = BertTokenizerFast.from_pretrained(pretrained_model_name_or_path)
+
+dm = GPLinkerDataModule(
+    tokenizer=tokenizer,
+    train_batch_size=16,  # 训练集batch_size
+    validation_batch_size=16,  # 验证集batch_size
+    num_workers=16,  # 多进程加载数据
+    dataset_name="datasets/duie",  # 训练数据所在目录
+    train_file="train.json",  # 训练集文件名
+    validation_file="dev.json",  # 验证集文件名
+    max_length=128,  # 序列最大长度
+    cache_dir="datasets/duie",  # 数据缓存路径
+    task_name="duie-bert-gplinker",  # 自定义任务名称
+    is_chinese=True,
+)
+
+model = RelationExtractionTransformer(
+    downstream_model_name="gplinker",  # 模型名称
+    downstream_model_type="bert",  # 预训练模型类型
+    pretrained_model_name_or_path=pretrained_model_name_or_path,
+    tokenizer=tokenizer,
+    predicates=dm.predicate_list,
+    learning_rate=2e-5,
+    average="micro",
+    output_dir="outputs/duie/gplinker",  # 模型保存路径
+)
+
+model_ckpt = pl.callbacks.ModelCheckpoint(
+    dirpath="outputs/duie/gplinker",
+    filename="best_model",
+    monitor="val_f1_micro",
+    save_top_k=1,
+    mode="max",
+)
+
+wandb_logger = WandbLogger(project="Relation Extraction", name="duie-bert-gplinker")
+
+trainer = pl.Trainer(
+    logger=wandb_logger,
+    accelerator="gpu",
+    devices=1,
+    max_epochs=12,
+    val_check_interval=0.5,
+    gradient_clip_val=1.0,
+    callbacks=[model_ckpt, LoggingCallback()]
+)
+
+trainer.fit(model, dm)
+```
+
+</details>
+
+### 3. 预测
+
+```python
+from pprint import pprint
+from lightningblocks.task.relation_extraction import RelationExtractionPipeline
+
+pipline = RelationExtractionPipeline(model_name_or_path="my_bert_model_path", model_name="gplinker", model_type="bert")
+text = "查尔斯·阿兰基斯（Charles Aránguiz），1989年4月17日出生于智利圣地亚哥，智利职业足球运动员，司职中场，效力于德国足球甲级联赛勒沃库森足球俱乐部。"
+pprint(pipline(text))
+```
+
+---
+
