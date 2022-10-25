@@ -29,9 +29,9 @@
 
 | 模型                                                                 | 论文                                                                                                           | 备注                              |
 |--------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------|---------------------------------|
-| [FC](./lightningblocks/task/text_classification/fc/model.py)       |                                                                                                              | 全连接层分类                          |
-| [MDP](./lightningblocks/task/text_classification/mdp/model.py)     | [Multi-Sample Dropout for Accelerated Training and Better Generalization.](https://arxiv.org/abs/1905.09788) | 使用 `MultiSampleDropout`，类似于模型融合 |
-| [RDROP](./lightningblocks/task/text_classification/rdrop/model.py) | [R-Drop: Regularized Dropout for Neural Networks.](https://arxiv.org/abs/2106.14448)                         | 全连接层分类并使用 `R-Drop` 正则化损失        |
+| [FC](lightningnlp/task/text_classification/fc/model.py)       |                                                                                                              | 全连接层分类                          |
+| [MDP](lightningnlp/task/text_classification/mdp/model.py)     | [Multi-Sample Dropout for Accelerated Training and Better Generalization.](https://arxiv.org/abs/1905.09788) | 使用 `MultiSampleDropout`，类似于模型融合 |
+| [RDROP](lightningnlp/task/text_classification/rdrop/model.py) | [R-Drop: Regularized Dropout for Neural Networks.](https://arxiv.org/abs/2106.14448)                         | 全连接层分类并使用 `R-Drop` 正则化损失        |
 
 <details>
 <summary>训练代码示例</summary>
@@ -41,8 +41,8 @@ import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 from transformers import BertTokenizerFast
 
-from lightningblocks.callbacks import LoggingCallback
-from lightningblocks.task.text_classification import (
+from lightningnlp.callbacks import LoggingCallback
+from lightningnlp.task.text_classification import (
     TextClassificationDataModule,
     TextClassificationTransformer,
 )
@@ -102,7 +102,7 @@ trainer.fit(model, dm)
 ### 3. 预测
 
 ```python
-from lightningblocks.task.text_classification import TextClassificationTransformer
+from lightningnlp.task.text_classification import TextClassificationTransformer
 
 model = TextClassificationTransformer.load_from_checkpoint("my_bert_model_path")
 text = "以色列大规模空袭开始！伊朗多个军事目标遭遇打击，誓言对等反击"
@@ -148,15 +148,15 @@ print(model.predict(text))
 
 | 模型                                                                                        | 论文                                                                                                                                                 | 备注                                                                                                                                            |
 |-------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| [SOFTMAX](./lightningblocks/task/named_entity_recognition/crf/model.py)                   |                                                                                                                                                    | 全连接层序列标注并使用 `BIO` 解码                                                                                                                          |
-| [CRF](./lightningblocks/task/named_entity_recognition/crf/model.py)                       |                                                                                                                                                    | 全连接层+条件随机场，并使用 `BIO` 解码                                                                                                                       |
-| [CASCADE-CRF](./lightningblocks/task/named_entity_recognition/crf/model.py)               |                                                                                                                                                    | 先预测实体再预测实体类型                                                                                                                                  |
-| [SPAN](./lightningblocks/task/named_entity_recognition/span/model.py)                     |                                                                                                                                                    | 使用两个指针网络预测实体起始位置                                                                                                                              |
-| [GLOBAL-POINTER](./lightningblocks/task/named_entity_recognition/global_pointer/model.py) |                                                                                                                                                    | [GlobalPointer：用统一的方式处理嵌套和非嵌套NER](https://spaces.ac.cn/archives/8373)、[Efficient GlobalPointer：少点参数，多点效果](https://spaces.ac.cn/archives/8877) |
-| [MRC](./lightningblocks/task/named_entity_recognition/mrc/model.py)                       | [A Unified MRC Framework for Named Entity Recognition.](https://aclanthology.org/2020.acl-main.519.pdf)                                            |                                                                                                                                               |
-| [TPLINKER](./lightningblocks/task/named_entity_recognition/tplinker/model.py)             | [TPLinker: Single-stage Joint Extraction of Entities and Relations Through Token Pair Linking.](https://aclanthology.org/2020.coling-main.138.pdf) |                                                                                                                                               |
-| [LEAR](./lightningblocks/task/named_entity_recognition/lear/model.py)                     | [Enhanced Language Representation with Label Knowledge for Span Extraction.](https://aclanthology.org/2021.emnlp-main.379.pdf)                     |                                                                                                                                               |
-| [W2NER](./lightningblocks/task/named_entity_recognition/w2ner/model.py)                   | [Unified Named Entity Recognition as Word-Word Relation Classification.](https://arxiv.org/pdf/2112.10070.pdf)                                     |                                                                                                                                               |
+| [SOFTMAX](lightningnlp/task/named_entity_recognition/crf/model.py)                   |                                                                                                                                                    | 全连接层序列标注并使用 `BIO` 解码                                                                                                                          |
+| [CRF](lightningnlp/task/named_entity_recognition/crf/model.py)                       |                                                                                                                                                    | 全连接层+条件随机场，并使用 `BIO` 解码                                                                                                                       |
+| [CASCADE-CRF](lightningnlp/task/named_entity_recognition/crf/model.py)               |                                                                                                                                                    | 先预测实体再预测实体类型                                                                                                                                  |
+| [SPAN](lightningnlp/task/named_entity_recognition/span/model.py)                     |                                                                                                                                                    | 使用两个指针网络预测实体起始位置                                                                                                                              |
+| [GLOBAL-POINTER](lightningnlp/task/named_entity_recognition/global_pointer/model.py) |                                                                                                                                                    | [GlobalPointer：用统一的方式处理嵌套和非嵌套NER](https://spaces.ac.cn/archives/8373)、[Efficient GlobalPointer：少点参数，多点效果](https://spaces.ac.cn/archives/8877) |
+| [MRC](lightningnlp/task/named_entity_recognition/mrc/model.py)                       | [A Unified MRC Framework for Named Entity Recognition.](https://aclanthology.org/2020.acl-main.519.pdf)                                            |                                                                                                                                               |
+| [TPLINKER](lightningnlp/task/named_entity_recognition/tplinker/model.py)             | [TPLinker: Single-stage Joint Extraction of Entities and Relations Through Token Pair Linking.](https://aclanthology.org/2020.coling-main.138.pdf) |                                                                                                                                               |
+| [LEAR](lightningnlp/task/named_entity_recognition/lear/model.py)                     | [Enhanced Language Representation with Label Knowledge for Span Extraction.](https://aclanthology.org/2021.emnlp-main.379.pdf)                     |                                                                                                                                               |
+| [W2NER](lightningnlp/task/named_entity_recognition/w2ner/model.py)                   | [Unified Named Entity Recognition as Word-Word Relation Classification.](https://arxiv.org/pdf/2112.10070.pdf)                                     |                                                                                                                                               |
 
 
 <details>
@@ -167,8 +167,8 @@ import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 from transformers import BertTokenizerFast
 
-from lightningblocks.callbacks import LoggingCallback
-from lightningblocks.task.named_entity_recognition import (
+from lightningnlp.callbacks import LoggingCallback
+from lightningnlp.task.named_entity_recognition import (
     CRFNerDataModule,
     NamedEntityRecognitionTransformer,
 )
@@ -231,7 +231,7 @@ trainer.fit(model, dm)
 
 ```python
 from pprint import pprint
-from lightningblocks.task.named_entity_recognition import NerPipeline
+from lightningnlp.task.named_entity_recognition import NerPipeline
 
 pipline = NerPipeline(model_name_or_path="my_bert_model_path", model_name="crf", model_type="bert")
 text = "结果上周六他们主场0：3惨败给了中游球队瓦拉多利德，近7个多月以来西甲首次输球。"
@@ -277,13 +277,13 @@ pprint(pipline(text))
 
 | 模型                                                                       | 论文                                                                                                                                                 | 备注                                                                  |
 |--------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
-| [CASREL](./lightningblocks/task/relation_extraction/casrel/model.py)     | [A Novel Cascade Binary Tagging Framework for Relational Triple Extraction.](https://aclanthology.org/2020.acl-main.136.pdf)                       |                                                                     |
-| [TPLINKER](./lightningblocks/task/relation_extraction/tplinker/model.py) | [TPLinker: Single-stage Joint Extraction of Entities and Relations Through Token Pair Linking.](https://aclanthology.org/2020.coling-main.138.pdf) |                                                                     |
-| [SPN](./lightningblocks/task/relation_extraction/spn/model.py)           | [Joint Entity and Relation Extraction with Set Prediction Networks.](http://xxx.itp.ac.cn/pdf/2011.01675v2)                                        |                                                                     |
-| [PRGC](./lightningblocks/task/relation_extraction/prgc/model.py)         | [PRGC: Potential Relation and Global Correspondence Based Joint Relational Triple Extraction.](https://aclanthology.org/2021.acl-long.486.pdf)     |                                                                     |
-| [PFN](./lightningblocks/task/relation_extraction/pfn/model.py)           | [A Partition Filter Network for Joint Entity and Relation Extraction.](https://aclanthology.org/2021.emnlp-main.17.pdf)                            |                                                                     |
-| [GRTE](./lightningblocks/task/relation_extraction/grte/model.py)         | [A Novel Global Feature-Oriented Relational Triple Extraction Model based on Table Filling.](https://aclanthology.org/2021.emnlp-main.208.pdf)     |                                                                     |
-| [GPLINKER](./lightningblocks/task/relation_extraction/gplinker/model.py) |                                                                                                                                                    | [GPLinker：基于GlobalPointer的实体关系联合抽取](https://kexue.fm/archives/8888) |
+| [CASREL](lightningnlp/task/relation_extraction/casrel/model.py)     | [A Novel Cascade Binary Tagging Framework for Relational Triple Extraction.](https://aclanthology.org/2020.acl-main.136.pdf)                       |                                                                     |
+| [TPLINKER](lightningnlp/task/relation_extraction/tplinker/model.py) | [TPLinker: Single-stage Joint Extraction of Entities and Relations Through Token Pair Linking.](https://aclanthology.org/2020.coling-main.138.pdf) |                                                                     |
+| [SPN](lightningnlp/task/relation_extraction/spn/model.py)           | [Joint Entity and Relation Extraction with Set Prediction Networks.](http://xxx.itp.ac.cn/pdf/2011.01675v2)                                        |                                                                     |
+| [PRGC](lightningnlp/task/relation_extraction/prgc/model.py)         | [PRGC: Potential Relation and Global Correspondence Based Joint Relational Triple Extraction.](https://aclanthology.org/2021.acl-long.486.pdf)     |                                                                     |
+| [PFN](lightningnlp/task/relation_extraction/pfn/model.py)           | [A Partition Filter Network for Joint Entity and Relation Extraction.](https://aclanthology.org/2021.emnlp-main.17.pdf)                            |                                                                     |
+| [GRTE](lightningnlp/task/relation_extraction/grte/model.py)         | [A Novel Global Feature-Oriented Relational Triple Extraction Model based on Table Filling.](https://aclanthology.org/2021.emnlp-main.208.pdf)     |                                                                     |
+| [GPLINKER](lightningnlp/task/relation_extraction/gplinker/model.py) |                                                                                                                                                    | [GPLinker：基于GlobalPointer的实体关系联合抽取](https://kexue.fm/archives/8888) |
 
 
 <details>
@@ -294,8 +294,8 @@ import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 from transformers import BertTokenizerFast
 
-from lightningblocks.callbacks import LoggingCallback
-from lightningblocks.task.relation_extraction import (
+from lightningnlp.callbacks import LoggingCallback
+from lightningnlp.task.relation_extraction import (
     GPLinkerDataModule,
     RelationExtractionTransformer,
 )
@@ -358,7 +358,7 @@ trainer.fit(model, dm)
 
 ```python
 from pprint import pprint
-from lightningblocks.task.relation_extraction import RelationExtractionPipeline
+from lightningnlp.task.relation_extraction import RelationExtractionPipeline
 
 pipline = RelationExtractionPipeline(model_name_or_path="my_bert_model_path", model_name="gplinker", model_type="bert")
 text = "查尔斯·阿兰基斯（Charles Aránguiz），1989年4月17日出生于智利圣地亚哥，智利职业足球运动员，司职中场，效力于德国足球甲级联赛勒沃库森足球俱乐部。"

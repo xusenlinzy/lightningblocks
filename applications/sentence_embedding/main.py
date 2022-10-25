@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from typing import Union, List
 from roformer import RoFormerModel
 from transformers import BertTokenizer
-from lightningblocks.task.sentence_embedding import SentenceEmbeddings
+from lightningnlp.task.sentence_embedding import SentenceEmbeddings
 
 
 # 应用实例化

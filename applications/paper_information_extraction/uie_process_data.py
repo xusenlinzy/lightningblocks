@@ -1,5 +1,5 @@
 import argparse
-from lightningblocks.task.uie import convert_data
+from lightningnlp.task.uie import convert_data
 
 
 if __name__ == "__main__":

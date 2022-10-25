@@ -1,7 +1,7 @@
 import time
 import gradio as gr
 import streamlit as st
-from lightningblocks.task.relation_extraction import RelationExtractionPipeline
+from lightningnlp.task.relation_extraction import RelationExtractionPipeline
 
 
 MODEL_PATH_MAP = {

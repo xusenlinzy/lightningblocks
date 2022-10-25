@@ -1,6 +1,6 @@
 import torch
 from scipy.spatial.distance import cosine
-from lightningblocks.models import RoFormerModel
+from lightningnlp.models import RoFormerModel
 from transformers import BertTokenizer
 import gradio as gr
 

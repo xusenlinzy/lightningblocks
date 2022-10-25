@@ -1,6 +1,0 @@
-from lightningblocks.task.relation_extraction.auto.model import get_auto_re_model
-from lightningblocks.task.relation_extraction.auto.model import get_auto_re_model_config
-from lightningblocks.task.relation_extraction.auto.data import get_auto_re_collator
-from lightningblocks.task.relation_extraction.auto.predictor import get_auto_re_predictor
-from lightningblocks.task.relation_extraction.auto.pipeline import RelationExtractionPipeline
-from lightningblocks.task.relation_extraction.auto.pipeline import EnsembleRelationExtractionPipeline

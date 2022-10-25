@@ -3,7 +3,7 @@ import streamlit as st
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List, Union
-from lightningblocks.task.uie import UIEPredictor
+from lightningnlp.task.uie import UIEPredictor
 
 
 # 应用实例化

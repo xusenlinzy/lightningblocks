@@ -1,4 +1,0 @@
-from lightningblocks.task.relation_extraction.tplinker.data import DataCollatorForTPLinkerPlus
-from lightningblocks.task.relation_extraction.tplinker.data import TPlinkerNerDataModule
-from lightningblocks.task.relation_extraction.tplinker.model import get_auto_tplinker_re_model
-from lightningblocks.task.relation_extraction.tplinker.model import get_tplinker_model_config

@@ -1,2 +1,0 @@
-from lightningblocks.task.text_classification.fc.model import get_auto_fc_tc_model
-from lightningblocks.task.text_classification.fc.model import get_fc_model_config

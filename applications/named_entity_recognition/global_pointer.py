@@ -2,8 +2,8 @@ import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 from transformers import BertTokenizerFast
 
-from lightningblocks.callbacks import LoggingCallback
-from lightningblocks.task.named_entity_recognition import (
+from lightningnlp.callbacks import LoggingCallback
+from lightningnlp.task.named_entity_recognition import (
     GlobalPointerDataModule,
     NamedEntityRecognitionTransformer,
 )

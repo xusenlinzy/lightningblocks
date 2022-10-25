@@ -1,8 +1,8 @@
 import time
 import gradio as gr
 import streamlit as st
-from lightningblocks.utils.app import make_color_palette, visualize_ner
-from lightningblocks.task.named_entity_recognition import NerPipeline
+from lightningnlp.utils.app import make_color_palette, visualize_ner
+from lightningnlp.task.named_entity_recognition import NerPipeline
 
 
 MODEL_PATH_MAP = {

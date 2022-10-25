@@ -1,0 +1,1 @@
+from lightningnlp.task.question_answering.datasets.squad import SquadDataModule

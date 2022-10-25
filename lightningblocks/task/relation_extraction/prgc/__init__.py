@@ -1,4 +1,0 @@
-from lightningblocks.task.relation_extraction.prgc.data import DataCollatorForPRGC
-from lightningblocks.task.relation_extraction.prgc.data import PRGCDataModule
-from lightningblocks.task.relation_extraction.prgc.model import get_auto_prgc_re_model
-from lightningblocks.task.relation_extraction.prgc.model import get_prgc_model_config

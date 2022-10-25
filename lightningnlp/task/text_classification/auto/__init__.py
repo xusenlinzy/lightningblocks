@@ -1,0 +1,2 @@
+from lightningnlp.task.text_classification.auto.model import get_auto_tc_model
+from lightningnlp.task.text_classification.auto.model import get_auto_tc_model_config
