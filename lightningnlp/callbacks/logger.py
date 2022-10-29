@@ -5,10 +5,8 @@ import logging
 import threading
 import time
 import colorlog
-from typing import Any
 import pytorch_lightning as pl
 from pytorch_lightning.utilities import rank_zero_info
-from pytorch_lightning.utilities.types import STEP_OUTPUT
 
 
 log_config = {

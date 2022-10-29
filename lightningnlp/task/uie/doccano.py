@@ -36,9 +36,17 @@ def convert_data(args):
     with open(args.doccano_file, "r", encoding="utf-8") as f:
         raw_examples = f.readlines()
 
-    def _create_ext_examples(examples, negative_ratio=0, shuffle=False, is_train=True):
-        entities, relations = convert_ext_examples(examples, negative_ratio, is_train=is_train)
-        examples = entities + relations
+    def _create_ext_examples(
+        examples,
+        negative_ratio,
+        prompt_prefix="情感倾向",
+        options=["正向", "负向"],
+        separator="##",
+        shuffle=False,
+        is_train=True,
+    ):
+        entities, relations, aspects = convert_ext_examples(examples, negative_ratio, prompt_prefix, options, separator, is_train)
+        examples = entities + relations + aspects
         if shuffle:
             indexes = np.random.permutation(len(examples))
             examples = [examples[i] for i in indexes]
@@ -66,34 +74,65 @@ def convert_data(args):
     if len(args.splits) == 0:
         if args.task_type == "ext":
             examples = _create_ext_examples(raw_examples, args.negative_ratio,
-                                            args.is_shuffle)
+                                            args.prompt_prefix, args.options,
+                                            args.separator, args.is_shuffle)
         else:
             examples = _create_cls_examples(raw_examples, args.prompt_prefix,
                                             args.options, args.is_shuffle)
         _save_examples(args.save_dir, "train.txt", examples)
     else:
+        index_list = list(range(len(raw_examples)))
         if args.is_shuffle:
             indexes = np.random.permutation(len(raw_examples))
+            index_list = indexes.tolist()
             raw_examples = [raw_examples[i] for i in indexes]
 
         i1, i2, _ = args.splits
         p1 = int(len(raw_examples) * i1)
         p2 = int(len(raw_examples) * (i1 + i2))
 
+        train_ids = index_list[:p1]
+        dev_ids = index_list[p1: p2]
+        test_ids = index_list[p2:]
+
+        with open(os.path.join(args.save_dir, "sample_index.json"), "w") as fp:
+            maps = {
+                "train_ids": train_ids,
+                "dev_ids": dev_ids,
+                "test_ids": test_ids
+            }
+            fp.write(json.dumps(maps))
+
         if args.task_type == "ext":
             train_examples = _create_ext_examples(
-                raw_examples[:p1], args.negative_ratio, args.is_shuffle)
+                raw_examples[:p1],
+                args.negative_ratio,
+                args.prompt_prefix,
+                args.options, args.separator,
+                args.is_shuffle,
+            )
+
             dev_examples = _create_ext_examples(
-                raw_examples[p1:p2], -1, is_train=False)
+                raw_examples[p1: p2],
+                -1,
+                args.prompt_prefix,
+                args.options,
+                args.separator,
+                is_train=False,
+            )
+
             test_examples = _create_ext_examples(
-                raw_examples[p2:], -1, is_train=False)
+                raw_examples[p2:],
+                -1,
+                args.prompt_prefix,
+                args.options,
+                args.separator,
+                is_train=False,
+            )
         else:
-            train_examples = _create_cls_examples(
-                raw_examples[:p1], args.prompt_prefix, args.options)
-            dev_examples = _create_cls_examples(
-                raw_examples[p1:p2], args.prompt_prefix, args.options)
-            test_examples = _create_cls_examples(
-                raw_examples[p2:], args.prompt_prefix, args.options)
+            train_examples = _create_cls_examples(raw_examples[:p1], args.prompt_prefix, args.options)
+            dev_examples = _create_cls_examples(raw_examples[p1:p2], args.prompt_prefix, args.options)
+            test_examples = _create_cls_examples(raw_examples[p2:], args.prompt_prefix, args.options)
 
         _save_examples(args.save_dir, "train.txt", train_examples)
         _save_examples(args.save_dir, "dev.txt", dev_examples)
@@ -103,7 +142,6 @@ def convert_data(args):
 
 
 if __name__ == "__main__":
-    # yapf: disable
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -113,22 +151,21 @@ if __name__ == "__main__":
     parser.add_argument("-s", "--save_dir", default="./data",
                         type=str, help="The path of data that you wanna save.")
     parser.add_argument("--negative_ratio", default=5, type=int,
-                        help="Used only for the extraction task, the ratio of positive and negative samples, "
-                             "number of negative samples = negative_ratio * number of positive samples")
+                        help="Used only for the extraction task, the ratio of positive and negative samples, number of negtive samples = negative_ratio * number of positive samples")
     parser.add_argument("--splits", default=[0.8, 0.1, 0.1], type=float, nargs="*",
-                        help="The ratio of samples in datasets. [0.6, 0.2, 0.2] means 60%% samples used for training, "
-                             "20%% for evaluation and 20%% for test.")
+                        help="The ratio of samples in datasets. [0.8, 0.1, 0.1] means 80%% samples used for training, 10%% for evaluation and 10%% for test.")
     parser.add_argument("--task_type", choices=['ext', 'cls'], default="ext", type=str,
-                        help="Select task type, ext for the extraction task and cls for the classification task, "
-                             "defaults to ext.")
+                        help="Select task type, ext for the extraction task and cls for the classification task, defaults to ext.")
     parser.add_argument("--options", default=["正向", "负向"], type=str, nargs="+",
                         help="Used only for the classification task, the options for classification")
     parser.add_argument("--prompt_prefix", default="情感倾向", type=str,
                         help="Used only for the classification task, the prompt prefix for classification")
     parser.add_argument("--is_shuffle", default=True, type=bool,
-                        help="Whether to shuffle the labeled datasets, defaults to True.")
+                        help="Whether to shuffle the labeled dataset, defaults to True.")
     parser.add_argument("--seed", type=int, default=1000,
-                        help="random seed for initialization")
+                        help="Random seed for initialization")
+    parser.add_argument("--separator", type=str, default='##',
+                        help="Used only for entity/aspect-level classification task, separator for entity label and classification label")
 
     args = parser.parse_args()
 

@@ -53,10 +53,10 @@ def get_path_from_url(url, root_dir, check_exist=True, decompress=True):
             raise RuntimeError("Downloading from {} failed with code "
                                "{}!".format(url, req.status_code))
 
-        # For protecting download interrupted, download to
+        # For protecting download interupted, download to
         # tmp_fullname firstly, move tmp_fullname to fullname
         # after download finished
-        tmp_fullname = f"{fullname}_tmp"
+        tmp_fullname = fullname + "_tmp"
         total_size = req.headers.get('content-length')
         with open(tmp_fullname, 'wb') as f:
             if total_size:
@@ -129,7 +129,9 @@ def get_path_from_url(url, root_dir, check_exist=True, decompress=True):
             return uncompressed_path
 
     def _is_a_single_file(file_list):
-        return len(file_list) == 1 and file_list[0].find(os.sep) < 0
+        if len(file_list) == 1 and file_list[0].find(os.sep) < 0:
+            return True
+        return False
 
     def _is_a_single_dir(file_list):
         new_file_list = []
@@ -177,9 +179,9 @@ def get_path_from_url(url, root_dir, check_exist=True, decompress=True):
         """
         logger.info("Decompressing {}...".format(fname))
 
-        # For protecting decompressing interrupted,
+        # For protecting decompressing interupted,
         # decompress to fpath_tmp directory firstly, if decompress
-        # successes, move decompress files to fpath and delete
+        # successed, move decompress files to fpath and delete
         # fpath_tmp and remove download compress file.
 
         if tarfile.is_tarfile(fname):
@@ -187,7 +189,7 @@ def get_path_from_url(url, root_dir, check_exist=True, decompress=True):
         elif zipfile.is_zipfile(fname):
             uncompressed_path = _uncompress_file_zip(fname)
         else:
-            raise TypeError("Unsupported compress file type {}".format(fname))
+            raise TypeError("Unsupport compress file type {}".format(fname))
 
         return uncompressed_path
 

@@ -1,12 +1,11 @@
+import os
 import re
 import six
 import math
 import torch
-import os.path
 import argparse
 import numpy as np
 from pprint import pprint
-from transformers import BertTokenizerFast
 from lightningnlp.callbacks import Logger, tqdm
 from lightningnlp.utils.common import cut_chinese_sent, dbc2sbc
 from lightningnlp.task.uie.utils import get_bool_ids_greater_than, get_span, get_id_and_prob
@@ -18,6 +17,7 @@ logger = Logger("UIE")
 class ONNXInferBackend(object):
     def __init__(self, model_name_or_path, device='cpu', use_fp16=False):
         from onnxruntime import InferenceSession, SessionOptions
+
         logger.info(">>> [ONNXInferBackend] Creating Engine ...")
         onnx_model = float_onnx_file = os.path.join(model_name_or_path, "inference.onnx")
 
@@ -28,8 +28,10 @@ class ONNXInferBackend(object):
         if device == "gpu":
             providers = ['CUDAExecutionProvider']
             logger.info(">>> [ONNXInferBackend] Use GPU to inference ...")
+
             if use_fp16:
                 logger.info(">>> [ONNXInferBackend] Use FP16 to inference ...")
+
                 from onnxconverter_common import float16
                 import onnx
 
@@ -41,6 +43,7 @@ class ONNXInferBackend(object):
         else:
             providers = ['CPUExecutionProvider']
             logger.info(">>> [ONNXInferBackend] Use CPU to inference ...")
+
         sess_options = SessionOptions()
         self.predictor = InferenceSession(onnx_model, sess_options=sess_options, providers=providers)
 
@@ -62,6 +65,7 @@ class ONNXInferBackend(object):
 class PyTorchInferBackend:
     def __init__(self, model_name_or_path, device='cpu', use_fp16=False, multilingual=False):
         from lightningnlp.task.uie.model import UIE, UIEM
+
         logger.info(">>> [PyTorchInferBackend] Creating Engine ...")
 
         if multilingual:
@@ -125,23 +129,48 @@ class UIEPredictor(object):
 
         assert isinstance(device, six.string_types), "The type of device must be string."
         assert device in ['cpu', 'gpu'], "The device must be cpu or gpu."
+
+        self._multilingual = multilingual
+        if model_name_or_path in ["uie-m-base", "uie-m-large"]:
+            self._multilingual = True
+
+        self._is_en = is_english_model
+        if model_name_or_path in ["uie-base-en"] or schema_lang == "en":
+            self._is_en = True
+
         self._engine = engine
         self._model_name_or_path = model_name_or_path
-        self._is_en = bool(schema_lang == 'en' or is_english_model)
-        self._multilingual = multilingual
         self._device = device
         self._position_prob = position_prob
         self._max_seq_len = max_seq_len
         self._batch_size = batch_size
         self._split_sentence = split_sentence
         self._use_fp16 = use_fp16
+
         self._schema_tree = None
         self.set_schema(schema)
+
         self._prepare_predictor()
 
     def _prepare_predictor(self):
-        self._tokenizer = BertTokenizerFast.from_pretrained(self._model_name_or_path)
         assert self._engine in ['pytorch', 'onnx'], "engine must be pytorch or onnx!"
+
+        if not os.path.exists(self._model_name_or_path):
+            input_path = self._model_name_or_path
+            self._model_name_or_path = self._model_name_or_path.replace('-', '_') + '_pytorch'
+            if not os.path.exists(self._model_name_or_path):
+                from lightningnlp.task.uie.convert import check_model, extract_and_convert
+
+                check_model(input_path)
+                extract_and_convert(input_path, self._model_name_or_path)
+
+        if self._multilingual:
+            from lightningnlp.task.uie.tokenizer import ErnieMTokenizerFast
+            self._tokenizer = ErnieMTokenizerFast.from_pretrained(self._model_name_or_path)
+        else:
+            from transformers import BertTokenizerFast
+            self._tokenizer = BertTokenizerFast.from_pretrained(self._model_name_or_path)
+
         if self._engine == 'pytorch':
             self.inference_backend = PyTorchInferBackend(self._model_name_or_path,
                                                          device=self._device,
@@ -149,6 +178,35 @@ class UIEPredictor(object):
                                                          multilingual=self._multilingual)
 
         if self._engine == 'onnx':
+            if os.path.exists(os.path.join(self._model_name_or_path, "pytorch_model.bin")) and not os.path.exists(
+                    os.path.join(self._model_name_or_path, "inference.onnx")):
+                from lightningnlp.task.uie.export_model import export_onnx
+                from lightningnlp.task.uie.model import UIE, UIEM
+
+                if self._multilingual:
+                    model = UIEM.from_pretrained(self._model_name_or_path)
+                else:
+                    model = UIE.from_pretrained(self._model_name_or_path)
+
+                input_names = [
+                    'input_ids',
+                    'token_type_ids',
+                    'attention_mask',
+                ]
+
+                output_names = [
+                    'start_prob',
+                    'end_prob'
+                ]
+
+                logger.info("Converting to the inference model cost a little time.")
+
+                save_path = export_onnx(
+                    self._model_name_or_path, self._tokenizer, model, 'cpu', input_names, output_names)
+                logger.info(
+                    "The inference model save in the path:{}".format(save_path))
+                del model
+
             self.inference_backend = ONNXInferBackend(self._model_name_or_path,
                                                       device=self._device,
                                                       use_fp16=self._use_fp16)
@@ -178,93 +236,92 @@ class UIEPredictor(object):
             return results
 
         schema_list = self._schema_tree.children[:]
-        with tqdm(total=len(schema_list)) as pbar:
-            while len(schema_list) > 0:
-                node = schema_list.pop(0)
-                examples = []
-                input_map = {}
-                cnt = 0
-                idx = 0
-                if not node.prefix:
-                    for data in datas:
-                        examples.append({"text": data, "prompt": dbc2sbc(node.name)})
-                        input_map[cnt] = [idx]
-                        idx += 1
-                        cnt += 1
-                else:
-                    for pre, data in zip(node.prefix, datas):
-                        if len(pre) == 0:
-                            input_map[cnt] = []
-                        else:
-                            for p in pre:
-                                if self._is_en:
-                                    if re.search(r'\[.*?\]$', node.name):
-                                        prompt_prefix = node.name[:node.name.find(
-                                            "[", 1)].strip()
-                                        cls_options = re.search(
-                                            r'\[.*?\]$', node.name).group()
-                                        # Sentiment classification of xxx [positive, negative]
-                                        prompt = prompt_prefix + p + " " + cls_options
-                                    else:
-                                        prompt = node.name + p
+        while len(schema_list) > 0:
+            node = schema_list.pop(0)
+            examples = []
+            input_map = {}
+            cnt = 0
+            idx = 0
+            if not node.prefix:
+                for data in datas:
+                    examples.append({"text": data, "prompt": dbc2sbc(node.name)})
+                    input_map[cnt] = [idx]
+                    idx += 1
+                    cnt += 1
+            else:
+                for pre, data in zip(node.prefix, datas):
+                    if len(pre) == 0:
+                        input_map[cnt] = []
+                    else:
+                        for p in pre:
+                            if self._is_en:
+                                if re.search(r'\[.*?\]$', node.name):
+                                    prompt_prefix = node.name[:node.name.find(
+                                        "[", 1)].strip()
+                                    cls_options = re.search(
+                                        r'\[.*?\]$', node.name).group()
+                                    # Sentiment classification of xxx [positive, negative]
+                                    prompt = prompt_prefix + p + " " + cls_options
                                 else:
-                                    prompt = p + node.name
-                                examples.append({
-                                    "text": data,
-                                    "prompt": dbc2sbc(prompt)
-                                })
-                            input_map[cnt] = [i + idx for i in range(len(pre))]
-                            idx += len(pre)
-                        cnt += 1
-
-                result_list = self._single_stage_predict(examples) if examples else []
-                if not node.parent_relations:
-                    relations = [[] for _ in range(len(datas))]
-                    for k, v in input_map.items():
-                        for idx in v:
-                            if len(result_list[idx]) == 0:
-                                continue
-                            if node.name not in results[k].keys():
-                                results[k][node.name] = result_list[idx]
+                                    prompt = node.name + p
                             else:
-                                results[k][node.name].extend(result_list[idx])
-                        if node.name in results[k].keys():
-                            relations[k].extend(results[k][node.name])
-                else:
-                    relations = node.parent_relations
-                    for k, v in input_map.items():
-                        for i in range(len(v)):
-                            if len(result_list[v[i]]) == 0:
-                                continue
-                            if "relations" not in relations[k][i].keys():
-                                relations[k][i]["relations"] = {node.name: result_list[v[i]]}
-                            elif node.name not in relations[k][i]["relations"].keys():
-                                relations[k][i]["relations"][node.name] = result_list[v[i]]
-                            else:
-                                relations[k][i]["relations"][node.name].extend(result_list[v[i]])
+                                prompt = p + node.name
+                            examples.append({
+                                "text": data,
+                                "prompt": dbc2sbc(prompt)
+                            })
+                        input_map[cnt] = [i + idx for i in range(len(pre))]
+                        idx += len(pre)
+                    cnt += 1
 
-                    new_relations = [[] for _ in range(len(datas))]
-                    for i in range(len(relations)):
-                        for j in range(len(relations[i])):
-                            if "relations" in relations[i][j].keys() and node.name in relations[i][j]["relations"].keys():
-                                for k in range(len(relations[i][j]["relations"][node.name])):
-                                    new_relations[i].append(relations[i][j]["relations"][node.name][k])
-                    relations = new_relations
-
-                prefix = [[] for _ in range(len(datas))]
+            result_list = self._single_stage_predict(examples) if examples else []
+            if not node.parent_relations:
+                relations = [[] for _ in range(len(datas))]
                 for k, v in input_map.items():
                     for idx in v:
-                        for i in range(len(result_list[idx])):
-                            if self._is_en:
-                                prefix[k].append(" of " + result_list[idx][i]["text"])
-                            else:
-                                prefix[k].append(result_list[idx][i]["text"] + "的")
+                        if len(result_list[idx]) == 0:
+                            continue
+                        if node.name not in results[k].keys():
+                            results[k][node.name] = result_list[idx]
+                        else:
+                            results[k][node.name].extend(result_list[idx])
+                    if node.name in results[k].keys():
+                        relations[k].extend(results[k][node.name])
+            else:
+                relations = node.parent_relations
+                for k, v in input_map.items():
+                    for i in range(len(v)):
+                        if len(result_list[v[i]]) == 0:
+                            continue
+                        if "relations" not in relations[k][i].keys():
+                            relations[k][i]["relations"] = {node.name: result_list[v[i]]}
+                        elif node.name not in relations[k][i]["relations"].keys():
+                            relations[k][i]["relations"][node.name] = result_list[v[i]]
+                        else:
+                            relations[k][i]["relations"][node.name].extend(result_list[v[i]])
 
-                for child in node.children:
-                    child.prefix = prefix
-                    child.parent_relations = relations
-                    schema_list.append(child)
-                pbar.update(1)
+                new_relations = [[] for _ in range(len(datas))]
+                for i in range(len(relations)):
+                    for j in range(len(relations[i])):
+                        if "relations" in relations[i][j].keys() and node.name in relations[i][j]["relations"].keys():
+                            for k in range(len(relations[i][j]["relations"][node.name])):
+                                new_relations[i].append(relations[i][j]["relations"][node.name][k])
+                relations = new_relations
+
+            prefix = [[] for _ in range(len(datas))]
+            for k, v in input_map.items():
+                for idx in v:
+                    for i in range(len(result_list[idx])):
+                        if self._is_en:
+                            prefix[k].append(" of " + result_list[idx][i]["text"])
+                        else:
+                            prefix[k].append(result_list[idx][i]["text"] + "的")
+
+            for child in node.children:
+                child.prefix = prefix
+                child.parent_relations = relations
+                schema_list.append(child)
+
         return results
 
     def _convert_ids_to_results(self, examples, sentence_ids, probs):
@@ -358,7 +415,7 @@ class UIEPredictor(object):
             stride=2,
             truncation=True,
             max_length=self._max_seq_len,
-            padding="longest",
+            padding="max_length" if self._multilingual else "longest",
             add_special_tokens=True,
             return_offsets_mapping=True,
             return_tensors="np")
@@ -369,7 +426,8 @@ class UIEPredictor(object):
         for batch_start in batch_iterator:
             if self._multilingual:
                 batch = {key: np.array(value[batch_start: batch_start + self._batch_size], dtype="int64") for key, value
-                         in encoded_inputs.items() if key in ["input_ids"]}
+                         in encoded_inputs.items() if key in ["input_ids", "attention_mask"]}
+                batch["position_ids"] = (np.cumsum(np.ones_like(batch["input_ids"]), axis=1) - np.ones_like(batch["input_ids"])) * batch["attention_mask"]
             else:
                 batch = {key: np.array(value[batch_start: batch_start + self._batch_size], dtype="int64") for key, value
                          in encoded_inputs.items() if key not in self.keys_to_ignore_on_gpu}
@@ -570,36 +628,40 @@ def parse_args():
 
 
 if __name__ == '__main__':
-    # 命名实体识别
-    schema = ['时间', '选手', '赛事名称']  # Define the schema for entity extraction
-    ie = UIEPredictor("uie_base_pytorch", schema=schema)
 
-    texts = ["2月8日上午北京冬奥会自由式滑雪女子大跳台决赛中中国选手谷爱凌以188.25分获得金牌！",
-             "北京时间24日，2022年羽毛球世锦赛中男单选手赵俊鹏直落两局击败上届亚军、12号种子斯里坎特，与石宇奇携手晋级16强。"]
-    pprint(ie(texts))
+    schema = ['Time', 'Player', 'Competition', 'Score']
+    ie = UIEPredictor("uie-m-base", schema=schema, schema_lang="en")
+    pprint(ie("2月8日上午北京冬奥会自由式滑雪女子大跳台决赛中中国选手谷爱凌以188.25分获得金牌！"))
 
-    schema = ['肿瘤的大小', '肿瘤的个数', '肝癌级别', '脉管内癌栓分级']
-    ie.set_schema(schema)
-    pprint(
-        ie("（右肝肿瘤）肝细胞性肝癌（II-III级，梁索型和假腺管型），肿瘤包膜不完整，紧邻肝被膜，侵及周围肝组织，未见脉管内癌栓（MVI分级：M0级）及卫星子灶形成。（肿物1个，大小4.2×4.0×2.8cm）。"))
-
-    # 关系抽取
-    schema = {'竞赛名称': ['主办方', '承办方', '已举办次数']}
-    ie.set_schema(schema)  # Reset schema
-    pprint(
-        ie('2022语言与智能技术竞赛由中国中文信息学会和中国计算机学会联合主办，百度公司、中国中文信息学会评测工作委员会和中国计算机学会自然语言处理专委会承办，已连续举办4届，成为全球最热门的中文NLP赛事之一。'))
-
-    # 事件抽取
-    schema = {'地震触发词': ['地震强度', '时间', '震中位置', '震源深度']}
-    ie.set_schema(schema)  # Reset schema
-    ie('中国地震台网正式测定：5月16日06时08分在云南临沧市凤庆县(北纬24.34度，东经99.98度)发生3.5级地震，震源深度10千米。')
-
-    # 评论观点抽取
-    schema = {'评价维度': ['观点词', '情感倾向[正向，负向]']}
-    ie.set_schema(schema)  # Reset schema
-    pprint(ie("店面干净，很清静，服务员服务热情，性价比很高，发现收银台有排队"))
-
-    # 情感倾向分类
-    schema = '情感倾向[正向，负向]'
-    ie.set_schema(schema)
-    pprint(ie('这个产品用起来真的很流畅，我非常喜欢'))
+    # schema = ['时间', '选手', '赛事名称']  # Define the schema for entity extraction
+    # ie = UIEPredictor("uie-base", schema=schema)
+    #
+    # texts = ["2月8日上午北京冬奥会自由式滑雪女子大跳台决赛中中国选手谷爱凌以188.25分获得金牌！",
+    #          "北京时间24日，2022年羽毛球世锦赛中男单选手赵俊鹏直落两局击败上届亚军、12号种子斯里坎特，与石宇奇携手晋级16强。"]
+    # pprint(ie(texts))
+    #
+    # schema = ['肿瘤的大小', '肿瘤的个数', '肝癌级别', '脉管内癌栓分级']
+    # ie.set_schema(schema)
+    # pprint(
+    #     ie("（右肝肿瘤）肝细胞性肝癌（II-III级，梁索型和假腺管型），肿瘤包膜不完整，紧邻肝被膜，侵及周围肝组织，未见脉管内癌栓（MVI分级：M0级）及卫星子灶形成。（肿物1个，大小4.2×4.0×2.8cm）。"))
+    #
+    # # 关系抽取
+    # schema = {'竞赛名称': ['主办方', '承办方', '已举办次数']}
+    # ie.set_schema(schema)  # Reset schema
+    # pprint(
+    #     ie('2022语言与智能技术竞赛由中国中文信息学会和中国计算机学会联合主办，百度公司、中国中文信息学会评测工作委员会和中国计算机学会自然语言处理专委会承办，已连续举办4届，成为全球最热门的中文NLP赛事之一。'))
+    #
+    # # 事件抽取
+    # schema = {'地震触发词': ['地震强度', '时间', '震中位置', '震源深度']}
+    # ie.set_schema(schema)  # Reset schema
+    # ie('中国地震台网正式测定：5月16日06时08分在云南临沧市凤庆县(北纬24.34度，东经99.98度)发生3.5级地震，震源深度10千米。')
+    #
+    # # 评论观点抽取
+    # schema = {'评价维度': ['观点词', '情感倾向[正向，负向]']}
+    # ie.set_schema(schema)  # Reset schema
+    # pprint(ie("店面干净，很清静，服务员服务热情，性价比很高，发现收银台有排队"))
+    #
+    # # 情感倾向分类
+    # schema = '情感倾向[正向，负向]'
+    # ie.set_schema(schema)
+    # pprint(ie('这个产品用起来真的很流畅，我非常喜欢'))

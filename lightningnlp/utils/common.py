@@ -118,11 +118,11 @@ def dbc2sbc(s):
     rs = ""
     for char in s:
         code = ord(char)
-        if code == 12288:
-            code = 32
+        if code == 0x3000:
+            code = 0x0020
         else:
-            code -= 65248
-        if not 33 <= code <= 126:
+            code -= 0xfee0
+        if not (0x0021 <= code <= 0x7e):
             rs += char
             continue
         rs += chr(code)

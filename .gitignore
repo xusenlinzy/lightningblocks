@@ -15,8 +15,10 @@ __pycache__/
 /applications/paper_information_extraction/data/
 /applications/named_entity_recognition/datasets/
 /applications/relation_extraction/datasets/
-/applications/sentence_embedding/docker/
+/applications/sentence_embedding/docker-cpu/
 /applications/text_search/
 /commodity_classification/
 /knowledge_graph/ownthink/data/
 /knowledge_graph/medical/dict/
+/lightningnlp/task/uie/uie-base/
+/lightningnlp/task/uie/uie_base_pytorch/
