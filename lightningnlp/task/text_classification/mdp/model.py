@@ -21,8 +21,10 @@ def get_auto_mdp_tc_model(
         """
         1. 添加Multi-Sample Dropout
         2. Multi-Sample Dropout可以理解为Dropout选择了输入集中的一个子集进行训练，相当于Stacking方法中的子模型
+
         Args:
             config: 模型的配置对象
+
         Reference:
             [1] Multi-Sample Dropout for Accelerated Training and Better Generalization
         """
@@ -35,7 +37,7 @@ def get_auto_mdp_tc_model(
             if self.pooler_type != "cls":
                 self.config.output_hidden_states = True
 
-            self.bert = base_model(self.config)
+            self.backbone = base_model(self.config)
 
             classifier_dropout = (
                 config.classifier_dropout if config.classifier_dropout is not None else config.hidden_dropout_prob
@@ -57,7 +59,7 @@ def get_auto_mdp_tc_model(
             labels: Optional[torch.Tensor] = None,
         ) -> SequenceClassifierOutput:
 
-            outputs = self.bert(
+            outputs = self.backbone(
                 input_ids,
                 attention_mask=attention_mask,
                 token_type_ids=token_type_ids,

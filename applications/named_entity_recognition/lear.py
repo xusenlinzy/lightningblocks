@@ -28,6 +28,7 @@ downstream_model_type = "bert"  # 预训练模型类型
 
 # training args
 learning_rate = 2e-5  # 学习率
+base_model_name = "backbone"  # 模型主干名称
 other_learning_rate = 1e-4  # 除bert之外其他层的学习率
 output_dir = "outputs/cmeee/lear"  # 模型保存路径
 
@@ -72,6 +73,7 @@ def main():
         labels=dm.label_list,
         average="micro",
         learning_rate=learning_rate,
+        base_model_name=base_model_name,
         other_learning_rate=other_learning_rate,
         output_dir=output_dir,
     )

@@ -20,18 +20,16 @@
 }
 ```
 
-</details>
 
-**训练数据包含两个文件**：`train.json` 和 `dev.json`。
+</details>
 
 ### 2. 模型
 
 
-| 模型                                                                 | 论文                                                                                                           | 备注                              |
-|--------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------|---------------------------------|
+| 模型                                                            | 论文                                                                                                           | 备注                              |
+|---------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------|---------------------------------|
 | [FC](lightningnlp/task/text_classification/fc/model.py)       |                                                                                                              | 全连接层分类                          |
 | [MDP](lightningnlp/task/text_classification/mdp/model.py)     | [Multi-Sample Dropout for Accelerated Training and Better Generalization.](https://arxiv.org/abs/1905.09788) | 使用 `MultiSampleDropout`，类似于模型融合 |
-| [RDROP](lightningnlp/task/text_classification/rdrop/model.py) | [R-Drop: Regularized Dropout for Neural Networks.](https://arxiv.org/abs/2106.14448)                         | 全连接层分类并使用 `R-Drop` 正则化损失        |
 
 <details>
 <summary>训练代码示例</summary>
@@ -141,22 +139,21 @@ print(model.predict(text))
 ```
 </details>
 
-**训练数据包含两个文件**：`train.json` 和 `dev.json`。
 
 ### 2. 模型
 
 
-| 模型                                                                                        | 论文                                                                                                                                                 | 备注                                                                                                                                            |
-|-------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| [SOFTMAX](lightningnlp/task/named_entity_recognition/crf/model.py)                   |                                                                                                                                                    | 全连接层序列标注并使用 `BIO` 解码                                                                                                                          |
-| [CRF](lightningnlp/task/named_entity_recognition/crf/model.py)                       |                                                                                                                                                    | 全连接层+条件随机场，并使用 `BIO` 解码                                                                                                                       |
-| [CASCADE-CRF](lightningnlp/task/named_entity_recognition/crf/model.py)               |                                                                                                                                                    | 先预测实体再预测实体类型                                                                                                                                  |
-| [SPAN](lightningnlp/task/named_entity_recognition/span/model.py)                     |                                                                                                                                                    | 使用两个指针网络预测实体起始位置                                                                                                                              |
-| [GLOBAL-POINTER](lightningnlp/task/named_entity_recognition/global_pointer/model.py) |                                                                                                                                                    | [GlobalPointer：用统一的方式处理嵌套和非嵌套NER](https://spaces.ac.cn/archives/8373)、[Efficient GlobalPointer：少点参数，多点效果](https://spaces.ac.cn/archives/8877) |
-| [MRC](lightningnlp/task/named_entity_recognition/mrc/model.py)                       | [A Unified MRC Framework for Named Entity Recognition.](https://aclanthology.org/2020.acl-main.519.pdf)                                            |                                                                                                                                               |
-| [TPLINKER](lightningnlp/task/named_entity_recognition/tplinker/model.py)             | [TPLinker: Single-stage Joint Extraction of Entities and Relations Through Token Pair Linking.](https://aclanthology.org/2020.coling-main.138.pdf) |                                                                                                                                               |
-| [LEAR](lightningnlp/task/named_entity_recognition/lear/model.py)                     | [Enhanced Language Representation with Label Knowledge for Span Extraction.](https://aclanthology.org/2021.emnlp-main.379.pdf)                     |                                                                                                                                               |
-| [W2NER](lightningnlp/task/named_entity_recognition/w2ner/model.py)                   | [Unified Named Entity Recognition as Word-Word Relation Classification.](https://arxiv.org/pdf/2112.10070.pdf)                                     |                                                                                                                                               |
+| 模型                                                                                   | 论文                                                                                                                                                                            | 备注                                                                                                                                            |
+|--------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| [SOFTMAX](lightningnlp/task/named_entity_recognition/crf/model.py)                   |                                                                                                                                                                               | 全连接层序列标注并使用 `BIO` 解码                                                                                                                          |
+| [CRF](lightningnlp/task/named_entity_recognition/crf/model.py)                       | [Conditional Random Fields: Probabilistic Models for Segmenting and Labeling Sequence Data](https://repository.upenn.edu/cgi/viewcontent.cgi?article=1162&context=cis_papers) | 全连接层+条件随机场，并使用 `BIO` 解码                                                                                                                       |
+| [CASCADE-CRF](lightningnlp/task/named_entity_recognition/crf/model.py)               |                                                                                                                                                                               | 先预测实体再预测实体类型                                                                                                                                  |
+| [SPAN](lightningnlp/task/named_entity_recognition/span/model.py)                     |                                                                                                                                                                               | 使用两个指针网络预测实体起始位置                                                                                                                              |
+| [GLOBAL-POINTER](lightningnlp/task/named_entity_recognition/global_pointer/model.py) |                                                                                                                                                                               | [GlobalPointer：用统一的方式处理嵌套和非嵌套NER](https://spaces.ac.cn/archives/8373)、[Efficient GlobalPointer：少点参数，多点效果](https://spaces.ac.cn/archives/8877) |
+| [MRC](lightningnlp/task/named_entity_recognition/mrc/model.py)                       | [A Unified MRC Framework for Named Entity Recognition.](https://aclanthology.org/2020.acl-main.519.pdf)                                                                       |                                                                                                                                               |
+| [TPLINKER](lightningnlp/task/named_entity_recognition/tplinker/model.py)             | [TPLinker: Single-stage Joint Extraction of Entities and Relations Through Token Pair Linking.](https://aclanthology.org/2020.coling-main.138.pdf)                            |                                                                                                                                               |
+| [LEAR](lightningnlp/task/named_entity_recognition/lear/model.py)                     | [Enhanced Language Representation with Label Knowledge for Span Extraction.](https://aclanthology.org/2021.emnlp-main.379.pdf)                                                |                                                                                                                                               |
+| [W2NER](lightningnlp/task/named_entity_recognition/w2ner/model.py)                   | [Unified Named Entity Recognition as Word-Word Relation Classification.](https://arxiv.org/pdf/2112.10070.pdf)                                                                |                                                                                                                                               |
 
 
 <details>
@@ -271,12 +268,11 @@ pprint(pipline(text))
 
 </details>
 
-**训练数据包含两个文件**：`train.json` 和 `dev.json`。
 
 ### 2. 模型
 
-| 模型                                                                       | 论文                                                                                                                                                 | 备注                                                                  |
-|--------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
+| 模型                                                                  | 论文                                                                                                                                                 | 备注                                                                  |
+|---------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
 | [CASREL](lightningnlp/task/relation_extraction/casrel/model.py)     | [A Novel Cascade Binary Tagging Framework for Relational Triple Extraction.](https://aclanthology.org/2020.acl-main.136.pdf)                       |                                                                     |
 | [TPLINKER](lightningnlp/task/relation_extraction/tplinker/model.py) | [TPLinker: Single-stage Joint Extraction of Entities and Relations Through Token Pair Linking.](https://aclanthology.org/2020.coling-main.138.pdf) |                                                                     |
 | [SPN](lightningnlp/task/relation_extraction/spn/model.py)           | [Joint Entity and Relation Extraction with Set Prediction Networks.](http://xxx.itp.ac.cn/pdf/2011.01675v2)                                        |                                                                     |

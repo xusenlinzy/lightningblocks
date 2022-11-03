@@ -17,8 +17,6 @@ def get_auto_pfn_re_model(
 
     base_model, parent_model = MODEL_MAP[model_type]
 
-
-
     class PFN(parent_model):
         """
         基于`BERT`的`PFN`关系抽取模型
@@ -36,7 +34,7 @@ def get_auto_pfn_re_model(
         def __init__(self, config):
             super().__init__(config)
             self.config = config
-            self.bert = base_model(config, add_pooling_layer=False)
+            self.backbone = base_model(config, add_pooling_layer=False)
 
             classifier_dropout = (
                 config.classifier_dropout if config.classifier_dropout is not None else config.hidden_dropout_prob
@@ -68,7 +66,7 @@ def get_auto_pfn_re_model(
             target: Optional[List[Any]] = None,
         ) -> RelationExtractionOutput:
 
-            outputs = self.bert(
+            outputs = self.backbone(
                 input_ids,
                 attention_mask=attention_mask,
                 token_type_ids=token_type_ids,

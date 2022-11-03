@@ -35,7 +35,7 @@ def get_auto_lear_ner_model(
         def __init__(self, config):
             super().__init__(config)
             self.config = config
-            self.bert = base_model(config, add_pooling_layer=False)
+            self.backbone = base_model(config, add_pooling_layer=False)
 
             classifier_dropout = (
                 config.classifier_dropout if config.classifier_dropout is not None else config.hidden_dropout_prob
@@ -68,7 +68,7 @@ def get_auto_lear_ner_model(
             return_decoded_labels: Optional[bool] = True,
         ) -> SpanOutput:
 
-            token_features = self.bert(
+            token_features = self.backbone(
                 input_ids,
                 attention_mask=attention_mask,
                 token_type_ids=token_type_ids,
@@ -77,7 +77,7 @@ def get_auto_lear_ner_model(
             )[0]
             token_features = self.dropout(token_features)
 
-            label_features = self.bert(
+            label_features = self.backbone(
                 label_input_ids,
                 attention_mask=label_attention_mask,
                 token_type_ids=label_token_type_ids,
@@ -120,6 +120,7 @@ def get_auto_lear_ner_model(
 
         def decode(self, start_logits, end_logits, span_logits, attention_mask, texts, offset_mapping):
             decode_labels = []
+            id2label = {int(v): k for k, v in self.config.label2id.items()}
 
             if not self.config.nested:
                 seqlens = tensor_to_cpu(attention_mask.sum(1))
@@ -128,7 +129,6 @@ def get_auto_lear_ner_model(
 
                 start_thresh = getattr(self.config, "start_thresh", 0.5)
                 end_thresh = getattr(self.config, "end_thresh", 0.5)
-                id2label = {int(v): k for k, v in self.config.label2id.items()}
 
                 for starts, ends, l, text, mapping in zip(start_preds, end_preds, seqlens, texts, offset_mapping):
                     l = l.item()

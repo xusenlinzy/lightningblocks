@@ -88,7 +88,7 @@ def get_auto_w2ner_ner_model(
         def __init__(self, config):
             super().__init__(config)
             self.config = config
-            self.bert = base_model(config, add_pooling_layer=False)
+            self.backbone = base_model(config, add_pooling_layer=False)
 
             classifier_dropout = (
                 config.classifier_dropout if config.classifier_dropout is not None else config.hidden_dropout_prob
@@ -124,7 +124,7 @@ def get_auto_w2ner_ner_model(
             return_decoded_labels: Optional[bool] = True,
         ) -> SequenceLabelingOutput:
 
-            outputs = self.bert(
+            outputs = self.backbone(
                 input_ids,
                 output_attentions=output_attentions,
                 output_hidden_states=self.config.use_last_4_layers,
