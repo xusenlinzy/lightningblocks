@@ -1,12 +1,12 @@
-import re
-import itertools
 import json
 import math
 import random
+import re
+
 import numpy as np
 from torch.utils.data import Dataset
-from lightningnlp.callbacks import Logger, tqdm
 
+from lightningnlp.callbacks import Logger, tqdm
 
 logger = Logger("UIE")
 
@@ -100,16 +100,21 @@ class SpanEvaluator:
         """
         pred_start_ids = get_bool_ids_greater_than(start_probs)
         pred_end_ids = get_bool_ids_greater_than(end_probs)
+
         gold_start_ids = get_bool_ids_greater_than(gold_start_ids.tolist())
         gold_end_ids = get_bool_ids_greater_than(gold_end_ids.tolist())
+
         num_correct_spans = 0
         num_infer_spans = 0
         num_label_spans = 0
+
         for predict_start_ids, predict_end_ids, label_start_ids, label_end_ids in zip(
                 pred_start_ids, pred_end_ids, gold_start_ids, gold_end_ids):
-            [_correct, _infer, _label] = self.eval_span(
-                predict_start_ids, predict_end_ids, label_start_ids,
-                label_end_ids)
+
+            _correct, _infer, _label = self.eval_span(
+                predict_start_ids, predict_end_ids, label_start_ids, label_end_ids
+            )
+
             num_correct_spans += _correct
             num_infer_spans += _infer
             num_label_spans += _label
@@ -133,9 +138,11 @@ class SpanEvaluator:
         """
         pred_set = get_span(predict_start_ids, predict_end_ids)
         label_set = get_span(label_start_ids, label_end_ids)
+
         num_correct = len(pred_set & label_set)
         num_infer = len(pred_set)
         num_label = len(label_set)
+
         return num_correct, num_infer, num_label
 
     def accumulate(self):
@@ -144,12 +151,9 @@ class SpanEvaluator:
         Returns:
             tuple: Returns tuple (`precision, recall, f1 score`).
         """
-        precision = float(self.num_correct_spans /
-                          self.num_infer_spans) if self.num_infer_spans else 0.
-        recall = float(self.num_correct_spans /
-                       self.num_label_spans) if self.num_label_spans else 0.
-        f1_score = float(2 * precision * recall /
-                         (precision + recall)) if self.num_correct_spans else 0.
+        precision = float(self.num_correct_spans / self.num_infer_spans) if self.num_infer_spans else 0.
+        recall = float(self.num_correct_spans / self.num_label_spans) if self.num_label_spans else 0.
+        f1_score = float(2 * precision * recall / (precision + recall)) if self.num_correct_spans else 0.
         return precision, recall, f1_score
 
     def reset(self):
@@ -178,18 +182,24 @@ class IEDataset(Dataset):
     }
     """
 
-    def __init__(self, file_path, tokenizer, max_seq_len) -> None:
+    def __init__(self, file_path, tokenizer, max_seq_len, multilingual=False) -> None:
         super().__init__()
         self.file_path = file_path
         self.dataset = list(reader(file_path))
         self.tokenizer = tokenizer
         self.max_seq_len = max_seq_len
+        self.multilingual = multilingual
 
     def __len__(self):
         return len(self.dataset)
 
     def __getitem__(self, index):
-        return convert_example(self.dataset[index], tokenizer=self.tokenizer, max_seq_len=self.max_seq_len)
+        return convert_example(
+            self.dataset[index],
+            tokenizer=self.tokenizer,
+            max_seq_len=self.max_seq_len,
+            multilingual=self.multilingual,
+        )
 
 
 class IEMapDataset(Dataset):
@@ -203,17 +213,23 @@ class IEMapDataset(Dataset):
     }
     """
 
-    def __init__(self, data, tokenizer, max_seq_len) -> None:
+    def __init__(self, data, tokenizer, max_seq_len, multilingual=False) -> None:
         super().__init__()
         self.dataset = data
         self.tokenizer = tokenizer
         self.max_seq_len = max_seq_len
+        self.multilingual = multilingual
 
     def __len__(self):
         return len(self.dataset)
 
     def __getitem__(self, index):
-        return convert_example(self.dataset[index], tokenizer=self.tokenizer, max_seq_len=self.max_seq_len)
+        return convert_example(
+            self.dataset[index],
+            tokenizer=self.tokenizer,
+            max_seq_len=self.max_seq_len,
+            multilingual=self.multilingual,
+        )
 
 
 def reader(data_path, max_seq_len=512):
@@ -223,7 +239,7 @@ def reader(data_path, max_seq_len=512):
     with open(data_path, 'r', encoding='utf-8') as f:
         for line in f:
             json_line = json.loads(line)
-            content = json_line['content']
+            content = json_line['content'].strip()
             prompt = json_line['prompt']
             # Model Input is aslike: [CLS] Prompt [SEP] Content [SEP]
             # It include three summary tokens.
@@ -240,9 +256,14 @@ def reader(data_path, max_seq_len=512):
                 accumulate = 0
                 while True:
                     cur_result_list = []
-
                     for result in result_list:
-                        if result['start'] + 1 <= max_content_len < result['end']:
+                        if result['end'] - result['start'] > max_content_len:
+                            logger.warning(
+                                "result['end'] - result ['start'] exceeds max_content_len, which will result in no valid instance being returned"
+                            )
+                        if result['start'] + 1 <= max_content_len < result[
+                            'end'] and result['end'] - result[
+                            'start'] <= max_content_len:
                             max_content_len = result['start']
                             break
 
@@ -250,17 +271,13 @@ def reader(data_path, max_seq_len=512):
                     res_content = content[max_content_len:]
 
                     while True:
-                        if len(result_list) == 0:
+                        if len(result_list) != 0 and max_content_len >= result_list[0]['end'] > 0:
+                            cur_result = result_list.pop(0)
+                            cur_result_list.append(cur_result)
+                        elif len(result_list) != 0 and result_list[0]['end'] <= max_content_len and result_list[0][
+                            'end'] <= 0:
+                            cur_result_list = list(result_list)
                             break
-                        elif result_list[0]['end'] <= max_content_len:
-                            if result_list[0]['end'] > 0:
-                                cur_result = result_list.pop(0)
-                                cur_result_list.append(cur_result)
-                            else:
-                                cur_result_list = [
-                                    result for result in result_list
-                                ]
-                                break
                         else:
                             break
 
@@ -276,8 +293,10 @@ def reader(data_path, max_seq_len=512):
                             break
                         result['start'] -= max_content_len
                         result['end'] -= max_content_len
+
                     accumulate += max_content_len
                     max_content_len = max_seq_len - len(prompt) - 3
+
                     if len(res_content) == 0:
                         break
                     elif len(res_content) < max_content_len:
@@ -291,11 +310,10 @@ def reader(data_path, max_seq_len=512):
                     else:
                         content = res_content
 
-                for json_line in json_lines:
-                    yield json_line
+                yield from json_lines
 
 
-def convert_example(example, tokenizer, max_seq_len):
+def convert_example(example, tokenizer, max_seq_len, multilingual=False):
     """
     example: {
         title
@@ -311,7 +329,7 @@ def convert_example(example, tokenizer, max_seq_len):
         max_length=max_seq_len,
         add_special_tokens=True,
         return_offsets_mapping=True)
-    # encoded_inputs = encoded_inputs[0]
+
     offset_mapping = [list(x) for x in encoded_inputs["offset_mapping"][0]]
     bias = 0
     for index in range(1, len(offset_mapping)):
@@ -320,24 +338,43 @@ def convert_example(example, tokenizer, max_seq_len):
             bias = offset_mapping[index - 1][1] + 1  # Includes [SEP] token
         if mapping[0] == 0 and mapping[1] == 0:
             continue
+
         offset_mapping[index][0] += bias
         offset_mapping[index][1] += bias
+
     start_ids = [0 for _ in range(max_seq_len)]
     end_ids = [0 for _ in range(max_seq_len)]
+
     for item in example["result_list"]:
         start = map_offset(item["start"] + bias, offset_mapping)
         end = map_offset(item["end"] - 1 + bias, offset_mapping)
         start_ids[start] = 1.0
         end_ids[end] = 1.0
 
+    input_ids = np.array(encoded_inputs["input_ids"][0], dtype="int64")
+    attention_mask = np.asarray(["attention_mask"][0], dtype="int64")
+    token_type_ids = np.asarray(encoded_inputs["token_type_ids"][0],  dtype="int64")
+
+    if multilingual:
+        tokenized_output = [
+            input_ids,
+            (np.cumsum(np.ones_like(input_ids)) - np.ones_like(input_ids)) * attention_mask,
+            attention_mask,
+            start_ids,
+            end_ids
+        ]
+    else:
+        tokenized_output = [
+            input_ids,
+            token_type_ids,
+            attention_mask,
+            start_ids,
+            end_ids
+        ]
+
     tokenized_output = [
-        encoded_inputs["input_ids"][0], encoded_inputs["token_type_ids"][0],
-        encoded_inputs["attention_mask"][0],
-        start_ids, end_ids
+        np.pad(x, (0, max_seq_len - x.shape[-1]), 'constant') for x in tokenized_output
     ]
-    tokenized_output = [np.array(x, dtype="int64") for x in tokenized_output]
-    tokenized_output = [
-        np.pad(x, (0, max_seq_len - x.shape[-1]), 'constant') for x in tokenized_output]
     return tuple(tokenized_output)
 
 
@@ -356,7 +393,7 @@ def unify_prompt_name(prompt):
         cls_options = re.search(r'\[.*?\]$', prompt).group()[1:-1].split(",")
         cls_options = sorted(list(set(cls_options)))
         cls_options = ",".join(cls_options)
-        prompt = prompt_prefix + "[" + cls_options + "]"
+        prompt = f"{prompt_prefix}[{cls_options}]"
         return prompt
     return prompt
 
@@ -382,12 +419,13 @@ def get_id_and_prob(spans, offset_map):
     return sentence_id, prob
 
 
-def get_relation_type_dict(relation_data):
+def get_relation_type_dict(relation_data, schema_lang="ch"):
+    def compare(a, b, schema_lang="ch"):
+        if schema_lang == "ch":
+            a = a[::-1]
+            b = b[::-1]
 
-    def compare(a, b):
-        a = a[::-1]
-        b = b[::-1]
-        res = ""
+        res = ''
         for i in range(min(len(a), len(b))):
             if a[i] == b[i]:
                 res += a[i]
@@ -395,8 +433,10 @@ def get_relation_type_dict(relation_data):
                 break
         if res == "":
             return res
-        elif res[::-1][0] == "的":
+        if schema_lang == "ch" and res[::-1][0] == "的":
             return res[::-1][1:]
+        elif schema_lang == "en" and res[-3:] == " of":
+            return res[:-3]
         return ""
 
     relation_type_dict = {}
@@ -405,34 +445,35 @@ def get_relation_type_dict(relation_data):
         added = False
         if relation_data[i][0] not in added_list:
             for j in range(i + 1, len(relation_data)):
-                match = compare(relation_data[i][0], relation_data[j][0])
+                match = compare(relation_data[i][0], relation_data[j][0], schema_lang=schema_lang)
                 if match != "":
                     match = unify_prompt_name(match)
                     if relation_data[i][0] not in added_list:
                         added_list.append(relation_data[i][0])
-                        relation_type_dict.setdefault(match, []).append(
-                            relation_data[i][1])
+                        relation_type_dict.setdefault(match, []).append(relation_data[i][1])
                     added_list.append(relation_data[j][0])
-                    relation_type_dict.setdefault(match, []).append(
-                        relation_data[j][1])
+                    relation_type_dict.setdefault(match, []).append(relation_data[j][1])
                     added = True
             if not added:
                 added_list.append(relation_data[i][0])
-                suffix = relation_data[i][0].rsplit("的", 1)[1]
-                suffix = unify_prompt_name(suffix)
-                relation_type_dict[suffix] = relation_data[i][1]
+                if schema_lang == "ch":
+                    suffix = relation_data[i][0].rsplit("的", 1)[1]
+                    suffix = unify_prompt_name(suffix)
+                    relation_type = suffix
+                else:
+                    prefix = relation_data[i][0].split(" of ", 1)[0]
+                    prefix = unify_prompt_name(prefix)
+                    relation_type = prefix
+                relation_type_dict.setdefault(relation_type, []).append(relation_data[i][1])
     return relation_type_dict
 
 
-def add_entity_negative_example(examples, texts, prompts, label_set,
-                                negative_ratio):
+def add_entity_negative_example(examples, texts, prompts, label_set, negative_ratio):
     negative_examples = []
     positive_examples = []
     with tqdm(total=len(prompts)) as pbar:
         for i, prompt in enumerate(prompts):
-            redundants = list(set(label_set) ^ set(prompt))
-            redundants.sort()
-
+            redundants = sorted(set(label_set) ^ set(prompt))
             num_positive = len(examples[i])
             if num_positive != 0:
                 actual_ratio = math.ceil(len(redundants) / num_positive)
@@ -441,10 +482,9 @@ def add_entity_negative_example(examples, texts, prompts, label_set,
                 num_positive, actual_ratio = 1, 0
 
             if actual_ratio <= negative_ratio or negative_ratio == -1:
-                idxs = [k for k in range(len(redundants))]
+                idxs = list(range(len(redundants)))
             else:
-                idxs = random.sample(range(0, len(redundants)),
-                                     negative_ratio * num_positive)
+                idxs = random.sample(range(len(redundants)), negative_ratio * num_positive)
 
             for idx in idxs:
                 negative_result = {
@@ -468,12 +508,12 @@ def add_relation_negative_example(redundants, text, num_positive, ratio):
         # Set num_positive to 1 for text without positive example
         num_positive, actual_ratio = 1, 0
 
-    all_idxs = [k for k in range(len(redundants))]
+    all_idxs = list(range(len(redundants)))
     if actual_ratio <= ratio or ratio == -1:
         idxs = all_idxs
         rest_idxs = []
     else:
-        idxs = random.sample(range(0, len(redundants)), ratio * num_positive)
+        idxs = random.sample(range(len(redundants)), ratio * num_positive)
         rest_idxs = list(set(all_idxs) ^ set(idxs))
 
     for idx in idxs:
@@ -495,16 +535,26 @@ def add_relation_negative_example(redundants, text, num_positive, ratio):
     return added_example, rest_example
 
 
-def add_full_negative_example(examples, texts, relation_prompts, predicate_set,
-                              subject_goldens):
+def add_full_negative_example(
+    examples,
+    texts,
+    relation_prompts,
+    predicate_set,
+    subject_goldens,
+    schema_lang="ch"
+):
     with tqdm(total=len(relation_prompts)) as pbar:
         for i, relation_prompt in enumerate(relation_prompts):
             negative_sample = []
             for subject in subject_goldens[i]:
                 for predicate in predicate_set:
                     # The relation prompt is constructed as follows:
-                    # subject + "的" + predicate
-                    prompt = subject + "的" + predicate
+                    # subject + "的" + predicate -> Chinese
+                    # predicate + " of " + subject -> English
+                    if schema_lang == "ch":
+                        prompt = f"{subject}的{predicate}"
+                    else:
+                        prompt = f"{predicate} of {subject}"
                     if prompt not in relation_prompt:
                         negative_result = {
                             "content": texts[i],
@@ -517,52 +567,10 @@ def add_full_negative_example(examples, texts, relation_prompts, predicate_set,
     return examples
 
 
-def add_negative_example(examples, texts, prompts, label_set, negative_ratio):
-    negative_examples = []
-    positive_examples = []
-    with tqdm(total=len(prompts)) as pbar:
-        for i, prompt in enumerate(prompts):
-            negative_examples = []
-            redundants_list = sorted(set(label_set) ^ set(prompt))
-
-            num_positive = len(examples[i])
-            if num_positive != 0:
-                actual_ratio = math.ceil(len(redundants_list) / num_positive)
-            else:
-                # Set num_positive to 1 for text without positive example
-                num_positive, actual_ratio = 1, 0
-
-            if actual_ratio <= negative_ratio or negative_ratio == -1:
-                idxs = list(range(len(redundants_list)))
-            else:
-                idxs = random.sample(range(len(redundants_list)), negative_ratio * num_positive)
-
-            for idx in idxs:
-                negative_result = {
-                    "content": texts[i],
-                    "result_list": [],
-                    "prompt": redundants_list[idx]
-                }
-                negative_examples.append(negative_result)
-            positive_examples.extend(examples[i])
-            pbar.update(1)
-    return positive_examples, negative_examples
-
-
-def construct_relation_prompt_set(entity_name_set, predicate_set):
-    relation_prompt_set = set()
-    for entity_name, predicate in itertools.product(entity_name_set, predicate_set):
-        # The relation prompt is constructed as follows:
-        # subject + "的" + predicate
-        relation_prompt = f"{entity_name}的{predicate}"
-        relation_prompt_set.add(relation_prompt)
-    return sorted(list(relation_prompt_set))
-
-
 def generate_cls_example(text, labels, prompt_prefix, options):
     random.shuffle(options)
     cls_options = ",".join(options)
-    prompt = prompt_prefix + "[" + cls_options + "]"
+    prompt = f"{prompt_prefix}[{cls_options}]"
 
     result_list = []
     example = {"content": text, "result_list": result_list, "prompt": prompt}
@@ -579,7 +587,7 @@ def convert_cls_examples(raw_examples, prompt_prefix="情感倾向", options=["�
     Convert labeled data export from doccano for classification task.
     """
     examples = []
-    logger.info(f"Converting doccano data...")
+    logger.info("Converting doccano data...")
     with tqdm(total=len(raw_examples)) as pbar:
         for line in raw_examples:
             items = json.loads(line)
@@ -588,13 +596,11 @@ def convert_cls_examples(raw_examples, prompt_prefix="情感倾向", options=["�
                 text, labels = items["data"], items["label"]
             else:
                 text, labels = items["text"], items["label"]
-            example = generate_cls_example(
-                text, labels, prompt_prefix, options)
+            example = generate_cls_example(text, labels, prompt_prefix, options)
             examples.append(example)
     return examples
 
 
-# noinspection PyUnusedLocal
 def convert_ext_examples(
     raw_examples,
     negative_ratio,
@@ -602,6 +608,7 @@ def convert_ext_examples(
     options=["正向", "负向"],
     separator="##",
     is_train=True,
+    schema_lang="ch"
 ):
     """
     Convert labeled data export from doccano for extraction and aspect-level classification task.
@@ -633,8 +640,7 @@ def convert_ext_examples(
             entity_id = 0
             if "data" in items.keys():
                 relation_mode = False
-                if isinstance(items["label"],
-                              dict) and "entities" in items["label"].keys():
+                if isinstance(items["label"], dict) and "entities" in items["label"].keys():
                     relation_mode = True
                 text = items["data"]
                 entities = []
@@ -653,9 +659,7 @@ def convert_ext_examples(
                         entity_id += 1
                 else:
                     # Export file in JSONL format for relation labeling task which doccano < 1.7.0
-                    # e.g. {"data": "", "label":
-                    # {"relations": [ {"id": 0, "start_offset": 0, "end_offset": 6, "label": "ORG"}, ... ],
-                    # "entities": [ {"id": 0, "from_id": 0, "to_id": 1, "type": "foundedAt"}, ... ]}}
+                    # e.g. {"data": "", "label": {"relations": [ {"id": 0, "start_offset": 0, "end_offset": 6, "label": "ORG"}, ... ], "entities": [ {"id": 0, "from_id": 0, "to_id": 1, "type": "foundedAt"}, ... ]}}
                     entities.extend(
                         [entity for entity in items["label"]["entities"]])
                     if "relations" in items["label"].keys():
@@ -680,11 +684,8 @@ def convert_ext_examples(
                     relations = []
                 else:
                     # Export file in JSONL (relation) format
-                    # e.g. {"text": "", "relations":
-                    # [ {"id": 0, "start_offset": 0, "end_offset": 6, "label": "ORG"}, ... ],
-                    # "entities": [ {"id": 0, "from_id": 0, "to_id": 1, "type": "foundedAt"}, ... ]}
-                    text, relations, entities = items["text"], items[
-                        "relations"], items["entities"]
+                    # e.g. {"text": "", "relations": [ {"id": 0, "start_offset": 0, "end_offset": 6, "label": "ORG"}, ... ], "entities": [ {"id": 0, "from_id": 0, "to_id": 1, "type": "foundedAt"}, ... ]}
+                    text, relations, entities = items["text"], items["relations"], items["entities"]
             texts.append(text)
 
             entity_example = []
@@ -699,15 +700,19 @@ def convert_ext_examples(
                     "end": entity["end_offset"]
                 }
 
-                entity_label, entity_cls_label = _sep_cls_label(
-                    entity["label"], separator)
+                entity_label, entity_cls_label = _sep_cls_label(entity["label"], separator)
 
                 # Define the prompt prefix for entity-level classification
-                entity_cls_prompt_prefix = entity_name + "的" + prompt_prefix
+                # xxx + "的" + 情感倾向 -> Chinese
+                # Sentiment classification + " of " + xxx -> English
+                if schema_lang == "ch":
+                    entity_cls_prompt_prefix = entity_name + "的" + prompt_prefix
+                else:
+                    entity_cls_prompt_prefix = prompt_prefix + " of " + entity_name
                 if entity_cls_label is not None:
                     entity_cls_example = generate_cls_example(
-                        text, entity_cls_label, entity_cls_prompt_prefix,
-                        options)
+                        text, entity_cls_label, entity_cls_prompt_prefix, options
+                    )
 
                     entity_cls_examples.append(entity_cls_example)
 
@@ -723,8 +728,7 @@ def convert_ext_examples(
                         "prompt": entity_label
                     }
                 else:
-                    entity_example_map[entity_label]["result_list"].append(
-                        result)
+                    entity_example_map[entity_label]["result_list"].append(result)
 
                 if entity_label not in entity_label_set:
                     entity_label_set.append(entity_label)
@@ -749,18 +753,24 @@ def convert_ext_examples(
                 subject_id = relation["from_id"]
                 object_id = relation["to_id"]
                 # The relation prompt is constructed as follows:
-                # subject + "的" + predicate
-                prompt = entity_map[subject_id]["name"] + "的" + predicate
+                # subject + "的" + predicate -> Chinese
+                # predicate + " of " + subject -> English
+                if schema_lang == "ch":
+                    prompt = entity_map[subject_id]["name"] + "的" + predicate
+                    inverse_negative = entity_map[object_id]["name"] + "的" + predicate
+                else:
+                    prompt = predicate + " of " + entity_map[subject_id]["name"]
+                    inverse_negative = predicate + " of " + entity_map[object_id]["name"]
+
                 if entity_map[subject_id]["name"] not in subject_golden:
                     subject_golden.append(entity_map[subject_id]["name"])
+
                 result = {
                     "text": entity_map[object_id]["name"],
                     "start": entity_map[object_id]["start"],
                     "end": entity_map[object_id]["end"]
                 }
 
-                inverse_negative = entity_map[object_id][
-                    "name"] + "的" + predicate
                 inverse_relation.append(inverse_negative)
                 predicates.append(predicate)
 
@@ -789,8 +799,8 @@ def convert_ext_examples(
 
     logger.info(f"Adding negative samples for first stage prompt...")
     positive_examples, negative_examples = add_entity_negative_example(
-        entity_examples, texts, entity_prompts, entity_label_set,
-        negative_ratio)
+        entity_examples, texts, entity_prompts, entity_label_set, negative_ratio
+    )
     if len(positive_examples) == 0:
         all_entity_examples = []
     else:
@@ -817,29 +827,38 @@ def convert_ext_examples(
                     # 2. entity_name_set ^ subject_goldens[i]
                     redundants2 = []
                     if len(predicate_list[i]) != 0:
-                        nonentity_list = list(
-                            set(entity_name_set) ^ set(subject_goldens[i]))
+                        nonentity_list = list(set(entity_name_set) ^ set(subject_goldens[i]))
                         nonentity_list.sort()
 
-                        redundants2 = [
-                            nonentity + "的" +
-                            predicate_list[i][random.randrange(
-                                len(predicate_list[i]))]
-                            for nonentity in nonentity_list
-                        ]
+                        if schema_lang == "ch":
+                            redundants2 = [
+                                nonentity + "的" +
+                                predicate_list[i][random.randrange(len(predicate_list[i]))]
+                                for nonentity in nonentity_list
+                            ]
+                        else:
+                            redundants2 = [
+                                predicate_list[i][random.randrange(len(predicate_list[i]))] + " of " +
+                                nonentity for nonentity in nonentity_list
+                            ]
 
                     # 3. entity_label_set ^ entity_prompts[i]
                     redundants3 = []
                     if len(subject_goldens[i]) != 0:
-                        non_ent_label_list = list(
-                            set(entity_label_set) ^ set(entity_prompts[i]))
+                        non_ent_label_list = list(set(entity_label_set) ^ set(entity_prompts[i]))
                         non_ent_label_list.sort()
 
-                        redundants3 = [
-                            subject_goldens[i][random.randrange(
-                                len(subject_goldens[i]))] + "的" + non_ent_label
-                            for non_ent_label in non_ent_label_list
-                        ]
+                        if schema_lang == "ch":
+                            redundants3 = [
+                                subject_goldens[i][random.randrange(len(subject_goldens[i]))] + "的" +
+                                non_ent_label for non_ent_label in non_ent_label_list
+                            ]
+                        else:
+                            redundants3 = [
+                                non_ent_label + " of " +
+                                subject_goldens[i][random.randrange(len(subject_goldens[i]))]
+                                for non_ent_label in non_ent_label_list
+                            ]
 
                     redundants_list = [redundants1, redundants2, redundants3]
 
@@ -853,14 +872,12 @@ def convert_ext_examples(
                         negative_example.extend(added)
                         collects.extend(rest)
 
-                    num_sup = num_positive * negative_ratio - len(
-                        negative_example)
+                    num_sup = num_positive * negative_ratio - len(negative_example)
                     if num_sup > 0 and collects:
                         if num_sup > len(collects):
                             idxs = [k for k in range(len(collects))]
                         else:
-                            idxs = random.sample(range(0, len(collects)),
-                                                 num_sup)
+                            idxs = random.sample(range(0, len(collects)), num_sup)
                         for idx in idxs:
                             negative_example.append(collects[idx])
 
@@ -870,8 +887,13 @@ def convert_ext_examples(
             all_relation_examples = positive_examples + negative_examples
         else:
             relation_examples = add_full_negative_example(
-                relation_examples, texts, relation_prompts, predicate_set,
-                subject_goldens)
+                relation_examples,
+                texts,
+                relation_prompts,
+                predicate_set,
+                subject_goldens,
+                schema_lang=schema_lang
+            )
             all_relation_examples = [
                 r for relation_example in relation_examples
                 for r in relation_example

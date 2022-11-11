@@ -1,8 +1,9 @@
 import torch.nn as nn
+from transformers.models.bert.modeling_bert import BertAttention, BertIntermediate, BertOutput
+
+from .attentions import MultiHeadAttentionLayer
 from .layer_norm import LayerNorm
 from .linears import PositionWiseFeedForward
-from .attentions import MultiHeadAttentionLayer
-from transformers.models.bert.modeling_bert import BertAttention, BertIntermediate, BertOutput
 
 
 class BertLayer(nn.Module):

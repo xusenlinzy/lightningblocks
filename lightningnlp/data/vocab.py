@@ -1,9 +1,10 @@
 import collections
 import io
 import json
-import numpy as np
 import os
 import warnings
+
+import numpy as np
 
 
 class Vocab(object):

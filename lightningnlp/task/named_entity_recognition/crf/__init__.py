@@ -4,6 +4,6 @@ from lightningnlp.task.named_entity_recognition.crf.data import DataCollatorForC
 from lightningnlp.task.named_entity_recognition.crf.model import get_auto_cascade_crf_ner_model
 from lightningnlp.task.named_entity_recognition.crf.model import get_auto_crf_ner_model
 from lightningnlp.task.named_entity_recognition.crf.model import get_auto_softmax_ner_model
-from lightningnlp.task.named_entity_recognition.crf.model import get_softmax_model_config
-from lightningnlp.task.named_entity_recognition.crf.model import get_crf_model_config
 from lightningnlp.task.named_entity_recognition.crf.model import get_cascade_crf_ner_model_config
+from lightningnlp.task.named_entity_recognition.crf.model import get_crf_model_config
+from lightningnlp.task.named_entity_recognition.crf.model import get_softmax_model_config

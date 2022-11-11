@@ -1,11 +1,12 @@
 # Implementation of mixout from https://arxiv.org/abs/1909.11299
 # "Mixout: Effective Regularization to Finetune Large-scale Pretrained Language Models"
 import math
+
 import torch
-import torch.nn.init as init
 import torch.nn.functional as F
-from torch.nn import Parameter
+import torch.nn.init as init
 from torch.autograd.function import InplaceFunction
+from torch.nn import Parameter
 
 
 class Mixout(InplaceFunction):

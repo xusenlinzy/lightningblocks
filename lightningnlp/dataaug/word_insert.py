@@ -1,10 +1,11 @@
-import random
 import json
 import os
+import random
 from typing import Iterable
 
 import torch
 from transformers import BertForMaskedLM, BertTokenizer
+
 from lightningnlp.dataaug.base_augment import BaseAugment
 
 __all__ = ['WordInsert']

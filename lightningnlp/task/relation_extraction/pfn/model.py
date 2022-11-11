@@ -1,12 +1,14 @@
 import itertools
+from typing import Optional, List, Any
+
+import numpy as np
 import torch
 import torch.nn as nn
-import numpy as np
-from typing import Optional, List, Any
 from transformers import PreTrainedModel
-from lightningnlp.utils.tensor import tensor_to_numpy
-from lightningnlp.task.utils import RelationExtractionOutput, MODEL_MAP
+
 from lightningnlp.layers.pfn import encoder, ner_unit, re_unit
+from lightningnlp.task.utils import RelationExtractionOutput, MODEL_MAP
+from lightningnlp.utils.tensor import tensor_to_numpy
 
 
 def get_auto_pfn_re_model(

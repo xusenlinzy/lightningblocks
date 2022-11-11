@@ -1,13 +1,14 @@
-import os
-import json
-import shutil
-import pickle
-import torch
 import collections
+import json
+import os
+import pickle
+import shutil
 from base64 import b64decode
+
+import torch
+
 from lightningnlp.callbacks import Logger
 from lightningnlp.utils.download import get_path_from_url
-
 
 logger = Logger("UIE")
 

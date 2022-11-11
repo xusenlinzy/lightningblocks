@@ -1,10 +1,12 @@
-import torch
 from collections.abc import Mapping
 from typing import Any, Dict, List, Optional, Union
+
+import torch
+
 from lightningnlp.core import TaskTransformer
 from lightningnlp.metrics import ExtractionScore
-from lightningnlp.task.relation_extraction.auto import get_auto_re_model, get_auto_re_model_config
 from lightningnlp.task.relation_extraction.auto import RelationExtractionPipeline
+from lightningnlp.task.relation_extraction.auto import get_auto_re_model, get_auto_re_model_config
 
 
 class RelationExtractionTransformer(TaskTransformer):

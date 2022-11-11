@@ -1,12 +1,14 @@
+from typing import Optional, List, Any
+
 import torch
 import torch.nn as nn
-from typing import Optional, List, Any
 from transformers import PreTrainedModel
-from lightningnlp.utils.tensor import sequence_padding, tensor_to_cpu
+
 from lightningnlp.layers.crf import CRF
-from lightningnlp.task.utils import get_entities, SequenceLabelingOutput, MODEL_MAP
 from lightningnlp.losses.focal_loss import FocalLoss
 from lightningnlp.losses.label_smoothing import LabelSmoothingCE
+from lightningnlp.task.utils import get_entities, SequenceLabelingOutput, MODEL_MAP
+from lightningnlp.utils.tensor import sequence_padding, tensor_to_cpu
 
 
 def get_auto_crf_ner_model(
@@ -14,7 +16,6 @@ def get_auto_crf_ner_model(
     output_attentions: Optional[bool] = None,
     output_hidden_states: Optional[bool] = None,
 ) -> PreTrainedModel:
-
     base_model, parent_model = MODEL_MAP[model_type]
 
     class CRFForNer(parent_model):
@@ -22,7 +23,6 @@ def get_auto_crf_ner_model(
         基于`BERT`的`CRF`实体识别模型
         + 📖 `BERT`编码器提取`token`的语义特征
         + 📖 `CRF`层学习标签之间的约束关系
-
         Args:
             `config`: 模型的配置对象
         """
@@ -30,13 +30,13 @@ def get_auto_crf_ner_model(
         def __init__(self, config):
             super().__init__(config)
             self.config = config
-            self.backbone = base_model(config, add_pooling_layer=False)
+            self.bert = base_model(config, add_pooling_layer=False)
 
             classifier_dropout = (
                 config.classifier_dropout if config.classifier_dropout is not None else config.hidden_dropout_prob
             )
             self.dropout = nn.Dropout(classifier_dropout)
-            
+
             self.use_lstm = getattr(config, 'use_lstm', False)
             mid_hidden_size = getattr(config, 'mid_hidden_size', config.hidden_size // 3)
             if self.use_lstm:
@@ -67,7 +67,7 @@ def get_auto_crf_ner_model(
             return_decoded_labels: Optional[bool] = True,
         ) -> SequenceLabelingOutput:
 
-            outputs = self.backbone(
+            outputs = self.bert(
                 input_ids,
                 attention_mask=attention_mask,
                 token_type_ids=token_type_ids,
@@ -98,7 +98,7 @@ def get_auto_crf_ner_model(
             )
 
         def decode(self, logits, mask, texts, offset_mapping):
-            decode_ids = self.crf.decode(logits, mask).squeeze(0)  # (batch_size, seq_length)
+            decode_ids = self.crf.decode(logits, mask.bool()).squeeze(0)  # (batch_size, seq_length)
             decode_ids, mask = tensor_to_cpu(decode_ids), tensor_to_cpu(mask)
             id2label = {int(v): k for k, v in self.config.label2id.items()}
 
@@ -106,14 +106,15 @@ def get_auto_crf_ner_model(
             for text, ids, mask, mapping in zip(texts, decode_ids, mask, offset_mapping):
                 decode_label = [id2label[id.item()] for id, m in zip(ids, mask) if m > 0][:-1]  # [CLS], [SEP]
                 decode_label = get_entities(decode_label)
-                decode_label = [(l[0], mapping[l[1]][0], mapping[l[2]][1], text[mapping[l[1]][0]: mapping[l[2]][1]]) for l in decode_label]
+                decode_label = [(l[0], mapping[l[1]][0], mapping[l[2]][1], text[mapping[l[1]][0]: mapping[l[2]][1]]) for
+                                l in decode_label]
                 decode_labels.append(set(decode_label))
 
             return decode_labels
 
         def compute_loss(self, inputs):
             logits, labels, mask = inputs[:3]
-            return -1 * self.crf(emissions=logits, tags=labels, mask=mask)
+            return -1 * self.crf(emissions=logits, tags=labels, mask=mask.bool())
 
     return CRFForNer
 
@@ -123,7 +124,6 @@ def get_auto_cascade_crf_ner_model(
     output_attentions: Optional[bool] = None,
     output_hidden_states: Optional[bool] = None,
 ) -> PreTrainedModel:
-
     base_model, parent_model = MODEL_MAP[model_type]
 
     class CascadeCRFForNer(parent_model):
@@ -132,7 +132,7 @@ def get_auto_cascade_crf_ner_model(
         + 📖 `BERT`编码器提取`token`的语义特征
         + 📖 第一阶段`CRF`层学习`BIO`标签之间的约束关系抽取所有实体
         + 📖 第二阶段采用一个线性层对实体进行分类
-        
+
         Args:
             `config`: 模型的配置对象
         """
@@ -205,7 +205,7 @@ def get_auto_cascade_crf_ner_model(
             )
 
         def decode(self, sequence_output, logits, mask, texts, offset_mapping):
-            decode_ids = self.crf.decode(logits, mask).squeeze(0)  # (batch_size, seq_length)
+            decode_ids = self.crf.decode(logits, mask.bool()).squeeze(0)  # (batch_size, seq_length)
             BIO_MAP = getattr(self.config, 'BIO_MAP', {0: "O", 1: "B-ENT", 2: "I-ENT"})
             id2label = {int(v): k for k, v in self.config.label2id.items()}
 
@@ -239,7 +239,7 @@ def get_auto_cascade_crf_ner_model(
 
         def compute_loss(self, inputs):
             logits, entity_logits, entity_labels, labels, mask = inputs[:5]
-            loss = -1 * self.crf(emissions=logits, tags=entity_labels, mask=mask)
+            loss = -1 * self.crf(emissions=logits, tags=entity_labels, mask=mask.bool())
             loss += 4 * nn.CrossEntropyLoss(ignore_index=0)(entity_logits.view(-1, self.config.num_labels),
                                                             labels.flatten())
             return loss
@@ -257,7 +257,6 @@ def get_auto_softmax_ner_model(
     class SoftmaxForNer(parent_model):
         """
         基于`BERT`的`Softmax`实体识别模型
-
         Args:
             `config`: 模型的配置对象
         """

@@ -1,11 +1,13 @@
+from typing import Optional, List, Any
+
 import torch
 import torch.nn as nn
-from typing import Optional, List, Any
 from transformers import PreTrainedModel
-from lightningnlp.utils.tensor import tensor_to_cpu
-from lightningnlp.task.utils import SpanOutput, MODEL_MAP
-from lightningnlp.losses.span_loss import SpanLossForMultiLabel
+
 from lightningnlp.layers.lear import LabelFusionForToken, Classifier, MLPForMultiLabel
+from lightningnlp.losses.span_loss import SpanLossForMultiLabel
+from lightningnlp.task.utils import SpanOutput, MODEL_MAP
+from lightningnlp.utils.tensor import tensor_to_cpu
 
 
 def get_auto_lear_ner_model(

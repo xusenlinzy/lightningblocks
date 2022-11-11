@@ -1,15 +1,13 @@
-import warnings
-
-import os
 import json
+import os
+import warnings
 from typing import List
 
-import torch
 import numpy as np
+import torch
 from torch import nn
-from torch.nn import functional as F
 from torch.nn import CrossEntropyLoss, MSELoss
-from transformers.models.bert.modeling_bert import BertEncoder, BertPooler, BertOnlyMLMHead, BertPreTrainedModel
+from torch.nn import functional as F
 from transformers import BertModel
 from transformers.modeling_outputs import (
     BaseModelOutputWithPooling,
@@ -18,6 +16,7 @@ from transformers.modeling_outputs import (
     QuestionAnsweringModelOutput,
     TokenClassifierOutput,
 )
+from transformers.models.bert.modeling_bert import BertEncoder, BertPooler, BertOnlyMLMHead, BertPreTrainedModel
 
 
 class PinyinEmbedding(nn.Module):

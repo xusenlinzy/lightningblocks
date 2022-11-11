@@ -1,7 +1,9 @@
-import torch
 from typing import List, Union, Dict, Set
-from lightningnlp.task.named_entity_recognition.predictor import NerPredictor, set2json
+
+import torch
+
 from lightningnlp.callbacks import tqdm
+from lightningnlp.task.named_entity_recognition.predictor import NerPredictor, set2json
 
 
 class LearNerPredictor(NerPredictor):

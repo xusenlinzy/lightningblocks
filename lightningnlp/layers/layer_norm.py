@@ -3,14 +3,12 @@ from torch import nn
 
 
 class ConditionalLayerNorm(nn.Module):
-    def __init__(self,
-                 normalized_shape,
-                 cond_shape,
-                 eps=1e-12):
+    def __init__(self, normalized_shape, cond_shape, eps=1e-12):
         super().__init__()
         self.eps = eps
         self.weight = nn.Parameter(torch.Tensor(normalized_shape))
         self.bias = nn.Parameter(torch.Tensor(normalized_shape))
+
         self.weight_dense = nn.Linear(cond_shape, normalized_shape, bias=False)
         self.bias_dense = nn.Linear(cond_shape, normalized_shape, bias=False)
 
@@ -22,6 +20,7 @@ class ConditionalLayerNorm(nn.Module):
         """
         nn.init.ones_(self.weight)
         nn.init.zeros_(self.bias)
+
         nn.init.zeros_(self.weight_dense.weight)
         nn.init.zeros_(self.bias_dense.weight)
 
@@ -41,7 +40,7 @@ class ConditionalLayerNorm(nn.Module):
 
 
 class LayerNorm(nn.Module):
-    def __init__(self, hidden_size, eps=1e-12, conditional_size=False, bias=True, mode='normal', **kwargs):
+    def __init__(self, hidden_size, eps=1e-12, conditional_size=False, bias=True, mode='normal'):
         """layernorm 层，这里自行实现，目的是为了兼容 conditianal layernorm，使得可以做条件文本生成、条件分类等任务
            条件layernorm来自于苏剑林的想法，详情：https://spaces.ac.cn/archives/7124
         """
@@ -59,6 +58,7 @@ class LayerNorm(nn.Module):
             # 这里采用全零初始化, 目的是在初始状态不干扰原来的预训练权重
             self.dense1 = nn.Linear(conditional_size, hidden_size, bias=False)
             self.dense1.weight.data.uniform_(0, 0)
+
             self.dense2 = nn.Linear(conditional_size, hidden_size, bias=False)
             self.dense2.weight.data.uniform_(0, 0)
 

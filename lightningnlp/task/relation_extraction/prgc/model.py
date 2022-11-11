@@ -1,10 +1,12 @@
+from typing import Optional, List, Any
+
 import torch
 import torch.nn as nn
-from typing import Optional, List, Any
 from transformers import PreTrainedModel
-from lightningnlp.utils.tensor import tensor_to_numpy
-from lightningnlp.task.utils import get_entities
+
 from lightningnlp.task.utils import RelationExtractionOutput, MODEL_MAP
+from lightningnlp.task.utils import get_entities
+from lightningnlp.utils.tensor import tensor_to_numpy
 
 
 class MultiNonLinearClassifier(nn.Module):

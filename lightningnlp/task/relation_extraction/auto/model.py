@@ -1,20 +1,21 @@
 from typing import Optional
+
 from transformers import PreTrainedModel
+
 from lightningnlp.task.relation_extraction.casrel import get_auto_casrel_re_model
 from lightningnlp.task.relation_extraction.casrel import get_casrel_model_config
 from lightningnlp.task.relation_extraction.gplinker import get_auto_gplinker_re_model
 from lightningnlp.task.relation_extraction.gplinker import get_gplinker_model_config
-from lightningnlp.task.relation_extraction.tplinker import get_auto_tplinker_re_model
-from lightningnlp.task.relation_extraction.tplinker import get_tplinker_model_config
 from lightningnlp.task.relation_extraction.grte import get_auto_grte_re_model
 from lightningnlp.task.relation_extraction.grte import get_grte_model_config
-from lightningnlp.task.relation_extraction.spn import get_auto_spn_re_model
-from lightningnlp.task.relation_extraction.spn import get_spn_model_config
 from lightningnlp.task.relation_extraction.pfn import get_auto_pfn_re_model
 from lightningnlp.task.relation_extraction.pfn import get_pfn_model_config
 from lightningnlp.task.relation_extraction.prgc import get_auto_prgc_re_model
 from lightningnlp.task.relation_extraction.prgc import get_prgc_model_config
-
+from lightningnlp.task.relation_extraction.spn import get_auto_spn_re_model
+from lightningnlp.task.relation_extraction.spn import get_spn_model_config
+from lightningnlp.task.relation_extraction.tplinker import get_auto_tplinker_re_model
+from lightningnlp.task.relation_extraction.tplinker import get_tplinker_model_config
 
 RE_MODEL_MAP = {
     "casrel": (get_auto_casrel_re_model, get_casrel_model_config),

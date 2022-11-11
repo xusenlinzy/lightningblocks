@@ -1,13 +1,14 @@
 import itertools
-import torch
-import numpy as np
-from functools import partial
 from dataclasses import dataclass
+from functools import partial
 from typing import Callable, Optional, List, Any, Dict
-from transformers import PreTrainedTokenizerBase
-from lightningnlp.utils.tensor import sequence_padding
-from lightningnlp.task.named_entity_recognition.data import TokenClassificationDataModule
 
+import numpy as np
+import torch
+from transformers import PreTrainedTokenizerBase
+
+from lightningnlp.task.named_entity_recognition.data import TokenClassificationDataModule
+from lightningnlp.utils.tensor import sequence_padding
 
 # dist_inputs
 # https://github.com/ljynlp/W2NER/issues/17

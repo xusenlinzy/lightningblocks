@@ -1,8 +1,10 @@
-import torch
 from collections import defaultdict
 from typing import List, Union, Dict, Set
-from lightningnlp.core import PredictorBase
+
+import torch
+
 from lightningnlp.callbacks import tqdm
+from lightningnlp.core import PredictorBase
 
 
 def set2json(labels: Set) -> Dict:

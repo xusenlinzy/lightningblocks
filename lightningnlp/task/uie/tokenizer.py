@@ -1,22 +1,19 @@
 import collections
 import json
 import os
-import unicodedata
 from shutil import copyfile
 from typing import Any, Dict, List, Optional, Tuple
 
 import sentencepiece as spm
-from transformers import SLOW_TO_FAST_CONVERTERS, PreTrainedTokenizerFast, requires_backends
-from transformers.convert_slow_tokenizer import Converter, SentencePieceExtractor
-
+import unicodedata
 from faster_tokenizer import Tokenizer, normalizers, pretokenizers, postprocessors
 from faster_tokenizer.models import BPE, Unigram
-
+from transformers import SLOW_TO_FAST_CONVERTERS, PreTrainedTokenizerFast, requires_backends
+from transformers.convert_slow_tokenizer import Converter, SentencePieceExtractor
 from transformers.tokenization_utils import AddedToken, PreTrainedTokenizer
 from transformers.utils import SPIECE_UNDERLINE
 
 from utils import logger
-
 
 VOCAB_FILES_NAMES = {
     "sentencepiece_model_file": "sentencepiece.bpe.model",

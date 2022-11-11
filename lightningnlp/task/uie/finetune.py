@@ -1,18 +1,19 @@
+import os
 import shutil
 import sys
 import time
-import os
+
 import torch
 from torch.utils.data import DataLoader
+from tqdm.contrib.logging import logging_redirect_tqdm
 from transformers import BertTokenizerFast
 
-from lightningnlp.utils.seed import seed_everything
 from lightningnlp.callbacks import Logger, tqdm
-from lightningnlp.task.uie.model import UIE
 from lightningnlp.task.uie.evaluate import evaluate
-from tqdm.contrib.logging import logging_redirect_tqdm
+from lightningnlp.task.uie.model import UIE, UIEM
+from lightningnlp.task.uie.tokenizer import ErnieMTokenizerFast
 from lightningnlp.task.uie.utils import IEDataset, SpanEvaluator, EarlyStopping
-
+from lightningnlp.utils.seed import seed_everything
 
 logger = Logger("UIE")
 
@@ -22,29 +23,28 @@ def do_train(args):
     seed_everything(args.seed)
     show_bar = True
 
-    tokenizer = BertTokenizerFast.from_pretrained(args.model)
-    model = UIE.from_pretrained(args.model)
+    tokenizer_class = ErnieMTokenizerFast if args.multilingual else BertTokenizerFast
+    model_class = UIEM if args.multilingual else UIE
+
+    tokenizer = tokenizer_class.from_pretrained(args.model)
+    model = model_class.from_pretrained(args.model)
+
     if args.device == 'gpu':
         model = model.cuda()
-    train_ds = IEDataset(args.train_path, tokenizer=tokenizer,
-                         max_seq_len=args.max_seq_len)
-    dev_ds = IEDataset(args.dev_path, tokenizer=tokenizer,
-                       max_seq_len=args.max_seq_len)
 
-    train_data_loader = DataLoader(
-        train_ds, batch_size=args.batch_size, shuffle=True)
-    dev_data_loader = DataLoader(
-        dev_ds, batch_size=args.batch_size, shuffle=True)
+    train_ds = IEDataset(args.train_path, tokenizer, args.max_seq_len, args.multilingual)
+    dev_ds = IEDataset(args.dev_path, tokenizer, args.max_seq_len, args.multilingual)
 
-    optimizer = torch.optim.AdamW(
-        lr=args.learning_rate, params=model.parameters())
+    train_data_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True)
+    dev_data_loader = DataLoader(dev_ds, batch_size=args.batch_size, shuffle=True)
+
+    optimizer = torch.optim.AdamW(lr=args.learning_rate, params=model.parameters())
 
     criterion = torch.nn.functional.binary_cross_entropy
     metric = SpanEvaluator()
 
     if args.early_stopping:
-        early_stopping_save_dir = os.path.join(
-            args.save_dir, "early_stopping")
+        early_stopping_save_dir = os.path.join(args.save_dir, "early_stopping")
         if not os.path.exists(early_stopping_save_dir):
             os.makedirs(early_stopping_save_dir)
         if show_bar:
@@ -54,8 +54,8 @@ def do_train(args):
         else:
             trace_func = logger.info
         early_stopping = EarlyStopping(
-            patience=7, verbose=True, trace_func=trace_func,
-            save_dir=early_stopping_save_dir)
+            patience=7, verbose=True, trace_func=trace_func, save_dir=early_stopping_save_dir
+        )
 
     loss_list = []
     loss_sum = 0
@@ -66,37 +66,54 @@ def do_train(args):
     epoch_iterator = range(1, args.num_epochs + 1)
     if show_bar:
         train_postfix_info = {'loss': 'unknown'}
-        epoch_iterator = tqdm(
-            epoch_iterator, desc='Training', unit='epoch')
+        epoch_iterator = tqdm(epoch_iterator, desc='Training', unit='epoch')
+
     for epoch in epoch_iterator:
         train_data_iterator = train_data_loader
         if show_bar:
-            train_data_iterator = tqdm(train_data_iterator,
-                                       desc=f'Training Epoch {epoch}', unit='batch')
+            train_data_iterator = tqdm(train_data_iterator, desc=f'Training Epoch {epoch}', unit='batch')
             train_data_iterator.set_postfix(train_postfix_info)
         for batch in train_data_iterator:
             if show_bar:
                 epoch_iterator.refresh()
-            input_ids, token_type_ids, att_mask, start_ids, end_ids = batch
+
+            if args.multilingual:
+                input_ids, position_ids, att_mask, start_ids, end_ids = batch
+            else:
+                input_ids, token_type_ids, att_mask, start_ids, end_ids = batch
+
             if args.device == 'gpu':
                 input_ids = input_ids.cuda()
-                token_type_ids = token_type_ids.cuda()
                 att_mask = att_mask.cuda()
                 start_ids = start_ids.cuda()
                 end_ids = end_ids.cuda()
-            outputs = model(input_ids=input_ids,
-                            token_type_ids=token_type_ids,
-                            attention_mask=att_mask)
-            start_prob, end_prob = outputs[0], outputs[1]
 
+                if args.multilingual:
+                    position_ids = position_ids.cuda()
+                else:
+                    token_type_ids = token_type_ids.cuda()
+
+            if args.multilingual:
+                outputs = model(
+                    input_ids=input_ids, position_ids=position_ids, attention_mask=att_mask,
+                )
+            else:
+                outputs = model(
+                    input_ids=input_ids, token_type_ids=token_type_ids, attention_mask=att_mask,
+                )
+
+            start_prob, end_prob = outputs[0], outputs[1]
             start_ids = start_ids.type(torch.float32)
             end_ids = end_ids.type(torch.float32)
+
             loss_start = criterion(start_prob, start_ids)
             loss_end = criterion(end_prob, end_ids)
             loss = (loss_start + loss_end) / 2.0
             loss.backward()
+
             optimizer.step()
             optimizer.zero_grad()
+
             loss_list.append(float(loss))
             loss_sum += float(loss)
             loss_num += 1
@@ -117,32 +134,31 @@ def do_train(args):
                     with logging_redirect_tqdm([logger.logger]):
                         logger.info(
                             "global step %d, epoch: %d, loss: %.5f, speed: %.2f step/s"
-                            % (global_step, epoch, loss_avg,
-                               args.logging_steps / time_diff))
+                            % (global_step, epoch, loss_avg, args.logging_steps / time_diff))
                 else:
                     logger.info(
                         "global step %d, epoch: %d, loss: %.5f, speed: %.2f step/s"
-                        % (global_step, epoch, loss_avg,
-                           args.logging_steps / time_diff))
+                        % (global_step, epoch, loss_avg, args.logging_steps / time_diff))
                 tic_train = time.time()
 
             if global_step % args.valid_steps == 0:
-                save_dir = os.path.join(
-                    args.save_dir, "model_%d" % global_step)
+                save_dir = os.path.join(args.save_dir, "model_%d" % global_step)
                 if not os.path.exists(save_dir):
                     os.makedirs(save_dir)
+
                 model_to_save = model
                 model_to_save.save_pretrained(save_dir)
                 tokenizer.save_pretrained(save_dir)
+
                 if args.max_model_num:
                     model_to_delete = global_step - args.max_model_num * args.valid_steps
-                    model_to_delete_path = os.path.join(
-                        args.save_dir, "model_%d" % model_to_delete)
+                    model_to_delete_path = os.path.join(args.save_dir, "model_%d" % model_to_delete)
                     if model_to_delete > 0 and os.path.exists(model_to_delete_path):
                         shutil.rmtree(model_to_delete_path)
 
                 dev_loss_avg, precision, recall, f1 = evaluate(
-                    model, metric, data_loader=dev_data_loader, device=args.device, loss_fn=criterion)
+                    model, metric, data_loader=dev_data_loader, device=args.device, loss_fn=criterion, multilingual=args.multilingual
+                )
 
                 if show_bar:
                     train_postfix_info.update({
@@ -170,13 +186,15 @@ def do_train(args):
                     best_f1 = f1
                     save_dir = os.path.join(args.save_dir, "model_best")
                     model_to_save = model
+
                     model_to_save.save_pretrained(save_dir)
                     tokenizer.save_pretrained(save_dir)
                 tic_train = time.time()
 
         if args.early_stopping:
             dev_loss_avg, precision, recall, f1 = evaluate(
-                model, metric, data_loader=dev_data_loader, device=args.device, loss_fn=criterion)
+                model, metric, data_loader=dev_data_loader, device=args.device, loss_fn=criterion, multilingual=args.multilingual
+            )
 
             if show_bar:
                 train_postfix_info.update({
@@ -236,7 +254,8 @@ if __name__ == "__main__":
                         help="Max number of saved model. Best model and earlystopping model is not included.")
     parser.add_argument("--early_stopping", action='store_true', default=False,
                         help="Use early stopping while training")
-
+    parser.add_argument("--multilingual", action='store_true',
+                        help="Whether is the multilingual model.")
     args = parser.parse_args()
 
     do_train(args)

@@ -1,10 +1,12 @@
+from typing import Optional, List, Any
+
 import torch
 import torch.nn as nn
-from typing import Optional, List, Any
 from transformers import PreTrainedModel
-from lightningnlp.utils.tensor import tensor_to_cpu
-from lightningnlp.task.utils import RelationExtractionOutput, MODEL_MAP
+
 from lightningnlp.layers.transformer import TransformerDecoderLayer
+from lightningnlp.task.utils import RelationExtractionOutput, MODEL_MAP
+from lightningnlp.utils.tensor import tensor_to_cpu
 
 
 def get_auto_grte_re_model(

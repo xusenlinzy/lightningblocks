@@ -2,8 +2,8 @@ from functools import partial
 from typing import Any, Optional, List
 
 from datasets import Dataset
-from transformers import PreTrainedTokenizerBase
 from pytorch_lightning.utilities import rank_zero_warn
+from transformers import PreTrainedTokenizerBase
 
 from lightningnlp.core import TransformerDataModule
 
@@ -16,7 +16,6 @@ class TokenClassificationDataModule(TransformerDataModule):
     """
 
     def __init__(self, *args, task_name: str = "crf", is_chinese: bool = True, **kwargs) -> None:
-        self.labels = None
         super().__init__(*args, **kwargs)
         self.task_name = task_name
         self.is_chinese = is_chinese
@@ -96,11 +95,12 @@ class TokenClassificationDataModule(TransformerDataModule):
 
     # noinspection PyPropertyAccess
     def _prepare_labels(self, dataset, label_column_name):
-        # Create unique label set from train datasets.
-        label_list = sorted({label["label"] for column in dataset["train"][label_column_name] for label in column})
-        label_to_id = {l: i for i, l in enumerate(label_list)}
-        self.labels = label_list
-        self.label_to_id = label_to_id
+        if self.labels is None:
+            # Create unique label set from train datasets.
+            self.labels = sorted({label["label"] for column in dataset["train"][label_column_name] for label in column})
+
+        labels = self.labels.keys() if isinstance(self.labels, dict) else self.labels
+        self.label_to_id = {l: i for i, l in enumerate(labels)}
 
     @property
     def label_list(self) -> List[str]:
@@ -114,11 +114,11 @@ class TokenClassificationDataModule(TransformerDataModule):
         examples: Any,
         tokenizer: PreTrainedTokenizerBase,
         max_length: int,
-        label_to_id,
-        text_column_name,
-        label_column_name,
-        mode,
-        is_chinese,
+        label_to_id: dict,
+        text_column_name: str = "text",
+        label_column_name: str = "entities",
+        mode: str = "train",
+        is_chinese: bool = True,
     ):
 
         # 英文文本使用空格分隔单词，BertTokenizer不对空格tokenize

@@ -1,13 +1,13 @@
-import os
 import contextlib
 import functools
 import logging
+import os
 import threading
 import time
+
 import colorlog
 import pytorch_lightning as pl
 from pytorch_lightning.utilities import rank_zero_info
-
 
 log_config = {
     'DEBUG': {

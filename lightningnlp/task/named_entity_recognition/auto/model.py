@@ -1,26 +1,27 @@
 from typing import Optional
-from transformers import PreTrainedModel
-from lightningnlp.task.named_entity_recognition.crf import get_auto_softmax_ner_model
-from lightningnlp.task.named_entity_recognition.crf import get_auto_crf_ner_model
-from lightningnlp.task.named_entity_recognition.crf import get_auto_cascade_crf_ner_model
-from lightningnlp.task.named_entity_recognition.span import get_auto_span_ner_model
-from lightningnlp.task.named_entity_recognition.global_pointer import get_auto_gp_ner_model
-from lightningnlp.task.named_entity_recognition.tplinker import get_auto_tplinker_ner_model
-from lightningnlp.task.named_entity_recognition.mrc import get_auto_mrc_ner_model
-from lightningnlp.task.named_entity_recognition.lear import get_auto_lear_ner_model
-from lightningnlp.task.named_entity_recognition.w2ner import get_auto_w2ner_ner_model
-from lightningnlp.task.named_entity_recognition.cnn import get_auto_cnn_ner_model
-from lightningnlp.task.named_entity_recognition.crf import get_softmax_model_config
-from lightningnlp.task.named_entity_recognition.crf import get_crf_model_config
-from lightningnlp.task.named_entity_recognition.crf import get_cascade_crf_ner_model_config
-from lightningnlp.task.named_entity_recognition.span import get_span_model_config
-from lightningnlp.task.named_entity_recognition.global_pointer import get_global_pointer_model_config
-from lightningnlp.task.named_entity_recognition.tplinker import get_tplinker_model_config
-from lightningnlp.task.named_entity_recognition.mrc import get_mrc_model_config
-from lightningnlp.task.named_entity_recognition.lear import get_lear_model_config
-from lightningnlp.task.named_entity_recognition.w2ner import get_w2ner_model_config
-from lightningnlp.task.named_entity_recognition.cnn import get_cnn_model_config
 
+from transformers import PreTrainedModel
+
+from lightningnlp.task.named_entity_recognition.cnn import get_auto_cnn_ner_model
+from lightningnlp.task.named_entity_recognition.cnn import get_cnn_model_config
+from lightningnlp.task.named_entity_recognition.crf import get_auto_cascade_crf_ner_model
+from lightningnlp.task.named_entity_recognition.crf import get_auto_crf_ner_model
+from lightningnlp.task.named_entity_recognition.crf import get_auto_softmax_ner_model
+from lightningnlp.task.named_entity_recognition.crf import get_cascade_crf_ner_model_config
+from lightningnlp.task.named_entity_recognition.crf import get_crf_model_config
+from lightningnlp.task.named_entity_recognition.crf import get_softmax_model_config
+from lightningnlp.task.named_entity_recognition.global_pointer import get_auto_gp_ner_model
+from lightningnlp.task.named_entity_recognition.global_pointer import get_global_pointer_model_config
+from lightningnlp.task.named_entity_recognition.lear import get_auto_lear_ner_model
+from lightningnlp.task.named_entity_recognition.lear import get_lear_model_config
+from lightningnlp.task.named_entity_recognition.mrc import get_auto_mrc_ner_model
+from lightningnlp.task.named_entity_recognition.mrc import get_mrc_model_config
+from lightningnlp.task.named_entity_recognition.span import get_auto_span_ner_model
+from lightningnlp.task.named_entity_recognition.span import get_span_model_config
+from lightningnlp.task.named_entity_recognition.tplinker import get_auto_tplinker_ner_model
+from lightningnlp.task.named_entity_recognition.tplinker import get_tplinker_model_config
+from lightningnlp.task.named_entity_recognition.w2ner import get_auto_w2ner_ner_model
+from lightningnlp.task.named_entity_recognition.w2ner import get_w2ner_model_config
 
 NER_MODEL_MAP = {
     "crf": (get_auto_crf_ner_model, get_crf_model_config),

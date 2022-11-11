@@ -1,9 +1,11 @@
-import torch
-from functools import partial
 from dataclasses import dataclass
+from functools import partial
 from typing import Callable, Optional, Union, List, Any, Dict
+
+import torch
 from transformers import PreTrainedTokenizerBase
 from transformers.file_utils import PaddingStrategy
+
 from lightningnlp.task.named_entity_recognition.data import TokenClassificationDataModule
 
 

@@ -1,10 +1,11 @@
-import pandas as pd
-import json
 import base64
-import uuid
+import json
 import re
-import streamlit as st
+import uuid
+
+import pandas as pd
 import seaborn as sns
+import streamlit as st
 
 
 def rgb2hex(r, g, b):

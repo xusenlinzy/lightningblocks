@@ -1,9 +1,11 @@
+from typing import Optional, List, Any
+
 import torch
 import torch.nn as nn
-from typing import Optional, List, Any
 from transformers import PreTrainedModel
-from lightningnlp.task.utils import RelationExtractionOutput, MODEL_MAP
+
 from lightningnlp.layers.layer_norm import LayerNorm
+from lightningnlp.task.utils import RelationExtractionOutput, MODEL_MAP
 
 
 def get_auto_casrel_re_model(

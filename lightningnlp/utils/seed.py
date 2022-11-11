@@ -1,8 +1,9 @@
+import logging
 import os
 import random
+
 import numpy as np
 import torch
-import logging
 
 logger = logging.getLogger(__name__)
 

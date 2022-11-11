@@ -1,11 +1,12 @@
-import os
-import json
 import collections
-import numpy as np
+import json
+import os
 from typing import Any, Dict, Optional, Tuple
-from transformers import EvalPrediction, PreTrainedTokenizerBase
-from lightningnlp.callbacks import Logger, tqdm
 
+import numpy as np
+from transformers import EvalPrediction, PreTrainedTokenizerBase
+
+from lightningnlp.callbacks import Logger, tqdm
 
 logger = Logger("Question Answering")
 

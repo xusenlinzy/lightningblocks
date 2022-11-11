@@ -1,15 +1,16 @@
+import argparse
+import math
 import os
 import re
-import six
-import math
-import torch
-import argparse
-import numpy as np
 from pprint import pprint
-from lightningnlp.callbacks import Logger, tqdm
-from lightningnlp.utils.common import cut_chinese_sent, dbc2sbc
-from lightningnlp.task.uie.utils import get_bool_ids_greater_than, get_span, get_id_and_prob
 
+import numpy as np
+import six
+import torch
+
+from lightningnlp.callbacks import Logger, tqdm
+from lightningnlp.task.uie.utils import get_bool_ids_greater_than, get_span, get_id_and_prob
+from lightningnlp.utils.common import cut_chinese_sent, dbc2sbc
 
 logger = Logger("UIE")
 

@@ -1,5 +1,7 @@
-import numpy as np
 from typing import List
+
+import numpy as np
+
 from lightningnlp.metrics.extraction.utils import _prf_divide, _warn_prf
 
 

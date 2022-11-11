@@ -1,8 +1,8 @@
 from pathlib import Path
 from typing import IO, Any, Callable, Dict, Optional, Tuple, Union
 
-import torch
 import pytorch_lightning as pl
+import torch
 from transformers import BertConfig, PreTrainedTokenizerBase, get_scheduler, Adafactor
 from transformers import PretrainedConfig, PreTrainedModel, Pipeline
 from transformers import pipeline as hf_transformers_pipeline

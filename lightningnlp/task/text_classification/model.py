@@ -2,6 +2,7 @@ from typing import Any, Dict, Optional
 
 import torch
 from torchmetrics import Accuracy, Precision, Recall
+
 from lightningnlp.core import TaskTransformer
 from lightningnlp.task.text_classification.auto import get_auto_tc_model_config, get_auto_tc_model
 

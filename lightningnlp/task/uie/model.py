@@ -1,9 +1,11 @@
+from dataclasses import dataclass
+from typing import Optional, Tuple
+
 import torch
 import torch.nn as nn
-from dataclasses import dataclass
 from transformers import ErnieModel, ErniePreTrainedModel, PretrainedConfig
 from transformers.utils import ModelOutput
-from typing import Optional, Tuple
+
 from lightningnlp.task.uie.erniem import ErnieMModel, ErnieMPreTrainedModel
 
 

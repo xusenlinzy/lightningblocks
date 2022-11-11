@@ -1,5 +1,7 @@
-import torch
 from typing import List, Union, Dict, Set
+
+import torch
+
 from lightningnlp.task.named_entity_recognition.predictor import NerPredictor, set2json
 
 

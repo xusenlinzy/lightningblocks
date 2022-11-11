@@ -1,10 +1,10 @@
 from collections import defaultdict
 from typing import List, Union
-from lightningnlp.utils.common import auto_splitter
+
 from lightningnlp.callbacks import Logger
 from lightningnlp.task.relation_extraction.auto.predictor import get_auto_re_predictor
 from lightningnlp.task.relation_extraction.predictor import set2json
-
+from lightningnlp.utils.common import auto_splitter
 
 logger = Logger("AUTO Relation Extraction Pipeline")
 

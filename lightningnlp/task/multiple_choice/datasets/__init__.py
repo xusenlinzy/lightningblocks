@@ -1,2 +1,2 @@
-from lightningnlp.task.multiple_choice.datasets.swag import SwagMultipleChoiceDataModule
 from lightningnlp.task.multiple_choice.datasets.race import RaceMultipleChoiceDataModule
+from lightningnlp.task.multiple_choice.datasets.swag import SwagMultipleChoiceDataModule

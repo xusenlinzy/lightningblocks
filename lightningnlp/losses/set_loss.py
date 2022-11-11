@@ -1,7 +1,7 @@
 import torch
-from torch import nn
 import torch.nn.functional as F
 from scipy.optimize import linear_sum_assignment
+from torch import nn
 
 
 class SetCriterion(nn.Module):

@@ -1,7 +1,9 @@
-import os
-import torch
 import logging
+import os
+
 import numpy as np
+import torch
+
 from ..utils.paths import save_model, json_to_text
 
 logger = logging.getLogger(__name__)

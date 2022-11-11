@@ -1,4 +1,5 @@
 from typing import Tuple
+
 from lightningnlp.core.seq2seq.data import Seq2SeqDataModule
 
 

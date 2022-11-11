@@ -2,8 +2,8 @@ from functools import partial
 from typing import Any, Optional
 
 from datasets import Dataset
-from transformers import PreTrainedTokenizerBase
 from pytorch_lightning.utilities import rank_zero_warn
+from transformers import PreTrainedTokenizerBase
 
 from lightningnlp.core import TransformerDataModule
 

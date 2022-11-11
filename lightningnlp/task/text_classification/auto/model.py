@@ -1,10 +1,11 @@
 from typing import Optional
-from transformers import PreTrainedModel
-from lightningnlp.task.text_classification.fc import get_fc_model_config
-from lightningnlp.task.text_classification.fc import get_auto_fc_tc_model
-from lightningnlp.task.text_classification.mdp import get_mdp_model_config
-from lightningnlp.task.text_classification.mdp import get_auto_mdp_tc_model
 
+from transformers import PreTrainedModel
+
+from lightningnlp.task.text_classification.fc import get_auto_fc_tc_model
+from lightningnlp.task.text_classification.fc import get_fc_model_config
+from lightningnlp.task.text_classification.mdp import get_auto_mdp_tc_model
+from lightningnlp.task.text_classification.mdp import get_mdp_model_config
 
 TC_MODEL_MAP = {
     "fc": (get_auto_fc_tc_model, get_fc_model_config),

@@ -1,6 +1,8 @@
-import torch
 from typing import Any, Dict
+
+import torch
 from datasets import Dataset
+
 from lightningnlp.task.question_answering.data import QuestionAnsweringDataModule
 from lightningnlp.task.question_answering.datasets.utils import (
     prepare_train_features,

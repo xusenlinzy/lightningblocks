@@ -1,5 +1,6 @@
-import numpy as np
 import warnings
+
+import numpy as np
 
 
 def _warn_prf(modifier, msg_start, result_size):

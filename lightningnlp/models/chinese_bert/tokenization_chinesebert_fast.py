@@ -1,4 +1,5 @@
 from functools import lru_cache
+
 from pypinyin import Style, pinyin
 from transformers.models.bert import BertTokenizerFast
 

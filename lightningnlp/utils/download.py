@@ -1,5 +1,6 @@
-import time
 import shutil
+import time
+
 from lightningnlp.callbacks import Logger, tqdm
 
 logger = Logger("Downloading")

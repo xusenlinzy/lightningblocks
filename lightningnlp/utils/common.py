@@ -1,10 +1,11 @@
-import re
-import os
-import warnings
-import math
 import hashlib
-import unicodedata
+import math
+import os
+import re
+import warnings
+
 import numpy as np
+import unicodedata
 
 
 def set_ignore_warnings():

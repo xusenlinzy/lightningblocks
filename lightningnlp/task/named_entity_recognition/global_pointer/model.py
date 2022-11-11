@@ -1,13 +1,15 @@
+from typing import Optional, List, Any
+
+import numpy as np
 import torch
 import torch.nn as nn
-import numpy as np
-from typing import Optional, List, Any
 from transformers import PreTrainedModel
-from lightningnlp.utils.tensor import tensor_to_cpu
-from lightningnlp.task.utils import SequenceLabelingOutput, MODEL_MAP
+
+from lightningnlp.layers.global_pointer import GlobalPointer, EfficientGlobalPointer, Biaffine, UnlabeledEntity
 from lightningnlp.losses import MultiLabelCategoricalCrossEntropy
 from lightningnlp.losses import SparseMultilabelCategoricalCrossentropy
-from lightningnlp.layers.global_pointer import GlobalPointer, EfficientGlobalPointer, Biaffine, UnlabeledEntity
+from lightningnlp.task.utils import SequenceLabelingOutput, MODEL_MAP
+from lightningnlp.utils.tensor import tensor_to_cpu
 
 
 def get_auto_gp_ner_model(

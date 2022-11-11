@@ -1,11 +1,13 @@
-import torch
 import itertools
-import numpy as np
 from typing import List, Union, Dict, Set
-from lightningnlp.task.named_entity_recognition.w2ner.data import DataCollatorForW2Ner
-from lightningnlp.task.named_entity_recognition.w2ner.data import DIST_TO_IDX
-from lightningnlp.task.named_entity_recognition.predictor import NerPredictor, set2json
+
+import numpy as np
+import torch
+
 from lightningnlp.callbacks import tqdm
+from lightningnlp.task.named_entity_recognition.predictor import NerPredictor, set2json
+from lightningnlp.task.named_entity_recognition.w2ner.data import DIST_TO_IDX
+from lightningnlp.task.named_entity_recognition.w2ner.data import DataCollatorForW2Ner
 
 
 class W2NerPredictor(NerPredictor):

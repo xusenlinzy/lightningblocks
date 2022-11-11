@@ -1,15 +1,16 @@
-import torch
-from typing import *
-from transformers.file_utils import ModelOutput
 from dataclasses import dataclass
-from transformers import BertModel, BertPreTrainedModel
-from transformers.models.nezha.modeling_nezha import NezhaModel, NezhaPreTrainedModel
-from transformers.models.albert.modeling_albert import AlbertModel, AlbertPreTrainedModel
-from transformers.models.xlnet.modeling_xlnet import XLNetModel, XLNetPreTrainedModel
-from transformers.models.ernie.modeling_ernie import ErnieModel, ErniePreTrainedModel
-from lightningnlp.models import RoFormerModel, RoFormerPreTrainedModel
-from lightningnlp.models import ChineseBertModel
+from typing import *
 
+import torch
+from transformers import BertModel, BertPreTrainedModel
+from transformers.file_utils import ModelOutput
+from transformers.models.albert.modeling_albert import AlbertModel, AlbertPreTrainedModel
+from transformers.models.ernie.modeling_ernie import ErnieModel, ErniePreTrainedModel
+from transformers.models.nezha.modeling_nezha import NezhaModel, NezhaPreTrainedModel
+from transformers.models.xlnet.modeling_xlnet import XLNetModel, XLNetPreTrainedModel
+
+from lightningnlp.models import ChineseBertModel
+from lightningnlp.models import RoFormerModel, RoFormerPreTrainedModel
 
 MODEL_MAP = {
     "bert": (BertModel, BertPreTrainedModel),

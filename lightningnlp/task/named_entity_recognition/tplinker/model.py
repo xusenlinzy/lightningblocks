@@ -1,11 +1,13 @@
+from typing import Optional, List, Any
+
 import torch
 import torch.nn as nn
-from typing import Optional, List, Any
 from transformers import PreTrainedModel
-from lightningnlp.utils.tensor import tensor_to_cpu
-from lightningnlp.task.utils import SequenceLabelingOutput, MODEL_MAP
+
 from lightningnlp.layers.global_pointer import HandshakingKernel
 from lightningnlp.losses import MultiLabelCategoricalCrossEntropy
+from lightningnlp.task.utils import SequenceLabelingOutput, MODEL_MAP
+from lightningnlp.utils.tensor import tensor_to_cpu
 
 
 def get_auto_tplinker_ner_model(

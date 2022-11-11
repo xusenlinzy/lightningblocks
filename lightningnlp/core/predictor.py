@@ -1,8 +1,10 @@
-import torch
-from typing import Union, Any, Dict
 from collections.abc import Mapping
-from transformers.tokenization_utils_base import PreTrainedTokenizerBase
+from typing import Union, Any, Dict
+
+import torch
 from transformers.modeling_utils import PreTrainedModel
+from transformers.tokenization_utils_base import PreTrainedTokenizerBase
+
 from lightningnlp.callbacks import Logger
 
 logger = Logger("PredictorBase")

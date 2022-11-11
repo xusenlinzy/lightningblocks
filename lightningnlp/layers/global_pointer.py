@@ -1,6 +1,8 @@
-import torch
 import math
+
+import torch
 import torch.nn as nn
+
 from .layer_norm import LayerNorm
 from .position import (
     SinusoidalPositionEncoding,

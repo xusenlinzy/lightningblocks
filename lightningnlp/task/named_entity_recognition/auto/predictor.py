@@ -1,9 +1,8 @@
 from lightningnlp.task.named_entity_recognition.auto import get_auto_ner_model
-from lightningnlp.task.named_entity_recognition.predictor import NerPredictor
-from lightningnlp.task.named_entity_recognition.mrc import PromptNerPredictor
 from lightningnlp.task.named_entity_recognition.lear import LearNerPredictor
+from lightningnlp.task.named_entity_recognition.mrc import PromptNerPredictor
+from lightningnlp.task.named_entity_recognition.predictor import NerPredictor
 from lightningnlp.task.named_entity_recognition.w2ner import W2NerPredictor
-
 
 PREDICTOR_MAP = {
     "mrc": PromptNerPredictor,

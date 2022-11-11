@@ -1,12 +1,13 @@
-import torch
-from tqdm import tqdm
-from numpy import ndarray
-from torch import Tensor
 from typing import List, Union
-from transformers import PreTrainedModel, PreTrainedTokenizerBase
-from sklearn.metrics.pairwise import cosine_similarity
-from lightningnlp.callbacks import Logger
 
+import torch
+from numpy import ndarray
+from sklearn.metrics.pairwise import cosine_similarity
+from torch import Tensor
+from tqdm import tqdm
+from transformers import PreTrainedModel, PreTrainedTokenizerBase
+
+from lightningnlp.callbacks import Logger
 
 logger = Logger("Sentence Embeddings")
 

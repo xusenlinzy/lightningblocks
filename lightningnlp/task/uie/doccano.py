@@ -1,17 +1,18 @@
+import json
 import os
 import time
-import json
-import numpy as np
 from decimal import Decimal
-from lightningnlp.callbacks import Logger
-from lightningnlp.utils.seed import seed_everything
-from lightningnlp.task.uie.utils import convert_ext_examples, convert_cls_examples
 
+import numpy as np
+
+from lightningnlp.callbacks import Logger
+from lightningnlp.task.uie.utils import convert_ext_examples, convert_cls_examples
+from lightningnlp.utils.seed import seed_everything
 
 logger = Logger("UIE")
 
 
-def convert_data(args):
+def do_convert(args):
     seed_everything(args.seed)
 
     tic_time = time.time()
@@ -25,8 +26,7 @@ def convert_data(args):
         raise ValueError("Only []/ len(splits)==3 accepted for splits.")
 
     def _check_sum(splits):
-        return Decimal(str(splits[0])) + Decimal(str(splits[1])) + Decimal(
-            str(splits[2])) == Decimal("1")
+        return Decimal(str(splits[0])) + Decimal(str(splits[1])) + Decimal(str(splits[2])) == Decimal("1")
 
     if len(args.splits) == 3 and not _check_sum(args.splits):
         raise ValueError(
@@ -44,8 +44,11 @@ def convert_data(args):
         separator="##",
         shuffle=False,
         is_train=True,
+        schema_lang="ch"
     ):
-        entities, relations, aspects = convert_ext_examples(examples, negative_ratio, prompt_prefix, options, separator, is_train)
+        entities, relations, aspects = convert_ext_examples(
+            examples, negative_ratio, prompt_prefix, options, separator, is_train, schema_lang
+        )
         examples = entities + relations + aspects
         if shuffle:
             indexes = np.random.permutation(len(examples))
@@ -73,12 +76,19 @@ def convert_data(args):
 
     if len(args.splits) == 0:
         if args.task_type == "ext":
-            examples = _create_ext_examples(raw_examples, args.negative_ratio,
-                                            args.prompt_prefix, args.options,
-                                            args.separator, args.is_shuffle)
+            examples = _create_ext_examples(
+                raw_examples,
+                args.negative_ratio,
+                args.prompt_prefix,
+                args.options,
+                args.separator,
+                args.is_shuffle,
+                schema_lang=args.schema_lang
+            )
         else:
-            examples = _create_cls_examples(raw_examples, args.prompt_prefix,
-                                            args.options, args.is_shuffle)
+            examples = _create_cls_examples(
+                raw_examples, args.prompt_prefix, args.options, args.is_shuffle
+            )
         _save_examples(args.save_dir, "train.txt", examples)
     else:
         index_list = list(range(len(raw_examples)))
@@ -108,10 +118,11 @@ def convert_data(args):
                 raw_examples[:p1],
                 args.negative_ratio,
                 args.prompt_prefix,
-                args.options, args.separator,
+                args.options,
+                args.separator,
                 args.is_shuffle,
+                schema_lang=args.schema_lang,
             )
-
             dev_examples = _create_ext_examples(
                 raw_examples[p1: p2],
                 -1,
@@ -119,8 +130,8 @@ def convert_data(args):
                 args.options,
                 args.separator,
                 is_train=False,
+                schema_lang=args.schema_lang,
             )
-
             test_examples = _create_ext_examples(
                 raw_examples[p2:],
                 -1,
@@ -128,11 +139,18 @@ def convert_data(args):
                 args.options,
                 args.separator,
                 is_train=False,
+                schema_lang=args.schema_lang
             )
         else:
-            train_examples = _create_cls_examples(raw_examples[:p1], args.prompt_prefix, args.options)
-            dev_examples = _create_cls_examples(raw_examples[p1:p2], args.prompt_prefix, args.options)
-            test_examples = _create_cls_examples(raw_examples[p2:], args.prompt_prefix, args.options)
+            train_examples = _create_cls_examples(
+                raw_examples[:p1], args.prompt_prefix, args.options
+            )
+            dev_examples = _create_cls_examples(
+                raw_examples[p1: p2], args.prompt_prefix, args.options
+            )
+            test_examples = _create_cls_examples(
+                raw_examples[p2:], args.prompt_prefix, args.options
+            )
 
         _save_examples(args.save_dir, "train.txt", train_examples)
         _save_examples(args.save_dir, "dev.txt", dev_examples)
@@ -144,16 +162,17 @@ def convert_data(args):
 if __name__ == "__main__":
     import argparse
 
+    # yapf: disable
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-d", "--doccano_file", default="./data/doccano.json",
-                        type=str, help="The doccano file exported from doccano platform.")
-    parser.add_argument("-s", "--save_dir", default="./data",
-                        type=str, help="The path of data that you wanna save.")
+    parser.add_argument("--doccano_file", default="./data/doccano.json", type=str,
+                        help="The doccano file exported from doccano platform.")
+    parser.add_argument("--save_dir", default="./data", type=str,
+                        help="The path of data that you wanna save.")
     parser.add_argument("--negative_ratio", default=5, type=int,
                         help="Used only for the extraction task, the ratio of positive and negative samples, number of negtive samples = negative_ratio * number of positive samples")
     parser.add_argument("--splits", default=[0.8, 0.1, 0.1], type=float, nargs="*",
-                        help="The ratio of samples in datasets. [0.8, 0.1, 0.1] means 80%% samples used for training, 10%% for evaluation and 10%% for test.")
+                        help="The ratio of samples in datasets. [0.6, 0.2, 0.2] means 60% samples used for training, 20% for evaluation and 20% for test.")
     parser.add_argument("--task_type", choices=['ext', 'cls'], default="ext", type=str,
                         help="Select task type, ext for the extraction task and cls for the classification task, defaults to ext.")
     parser.add_argument("--options", default=["正向", "负向"], type=str, nargs="+",
@@ -166,7 +185,10 @@ if __name__ == "__main__":
                         help="Random seed for initialization")
     parser.add_argument("--separator", type=str, default='##',
                         help="Used only for entity/aspect-level classification task, separator for entity label and classification label")
+    parser.add_argument("--schema_lang", choices=["ch", "en"], default="ch",
+                        help="Select the language type for schema.")
 
     args = parser.parse_args()
+    # yapf: enable
 
-    convert_data(args)
+    do_convert()

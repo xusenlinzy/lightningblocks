@@ -1,9 +1,10 @@
-import torch
-import numpy as np
 from typing import List, Union, Dict, Any
-from lightningnlp.core import PredictorBase
-from lightningnlp.callbacks import Logger, tqdm
 
+import numpy as np
+import torch
+
+from lightningnlp.callbacks import Logger, tqdm
+from lightningnlp.core import PredictorBase
 
 logger = Logger("Text Classification")
 

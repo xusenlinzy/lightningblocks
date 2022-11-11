@@ -16,13 +16,14 @@
 
 import math
 import os
+from dataclasses import dataclass
+from typing import Optional, Tuple
 
 import numpy as np
 import torch
 import torch.utils.checkpoint
 from torch import nn
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, MSELoss
-
 from transformers.activations import ACT2FN
 from transformers.file_utils import (
     add_code_sample_docstrings,
@@ -47,10 +48,8 @@ from transformers.modeling_utils import (
     find_pruneable_heads_and_indices,
     prune_linear_layer,
 )
-from dataclasses import dataclass
-from typing import Optional, Tuple
-
 from transformers.utils import logging
+
 from lightningnlp.models.roformer.configuration_roformer import RoFormerConfig
 
 logger = logging.get_logger(__name__)

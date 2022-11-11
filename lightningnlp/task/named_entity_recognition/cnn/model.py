@@ -1,12 +1,14 @@
-import torch
-from torch import nn
-import torch.nn.functional as F
-from torch_scatter import scatter_max
 from typing import Optional, List, Any
+
+import torch
+import torch.nn.functional as F
+from torch import nn
+from torch_scatter import scatter_max
 from transformers import PreTrainedModel
+
+from lightningnlp.task.utils import SequenceLabelingOutput, MODEL_MAP
 from lightningnlp.task.utils.decode_utils import filter_clashed_by_priority
 from lightningnlp.utils.tensor import tensor_to_cpu, seq_len_to_mask, tensor_to_list
-from lightningnlp.task.utils import SequenceLabelingOutput, MODEL_MAP
 
 
 class LayerNorm(nn.Module):

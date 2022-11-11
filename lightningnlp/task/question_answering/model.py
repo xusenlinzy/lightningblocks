@@ -1,9 +1,11 @@
 from functools import partial
 from typing import Any
+
 import torch
+
 from lightningnlp.core import TaskTransformer
-from lightningnlp.task.question_answering.data import QuestionAnsweringDataModule
 from lightningnlp.metrics import SquadMetric
+from lightningnlp.task.question_answering.data import QuestionAnsweringDataModule
 
 
 # noinspection PyUnresolvedReferences

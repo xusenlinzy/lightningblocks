@@ -6,7 +6,6 @@ import torch
 import torch.utils.checkpoint
 from torch import nn
 from transformers import PretrainedConfig
-
 from transformers.activations import ACT2FN
 from transformers.modeling_outputs import (
     BaseModelOutputWithPastAndCrossAttentions,

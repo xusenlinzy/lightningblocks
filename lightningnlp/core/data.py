@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Dict, Optional, Union, List
 
 import pytorch_lightning as pl
 from datasets import Dataset, DatasetDict, Version, load_dataset
@@ -22,6 +22,8 @@ class TransformerDataModule(pl.LightningDataModule):
     def __init__(
         self,
         tokenizer: PreTrainedTokenizerBase,
+        tokenizer_kwargs: Optional[dict] = None,
+        labels: Optional[Union[Dict[str, int], List[Any]]] = None,
         train_batch_size: int = 32,
         validation_batch_size: int = 32,
         test_batch_size: int = 32,
@@ -44,6 +46,9 @@ class TransformerDataModule(pl.LightningDataModule):
     ) -> None:
         super().__init__()
         self.tokenizer = tokenizer
+        self.tokenizer_kwargs = tokenizer_kwargs or {}
+        self.labels = labels
+
         self.train_batch_size = train_batch_size
         self.validation_batch_size = validation_batch_size
         self.test_batch_size = test_batch_size

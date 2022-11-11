@@ -1,13 +1,15 @@
+from typing import Optional, List, Any
+
 import torch
 import torch.nn as nn
-from typing import Optional, List, Any
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 from transformers import PreTrainedModel
-from lightningnlp.utils.tensor import tensor_to_cpu
-from lightningnlp.task.utils import SequenceLabelingOutput, MODEL_MAP
-from lightningnlp.layers.mlp import MLP
-from lightningnlp.layers.layer_norm import LayerNorm
+
 from lightningnlp.layers.conv import DilateConvLayer
+from lightningnlp.layers.layer_norm import LayerNorm
+from lightningnlp.layers.mlp import MLP
+from lightningnlp.task.utils import SequenceLabelingOutput, MODEL_MAP
+from lightningnlp.utils.tensor import tensor_to_cpu
 
 
 class Biaffine(nn.Module):

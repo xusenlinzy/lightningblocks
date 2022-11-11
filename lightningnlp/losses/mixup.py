@@ -1,8 +1,9 @@
 import random
+import warnings
+
+import numpy as np
 import torch
 import torch.nn as nn
-import numpy as np
-import warnings
 
 
 class MixUp(nn.Module):

@@ -1,28 +1,29 @@
 from collections import defaultdict
 from typing import List, Union
-from lightningnlp.utils.common import auto_splitter
+
 from lightningnlp.callbacks import Logger
 from lightningnlp.task.named_entity_recognition.auto.predictor import get_auto_ner_predictor
 from lightningnlp.task.named_entity_recognition.predictor import set2json
+from lightningnlp.utils.common import auto_splitter
 
 logger = Logger("AUTO NER")
 
 
 class NerPipeline(object):
     def __init__(
-        self,
-        model_name="crf",
-        model_type="bert",
-        model=None,
-        model_name_or_path=None,
-        tokenizer=None,
-        device="cpu",
-        use_fp16=False,
-        max_seq_len=512,
-        batch_size=64,
-        split_sentence=False,
-        schema2prompt=None,
-        load_weights=True,
+            self,
+            model_name="crf",
+            model_type="bert",
+            model=None,
+            model_name_or_path=None,
+            tokenizer=None,
+            device="cpu",
+            use_fp16=False,
+            max_seq_len=512,
+            batch_size=64,
+            split_sentence=False,
+            schema2prompt=None,
+            load_weights=True,
     ) -> None:
 
         self._model_name = model_name
@@ -42,15 +43,17 @@ class NerPipeline(object):
 
     def _prepare_predictor(self):
         logger.info(f">>> [Pytorch InferBackend of {self._model_type}-{self._model_name}] Creating Engine ...")
-        self.inference_backend = get_auto_ner_predictor(self._model_name,
-                                                        self._model_type,
-                                                        model=self._model,
-                                                        model_name_or_path=self._model_name_or_path,
-                                                        tokenizer=self._tokenizer,
-                                                        device=self._device,
-                                                        use_fp16=self._use_fp16,
-                                                        load_weights=self._load_weights,
-                                                        schema2prompt=self._schema2prompt)
+        self.inference_backend = get_auto_ner_predictor(
+            self._model_name,
+            self._model_type,
+            model=self._model,
+            model_name_or_path=self._model_name_or_path,
+            tokenizer=self._tokenizer,
+            device=self._device,
+            use_fp16=self._use_fp16,
+            load_weights=self._load_weights,
+            schema2prompt=self._schema2prompt,
+        )
 
     def __call__(self, inputs):
 
@@ -59,14 +62,16 @@ class NerPipeline(object):
             texts = [texts]
 
         max_prompt_len = len(max(self._schema2prompt.values())) if (
-                    self._schema2prompt is not None and self._model_name in ["pfn", "grte"]) else -1
+                self._schema2prompt is not None and self._model_name in ["pfn", "grte"]) else -1
         max_predict_len = self._max_seq_len - max_prompt_len - 3
 
-        short_input_texts, self.input_mapping = auto_splitter(texts, max_predict_len,
-                                                              split_sentence=self._split_sentence)
+        short_input_texts, self.input_mapping = auto_splitter(
+            texts, max_predict_len, split_sentence=self._split_sentence
+        )
 
-        results = self.inference_backend.predict(short_input_texts, batch_size=self._batch_size,
-                                                 max_length=self._max_seq_len, return_dict=False)
+        results = self.inference_backend.predict(
+            short_input_texts, batch_size=self._batch_size, max_length=self._max_seq_len, return_dict=False
+        )
         results = self._auto_joiner(results, short_input_texts, self.input_mapping)
 
         return results

@@ -1,12 +1,14 @@
+from typing import Optional
+
 import torch
 import torch.nn as nn
 from torch.nn import CrossEntropyLoss
-from typing import Optional
 from transformers import PreTrainedModel
 from transformers.modeling_outputs import SequenceClassifierOutput
-from lightningnlp.task.utils import MODEL_MAP
-from lightningnlp.layers.pooling import Pooler
+
 from lightningnlp.layers.dropouts import MultiSampleDropout
+from lightningnlp.layers.pooling import Pooler
+from lightningnlp.task.utils import MODEL_MAP
 
 
 def get_auto_mdp_tc_model(

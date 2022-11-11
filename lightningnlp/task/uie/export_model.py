@@ -1,28 +1,36 @@
 import argparse
 import os
-from itertools import chain
-from typing import List, Union
 import shutil
+from itertools import chain
 from pathlib import Path
+from typing import List, Union
 
 import numpy as np
 import torch
 from transformers import BertTokenizer, PreTrainedModel, PreTrainedTokenizerBase
 
-from lightningnlp.task.uie.model import UIE
 from lightningnlp.callbacks import Logger
+from lightningnlp.task.uie.model import UIE
 
 logger = Logger("UIE")
 
 
-def validate_onnx(tokenizer: PreTrainedTokenizerBase, pt_model: PreTrainedModel, onnx_path: Union[Path, str],
-                  strict: bool = True, atol: float = 1e-05):
+def validate_onnx(
+    tokenizer: PreTrainedTokenizerBase,
+    pt_model: PreTrainedModel,
+    onnx_path: Union[Path, str],
+    strict: bool = True,
+    atol: float = 1e-05
+):
     from onnxruntime import InferenceSession, SessionOptions
 
     logger.info("Validating ONNX model...")
     if strict:
-        ref_inputs = tokenizer('装备', "印媒所称的“印度第一艘国产航母”—“维克兰特”号", add_special_tokens=True,
-                               truncation=True, max_length=512, return_tensors="pt")
+        ref_inputs = tokenizer('装备', "印媒所称的“印度第一艘国产航母”—“维克兰特”号",
+                               add_special_tokens=True,
+                               truncation=True,
+                               max_length=512,
+                               return_tensors="pt")
 
     else:
         batch_size = 2
