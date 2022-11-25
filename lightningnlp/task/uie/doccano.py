@@ -12,7 +12,7 @@ from lightningnlp.utils.seed import seed_everything
 logger = Logger("UIE")
 
 
-def do_convert(args):
+def convert_data(args):
     seed_everything(args.seed)
 
     tic_time = time.time()
