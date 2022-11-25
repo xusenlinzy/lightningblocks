@@ -215,8 +215,6 @@ def get_auto_casrel_re_model(
 
 
 def get_casrel_model_config(predicates, **kwargs):
-    """Softmax实体识别模型的主要参数配置
-    """
     predicate2id = {v: i for i, v in enumerate(predicates)}
     model_config = {
         "num_predicates": len(predicates), "predicate2id": predicate2id,
