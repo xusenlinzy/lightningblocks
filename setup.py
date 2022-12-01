@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 setup(
     name="lightningnlp",
-    version="0.1.2",
+    version="0.1.4",
     description="Pytorch-lightning Code Blocks for NLP",
     long_description=long_description,
     long_description_content_type="text/markdown",

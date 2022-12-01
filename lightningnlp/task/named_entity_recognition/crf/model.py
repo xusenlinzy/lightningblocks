@@ -16,7 +16,7 @@ def get_auto_crf_ner_model(
     output_attentions: Optional[bool] = None,
     output_hidden_states: Optional[bool] = None,
 ) -> PreTrainedModel:
-    base_model, parent_model = MODEL_MAP[model_type]
+    base_model, parent_model, base_model_name = MODEL_MAP[model_type]
 
     class CRFForNer(parent_model):
         """
@@ -30,7 +30,7 @@ def get_auto_crf_ner_model(
         def __init__(self, config):
             super().__init__(config)
             self.config = config
-            self.bert = base_model(config, add_pooling_layer=False)
+            setattr(self, base_model_name, base_model(config, add_pooling_layer=False))
 
             classifier_dropout = (
                 config.classifier_dropout if config.classifier_dropout is not None else config.hidden_dropout_prob
@@ -67,7 +67,7 @@ def get_auto_crf_ner_model(
             return_decoded_labels: Optional[bool] = True,
         ) -> SequenceLabelingOutput:
 
-            outputs = self.bert(
+            outputs = getattr(self, base_model_name)(
                 input_ids,
                 attention_mask=attention_mask,
                 token_type_ids=token_type_ids,
@@ -124,7 +124,7 @@ def get_auto_cascade_crf_ner_model(
     output_attentions: Optional[bool] = None,
     output_hidden_states: Optional[bool] = None,
 ) -> PreTrainedModel:
-    base_model, parent_model = MODEL_MAP[model_type]
+    base_model, parent_model, base_model_name = MODEL_MAP[model_type]
 
     class CascadeCRFForNer(parent_model):
         """
@@ -140,7 +140,7 @@ def get_auto_cascade_crf_ner_model(
         def __init__(self, config):
             super().__init__(config)
             self.config = config
-            self.bert = base_model(config, add_pooling_layer=False)
+            setattr(self, base_model_name, base_model(config, add_pooling_layer=False))
 
             classifier_dropout = (
                 config.classifier_dropout if config.classifier_dropout is not None else config.hidden_dropout_prob
@@ -176,7 +176,7 @@ def get_auto_cascade_crf_ner_model(
             return_decoded_labels: Optional[bool] = True,
         ) -> SequenceLabelingOutput:
 
-            outputs = self.bert(
+            outputs = getattr(self, base_model_name)(
                 input_ids,
                 attention_mask=attention_mask,
                 token_type_ids=token_type_ids,
@@ -252,7 +252,7 @@ def get_auto_softmax_ner_model(
     output_attentions: Optional[bool] = None,
     output_hidden_states: Optional[bool] = None,
 ) -> PreTrainedModel:
-    base_model, parent_model = MODEL_MAP[model_type]
+    base_model, parent_model, base_model_name = MODEL_MAP[model_type]
 
     class SoftmaxForNer(parent_model):
         """
@@ -264,7 +264,7 @@ def get_auto_softmax_ner_model(
         def __init__(self, config):
             super().__init__(config)
             self.config = config
-            self.bert = base_model(config, add_pooling_layer=False)
+            setattr(self, base_model_name, base_model(config, add_pooling_layer=False))
 
             classifier_dropout = (
                 config.classifier_dropout if config.classifier_dropout is not None else config.hidden_dropout_prob
@@ -296,7 +296,7 @@ def get_auto_softmax_ner_model(
             return_decoded_labels: Optional[bool] = True,
         ) -> SequenceLabelingOutput:
 
-            outputs = self.bert(
+            outputs = getattr(self, base_model_name)(
                 input_ids,
                 attention_mask=attention_mask,
                 token_type_ids=token_type_ids,

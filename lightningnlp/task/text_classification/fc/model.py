@@ -16,7 +16,7 @@ def get_auto_fc_tc_model(
     output_hidden_states: Optional[bool] = None,
 ) -> PreTrainedModel:
 
-    base_model, parent_model = MODEL_MAP[model_type]
+    base_model, parent_model, base_model_name = MODEL_MAP[model_type]
     
     class SequenceClassification(parent_model):
         """
@@ -34,7 +34,7 @@ def get_auto_fc_tc_model(
             if self.pooler_type != "cls":
                 self.config.output_hidden_states = True
 
-            self.backbone = base_model(self.config)
+            setattr(self, base_model_name, base_model(config, add_pooling_layer=False))
             
             classifier_dropout = (
                 config.classifier_dropout if config.classifier_dropout is not None else config.hidden_dropout_prob
@@ -55,7 +55,7 @@ def get_auto_fc_tc_model(
             labels: Optional[torch.Tensor] = None,
         ) -> SequenceClassifierOutput:
 
-            outputs = self.backbone(
+            outputs = getattr(self, base_model_name)(
                 input_ids,
                 attention_mask=attention_mask,
                 token_type_ids=token_type_ids,

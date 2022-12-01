@@ -13,13 +13,13 @@ from lightningnlp.models import ChineseBertModel
 from lightningnlp.models import RoFormerModel, RoFormerPreTrainedModel
 
 MODEL_MAP = {
-    "bert": (BertModel, BertPreTrainedModel),
-    "ernie": (ErnieModel, ErniePreTrainedModel),
-    "roformer": (RoFormerModel, RoFormerPreTrainedModel),
-    "nezha": (NezhaModel, NezhaPreTrainedModel),
-    "albert": (AlbertModel, AlbertPreTrainedModel),
-    "xlnet": (XLNetModel, XLNetPreTrainedModel),
-    "chinese-bert": (ChineseBertModel, BertPreTrainedModel),
+    "bert": (BertModel, BertPreTrainedModel, "bert"),
+    "ernie": (ErnieModel, ErniePreTrainedModel, "ernie"),
+    "roformer": (RoFormerModel, RoFormerPreTrainedModel, "roformer"),
+    "nezha": (NezhaModel, NezhaPreTrainedModel, "nezha"),
+    "albert": (AlbertModel, AlbertPreTrainedModel, "albert"),
+    "xlnet": (XLNetModel, XLNetPreTrainedModel, "transformer"),
+    "chinese-bert": (ChineseBertModel, BertPreTrainedModel, "bert"),
 }
 
 

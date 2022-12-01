@@ -7,6 +7,7 @@ from lightningnlp.task.named_entity_recognition import (
     LEARNerDataModule,
     NamedEntityRecognitionTransformer,
 )
+from lightningnlp.task.utils import MODEL_MAP
 
 
 # datasets args
@@ -28,7 +29,7 @@ downstream_model_type = "bert"  # 预训练模型类型
 
 # training args
 learning_rate = 2e-5  # 学习率
-base_model_name = "backbone"  # 模型主干名称
+base_model_name = MODEL_MAP[downstream_model_type][-1]  # 模型主干名称
 other_learning_rate = 1e-4  # 除bert之外其他层的学习率
 output_dir = "outputs/cmeee/lear"  # 模型保存路径
 
