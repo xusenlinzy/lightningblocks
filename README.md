@@ -6,11 +6,29 @@
 
 ---
 
-## 安装稳定版本
+## 安装
 
-```commandline
+1. 搭建好 `pytorch GPU` 深度学习环境
+
+```bash
+conda create -n pytorch python=3.8
+conda activate pytorch
+conda install pytorch cudatoolkit -c pytorch
+```
+
+2. 安装需要用到的一些 `python` 包
+
+```bash
+pip install -r requirements.txt
+```
+
+3. 安装 `lightningnlp`
+
+```bash
 pip install lightningnlp
 ```
+
+4. 在 `https://pytorch-geometric.com/whl/` 中找到与 `torch` 版本对应的 `torch_scatter` 安装包，下载后使用 `pip` 安装 
 
 ## 文本分类
 
@@ -377,3 +395,18 @@ pprint(pipline(text))
 
 ![re](./images/re.png)
 
+## Citation
+如果 `LightningNLP` 对您的研究有帮助，欢迎引用
+
+```text
+@misc{=lightningnlp,
+    title={LightningNLP: An Easy-to-use NLP Library},
+    author={senlin xu},
+    howpublished = {\url{https://github.com/xusenlinzy/lightningblocks}},
+    year={2022}
+}
+```
+
+## Acknowledge
+
+我们借鉴了[`Lightning-transformers`](https://github.com/Lightning-AI/lightning-transformers) 关于模型使用的优秀设计，在此对`Lightning-transformers` 作者及其开源社区表示感谢。
