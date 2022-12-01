@@ -106,7 +106,7 @@ def visualize_ner(text, rlt, colors, span=False):
         spans = [{"start_token": t["start"], "end_token": t["end"], "label": k} for k, v in rlt.items() for t in v]
 
         ex = [{"text": text, "spans": spans, "tokens": list(text)}]
-        return displacy.render(ex, style="spn", manual=True, options={"colors": colors})
+        return displacy.render(ex, style="span", manual=True, options={"colors": colors})
 
     else:
         ents = [{"start": t["start"], "end": t["end"], "label": k} for k, v in rlt.items() for t in v]
