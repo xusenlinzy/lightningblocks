@@ -1,5 +1,6 @@
 colorama
 colorlog
+datasets
 faster_tokenizer
 jieba
 onnx
