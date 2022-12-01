@@ -1,3 +1,6 @@
+import os
+os.environ['TRANSFORMERS_NO_ADVISORY_WARNINGS'] = 'true'
+
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 from transformers import BertTokenizerFast
