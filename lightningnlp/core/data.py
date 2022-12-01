@@ -74,11 +74,26 @@ class TransformerDataModule(pl.LightningDataModule):
         self.streaming = streaming
         os.environ["TOKENIZERS_PARALLELISM"] = "TRUE"  # TODO: smarter handling of this env variable
 
+        self.setup_stages_run = []
+
+    # def setup(self, stage: Optional[str] = None):
+    #     dataset = self.load_dataset()
+    #     dataset = self.split_dataset(dataset)
+    #     dataset = self.process_data(dataset, stage=stage)
+    #     self.ds = dataset
+
     def setup(self, stage: Optional[str] = None):
-        dataset = self.load_dataset()
-        dataset = self.split_dataset(dataset)
-        dataset = self.process_data(dataset, stage=stage)
-        self.ds = dataset
+        # Load and split dataset only if setup has not been run before
+        if len(self.setup_stages_run) == 0:
+            dataset = self.load_dataset()
+            dataset = self.split_dataset(dataset)
+        else:
+            dataset = self.ds
+
+        # Process dataset only if setup has not been run before for this stage
+        if stage not in self.setup_stages_run:
+            self.ds = self.process_data(dataset, stage=stage)
+            self.setup_stages_run.append(stage)
 
     def process_data(
         self, dataset: Union[Dataset, DatasetDict], stage: Optional[str] = None

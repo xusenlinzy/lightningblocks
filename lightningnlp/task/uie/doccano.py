@@ -191,4 +191,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     # yapf: enable
 
-    do_convert()
+    convert_data(args)

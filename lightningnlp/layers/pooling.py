@@ -141,8 +141,8 @@ class Pooler(nn.Module):
     def __init__(self, pooler_type):
         super().__init__()
         self.pooler_type = pooler_type
-        assert self.pooler_type in ["cls", "cls_before_pooler", "avg", "avg_top2",
-                                    "avg_first_last"], f"unrecognized pooling type {self.pooler_type}"
+        assert self.pooler_type in ["cls", "cls_before_pooler", "avg", "avg_top2", "avg_first_last"], \
+            f"unrecognized pooling type {self.pooler_type}"
 
     def forward(self, outputs, attention_mask):
         last_hidden = outputs.last_hidden_state
@@ -150,6 +150,8 @@ class Pooler(nn.Module):
 
         if self.pooler_type in ['cls_before_pooler', 'cls']:
             return last_hidden[:, 0]
+        elif self.pooling == 'pooler':
+            return outputs.pooler_output
         elif self.pooler_type == "avg":
             return (last_hidden * attention_mask.unsqueeze(-1)).sum(1) / attention_mask.sum(-1).unsqueeze(-1)
         elif self.pooler_type == "avg_first_last":

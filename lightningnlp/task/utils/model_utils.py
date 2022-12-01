@@ -65,6 +65,7 @@ class SiameseClassificationOutput(ModelOutput):
 class SentenceEmbeddingOutput(ModelOutput):
     loss: Optional[torch.FloatTensor] = None
     embeddings: Optional[torch.FloatTensor] = None
+    scores: Optional[torch.FloatTensor] = None
 
 
 @dataclass

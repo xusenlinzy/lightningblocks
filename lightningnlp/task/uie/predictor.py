@@ -630,17 +630,17 @@ def parse_args():
 
 if __name__ == '__main__':
 
-    schema = ['Time', 'Player', 'Competition', 'Score']
-    ie = UIEPredictor("uie-m-base", schema=schema, schema_lang="en")
-    pprint(ie("2月8日上午北京冬奥会自由式滑雪女子大跳台决赛中中国选手谷爱凌以188.25分获得金牌！"))
+    # schema = ['Time', 'Player', 'Competition', 'Score']
+    # ie = UIEPredictor("uie-m-base", schema=schema, schema_lang="en")
+    # pprint(ie("2月8日上午北京冬奥会自由式滑雪女子大跳台决赛中中国选手谷爱凌以188.25分获得金牌！"))
 
-    # schema = ['时间', '选手', '赛事名称']  # Define the schema for entity extraction
-    # ie = UIEPredictor("uie-base", schema=schema)
-    #
-    # texts = ["2月8日上午北京冬奥会自由式滑雪女子大跳台决赛中中国选手谷爱凌以188.25分获得金牌！",
-    #          "北京时间24日，2022年羽毛球世锦赛中男单选手赵俊鹏直落两局击败上届亚军、12号种子斯里坎特，与石宇奇携手晋级16强。"]
-    # pprint(ie(texts))
-    #
+    schema = ['时间', '选手', '赛事名称']  # Define the schema for entity extraction
+    ie = UIEPredictor("uie-base", schema=schema)
+
+    texts = ["2月8日上午北京冬奥会自由式滑雪女子大跳台决赛中中国选手谷爱凌以188.25分获得金牌！",
+             "北京时间24日，2022年羽毛球世锦赛中男单选手赵俊鹏直落两局击败上届亚军、12号种子斯里坎特，与石宇奇携手晋级16强。"]
+    pprint(ie(texts))
+
     # schema = ['肿瘤的大小', '肿瘤的个数', '肝癌级别', '脉管内癌栓分级']
     # ie.set_schema(schema)
     # pprint(
