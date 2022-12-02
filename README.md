@@ -16,19 +16,13 @@ conda activate pytorch
 conda install pytorch cudatoolkit -c pytorch
 ```
 
-2. 安装需要用到的一些 `python` 包
-
-```bash
-pip install -r requirements.txt
-```
-
-3. 安装 `lightningnlp`
+2. 安装 `lightningnlp`
 
 ```bash
 pip install lightningnlp
 ```
 
-4. 在 `https://pytorch-geometric.com/whl/` 中找到与 `torch` 版本对应的 `torch_scatter` 安装包，下载后使用 `pip` 安装 
+3. 在 `https://pytorch-geometric.com/whl/` 中找到与 `torch` 版本对应的 `torch_scatter`，下载后使用 `pip` 安装到环境中 
 
 ## 文本分类
 
