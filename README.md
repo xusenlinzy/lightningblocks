@@ -67,7 +67,7 @@ import os
 os.environ['TRANSFORMERS_NO_ADVISORY_WARNINGS'] = 'true'
 
 import pytorch_lightning as pl
-from pytorch_lightning.loggers import WandbLogger
+from pytorch_lightning.loggers import WandbLogger  # 需要安装wandb
 from transformers import BertTokenizerFast
 
 from lightningnlp.callbacks import LoggingCallback
@@ -138,7 +138,6 @@ text = "以色列大规模空袭开始！伊朗多个军事目标遭遇打击，
 print(model.predict(text))
 ```
 
----
 
 ## 命名实体识别
 
@@ -273,7 +272,6 @@ pprint(pipline(text))
 
 ![ner](./images/ner.png)
 
----
 
 ## 实体关系抽取
 
@@ -401,8 +399,6 @@ pipline = RelationExtractionPipeline(model_name_or_path="xusenlin/duie-gplinker"
 text = "查尔斯·阿兰基斯（Charles Aránguiz），1989年4月17日出生于智利圣地亚哥，智利职业足球运动员，司职中场，效力于德国足球甲级联赛勒沃库森足球俱乐部。"
 pprint(pipline(text))
 ```
-
----
 
 ### 4. APP应用
 
