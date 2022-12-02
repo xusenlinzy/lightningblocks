@@ -259,6 +259,8 @@ trainer.fit(model, dm)
 
 ### 3. 预测
 
+本项目在 [huggingface](https://huggingface.co/xusenlin/cmeee-global-pointer) 上提供了一个训练好的模型作为示例可供测试和使用，运行以下代码会自动下载模型并进行预测
+
 ```python
 from pprint import pprint
 from lightningnlp.task.named_entity_recognition import NerPipeline
@@ -390,6 +392,8 @@ trainer.fit(model, dm)
 </details>
 
 ### 3. 预测
+
+本项目在 [huggingface](https://huggingface.co/xusenlin/duie-gplinker) 上提供了一个训练好的模型作为示例可供测试和使用，运行以下代码会自动下载模型并进行预测
 
 ```python
 from pprint import pprint
