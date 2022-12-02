@@ -24,6 +24,18 @@ pip install lightningnlp
 
 3. 在 `https://pytorch-geometric.com/whl/` 中找到与 `torch` 版本对应的 `torch_scatter`，下载后使用 `pip` 安装到环境中 
 
+```python
+import torch
+print(torch.__version__)  # 1.12.0
+print(torch.version.cuda)  # 11.3
+```
+
+```bash
+# 以python=3.8, torch=1.12.0, cuda=11.3为例
+wget https://data.pyg.org/whl/torch-1.12.0%2Bcu113/torch_scatter-2.1.0%2Bpt112cu113-cp38-cp38-linux_x86_64.whl
+pip install torch_scatter-2.1.0+pt112cu113-cp38-cp38-linux_x86_64.whl
+```
+
 ## 文本分类
 
 ### 1. 数据转换
