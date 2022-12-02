@@ -4,8 +4,6 @@
 
 </div>
 
----
-
 ## 安装
 
 1. 搭建好 `pytorch GPU` 深度学习环境
@@ -65,6 +63,9 @@ pip install torch_scatter-2.1.0+pt112cu113-cp38-cp38-linux_x86_64.whl
 <summary>训练代码示例</summary>
 
 ```python
+import os
+os.environ['TRANSFORMERS_NO_ADVISORY_WARNINGS'] = 'true'
+
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 from transformers import BertTokenizerFast
@@ -190,6 +191,9 @@ print(model.predict(text))
 <summary>训练代码示例</summary>
 
 ```python
+import os
+os.environ['TRANSFORMERS_NO_ADVISORY_WARNINGS'] = 'true'
+
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 from transformers import BertTokenizerFast
@@ -260,7 +264,7 @@ trainer.fit(model, dm)
 from pprint import pprint
 from lightningnlp.task.named_entity_recognition import NerPipeline
 
-pipline = NerPipeline(model_name_or_path="my_bert_model_path", model_name="crf", model_type="bert")
+pipline = NerPipeline(model_name_or_path="xusenlin/cmeee-global-pointer", model_name="global-pointer", model_type="bert")
 text = "结果上周六他们主场0：3惨败给了中游球队瓦拉多利德，近7个多月以来西甲首次输球。"
 pprint(pipline(text))
 ```
@@ -320,6 +324,9 @@ pprint(pipline(text))
 <summary>训练代码示例</summary>
 
 ```python
+import os
+os.environ['TRANSFORMERS_NO_ADVISORY_WARNINGS'] = 'true'
+
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 from transformers import BertTokenizerFast
@@ -390,7 +397,7 @@ trainer.fit(model, dm)
 from pprint import pprint
 from lightningnlp.task.relation_extraction import RelationExtractionPipeline
 
-pipline = RelationExtractionPipeline(model_name_or_path="my_bert_model_path", model_name="gplinker", model_type="bert")
+pipline = RelationExtractionPipeline(model_name_or_path="xusenlin/duie-gplinker", model_name="gplinker", model_type="bert")
 text = "查尔斯·阿兰基斯（Charles Aránguiz），1989年4月17日出生于智利圣地亚哥，智利职业足球运动员，司职中场，效力于德国足球甲级联赛勒沃库森足球俱乐部。"
 pprint(pipline(text))
 ```
