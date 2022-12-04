@@ -429,6 +429,7 @@ class UIEPredictor(object):
                 batch = {key: np.array(value[batch_start: batch_start + self._batch_size], dtype="int64") for key, value
                          in encoded_inputs.items() if key in ["input_ids", "attention_mask"]}
                 batch["position_ids"] = (np.cumsum(np.ones_like(batch["input_ids"]), axis=1) - np.ones_like(batch["input_ids"])) * batch["attention_mask"]
+                del batch["attention_mask"]
             else:
                 batch = {key: np.array(value[batch_start: batch_start + self._batch_size], dtype="int64") for key, value
                          in encoded_inputs.items() if key not in self.keys_to_ignore_on_gpu}

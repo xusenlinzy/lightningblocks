@@ -33,7 +33,6 @@ class NamedEntityRecognitionTransformer(TaskTransformer):
                          model_config_kwargs=model_config_kwargs, **kwargs)
         self.labels = labels
         self.average = kwargs.get("average", "micro")
-        self.metrics = {}
 
     def get_auto_model(self, downstream_model_type, downstream_model_name):
         return get_auto_ner_model(model_name=downstream_model_name, model_type=downstream_model_type)
@@ -49,21 +48,21 @@ class NamedEntityRecognitionTransformer(TaskTransformer):
         preds, labels = outputs["predictions"], outputs["groundtruths"]
         self.metric.update(labels, preds)
 
-    def common_epoch_end(self, prefix: str) -> None:
+    def common_epoch_end(self, prefix: str):
         metric_dict = self.compute_metrics(mode=prefix)
         self.log_dict(metric_dict, prog_bar=True, on_step=False, on_epoch=True)
         return metric_dict
 
-    def validation_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> torch.Tensor:
+    def validation_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0):
         return self.common_step(batch)
 
-    def validation_epoch_end(self, outputs) -> None:
+    def validation_epoch_end(self, outputs):
         return self.common_epoch_end("val")
 
-    def test_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> torch.Tensor:
+    def test_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0):
         return self.common_step(batch)
 
-    def test_epoch_end(self, outputs) -> None:
+    def test_epoch_end(self, outputs):
         return self.common_epoch_end("val")
 
     def configure_metrics(self, _) -> None:
