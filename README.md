@@ -408,6 +408,195 @@ pprint(pipline(text))
 
 ![re](./images/re.png)
 
+
+## 通用信息抽取
+
++ [UIE(Universal Information Extraction)](https://arxiv.org/pdf/2203.12277.pdf)：Yaojie Lu等人在ACL-2022中提出了通用信息抽取统一框架 `UIE`。
+
++ 该框架实现了实体抽取、关系抽取、事件抽取、情感分析等任务的统一建模，并使得不同任务间具备良好的迁移和泛化能力。
+
++ 为了方便大家使用 `UIE` 的强大能力，[PaddleNLP](https://github.com/PaddlePaddle/PaddleNLP)借鉴该论文的方法，基于 `ERNIE 3.0` 知识增强预训练模型，训练并开源了首个中文通用信息抽取模型 `UIE`。
+
++ 该模型可以支持不限定行业领域和抽取目标的关键信息抽取，实现零样本快速冷启动，并具备优秀的小样本微调能力，快速适配特定的抽取目标。
+
+![](./images/uie.png)
+
+
+### 预测
+
+<details>
+<summary>命名实体识别</summary>
+
+```python
+from pprint import pprint
+from lightningnlp.task.uie import UIEPredictor
+
+# 实体识别
+schema = ['时间', '选手', '赛事名称'] 
+uie = UIEPredictor("uie-base", schema=schema)
+pprint(uie("2月8日上午北京冬奥会自由式滑雪女子大跳台决赛中中国选手谷爱凌以188.25分获得金牌！")) # Better print results using pprint
+```
+输出：
+```text
+[{'时间': [{'end': 6,
+          'probability': 0.9857378532924486,
+          'start': 0,
+          'text': '2月8日上午'}],
+  '赛事名称': [{'end': 23,
+            'probability': 0.8503089953268272,
+            'start': 6,
+            'text': '北京冬奥会自由式滑雪女子大跳台决赛'}],
+  '选手': [{'end': 31,
+          'probability': 0.8981548639781138,
+          'start': 28,
+          'text': '谷爱凌'}]}]
+```
+</details>
+
+<details>
+<summary>实体关系抽取</summary>
+
+```python
+from pprint import pprint
+from lightningnlp.task.uie import UIEPredictor
+
+# 关系抽取
+schema = {'竞赛名称': ['主办方', '承办方', '已举办次数']} 
+uie = UIEPredictor("uie-base", schema=schema)
+pprint(uie("2022语言与智能技术竞赛由中国中文信息学会和中国计算机学会联合主办，百度公司、中国中文信息学会评测工作委员会和中国计算机学会自然语言处理专委会承办，已连续举办4届，成为全球最热门的中文NLP赛事之一。")) # Better print results using pprint
+```
+输出：
+```text
+[{'竞赛名称': [{'end': 13,
+            'probability': 0.7825402622754041,
+            'relations': {'主办方': [{'end': 22,
+                                  'probability': 0.8421710521379353,
+                                  'start': 14,
+                                  'text': '中国中文信息学会'},
+                                  {'end': 30,
+                                  'probability': 0.7580801847701935,
+                                  'start': 23,
+                                  'text': '中国计算机学会'}],
+                          '已举办次数': [{'end': 82,
+                                    'probability': 0.4671295049136148,
+                                    'start': 80,
+                                    'text': '4届'}],
+                          '承办方': [{'end': 39,
+                                  'probability': 0.8292706618236352,
+                                  'start': 35,
+                                  'text': '百度公司'},
+                                  {'end': 72,
+                                  'probability': 0.6193477885474685,
+                                  'start': 56,
+                                  'text': '中国计算机学会自然语言处理专委会'},
+                                  {'end': 55,
+                                  'probability': 0.7000497331473241,
+                                  'start': 40,
+                                  'text': '中国中文信息学会评测工作委员会'}]},
+            'start': 0,
+            'text': '2022语言与智能技术竞赛'}]}]
+```
+</details>
+
+
+<details>
+<summary>事件抽取</summary>
+
+```python
+from pprint import pprint
+from lightningnlp.task.uie import UIEPredictor
+
+# 事件抽取
+schema = {"地震触发词": ["地震强度", "时间", "震中位置", "震源深度"]}
+uie = UIEPredictor("uie-base", schema=schema)
+pprint(uie("中国地震台网正式测定：5月16日06时08分在云南临沧市凤庆县(北纬24.34度，东经99.98度)发生3.5级地震，震源深度10千米。")) # Better print results using pprint
+```
+输出：
+```text
+[{'地震触发词': {'end': 58,
+            'probability': 0.9977425932884216,
+            'relation': {'地震强度': [{'end': 56,
+                                   'probability': 0.9980800747871399,
+                                   'start': 52,
+                                   'text': '3.5级'}],
+                         '时间': [{'end': 22,
+                                 'probability': 0.9853301644325256,
+                                 'start': 11,
+                                 'text': '5月16日06时08分'}],
+                         '震中位置': [{'end': 50,
+                                   'probability': 0.7874020934104919,
+                                   'start': 23,
+                                   'text': '云南临沧市凤庆县(北纬24.34度，东经99.98度)'}],
+                         '震源深度': [{'end': 67,
+                                   'probability': 0.9937973618507385,
+                                   'start': 63,
+                                   'text': '10千米'}]},
+            'start': 56,
+            'text': '地震'}}]
+```
+</details>
+
+<details>
+<summary>评论观点抽取</summary>
+
+```python
+from pprint import pprint
+from lightningnlp.task.uie import UIEPredictor
+
+# 事件抽取
+schema = {'评价维度': ['观点词', '情感倾向[正向，负向]']}
+uie = UIEPredictor("uie-base", schema=schema)
+pprint(uie("店面干净，很清静，服务员服务热情，性价比很高，发现收银台有排队")) # Better print results using pprint
+```
+输出：
+```text
+[{'评价维度': [{'end': 20,
+            'probability': 0.9817040258681473,
+            'relations': {'情感倾向[正向，负向]': [{'probability': 0.9966142505350533,
+                                          'text': '正向'}],
+                          '观点词': [{'end': 22,
+                                  'probability': 0.957396472711558,
+                                  'start': 21,
+                                  'text': '高'}]},
+            'start': 17,
+            'text': '性价比'},
+          {'end': 2,
+            'probability': 0.9696849569741168,
+            'relations': {'情感倾向[正向，负向]': [{'probability': 0.9982153274927796,
+                                          'text': '正向'}],
+                          '观点词': [{'end': 4,
+                                  'probability': 0.9945318044652538,
+                                  'start': 2,
+                                  'text': '干净'}]},
+            'start': 0,
+            'text': '店面'}]}]
+```
+</details>
+
+
+<details>
+<summary>情感分类</summary>
+
+
+```python
+from pprint import pprint
+from lightningnlp.task.uie import UIEPredictor
+
+# 事件抽取
+schema = '情感倾向[正向，负向]'
+uie = UIEPredictor("uie-base", schema=schema)
+pprint(uie("这个产品用起来真的很流畅，我非常喜欢")) # Better print results using pprint
+```
+输出：
+```text
+[{'情感倾向[正向，负向]': {'end': 0,
+                  'probability': 0.9990023970603943,
+                  'start': 0,
+                  'text': '正向'}}]
+```
+</details>
+
+
 ## Citation
 如果 `LightningNLP` 对您的研究有帮助，欢迎引用
 
