@@ -421,9 +421,6 @@ pprint(pipline(text))
 
 ![](./images/uie.png)
 
-
-### 预测
-
 <details>
 <summary>命名实体识别</summary>
 
