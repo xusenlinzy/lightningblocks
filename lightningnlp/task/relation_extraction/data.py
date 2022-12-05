@@ -67,6 +67,8 @@ class RelationExtractionDataModule(TransformerDataModule):
             load_from_cache_file=self.load_from_cache_file,
         )
 
+        all_dataset = {"train": train_dataset, "validation": val_dataset}
+
         if "test" in dataset:
             test_dataset = dataset["test"].map(process_dev)
             test_dataset = test_dataset.map(
@@ -79,10 +81,9 @@ class RelationExtractionDataModule(TransformerDataModule):
                 load_from_cache_file=self.load_from_cache_file,
             )
 
-        all_dataset = {"train": train_dataset, "validation": val_dataset}
+            all_dataset.update({"test": test_dataset})
 
-        # noinspection PyUnboundLocalVariable
-        return all_dataset.update({"test": test_dataset}) if "test" in dataset else all_dataset
+        return all_dataset
 
     def _setup_input_fields(self, dataset, stage):
         split = "train" if stage == "fit" else "validation"

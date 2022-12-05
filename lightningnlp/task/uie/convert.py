@@ -283,10 +283,9 @@ def extract_and_convert(input_dir, output_dir, verbose=False):
 
     for weight_name, weight_value in paddle_paddle_params.items():
         transposed = ''
-        if 'weight' in weight_name:
-            if '.encoder' in weight_name or 'pooler' in weight_name or 'linear' in weight_name:
-                weight_value = weight_value.transpose()
-                transposed = '.T'
+        if 'weight' in weight_name and ('.encoder' in weight_name or 'pooler' in weight_name or 'linear' in weight_name):
+            weight_value = weight_value.transpose()
+            transposed = '.T'
         # Fix: embedding error
         if 'word_embeddings.weight' in weight_name:
             weight_value[0, :] = 0
@@ -302,25 +301,26 @@ def extract_and_convert(input_dir, output_dir, verbose=False):
 
 
 def check_model(input_model):
-    if not os.path.exists(input_model):
-        if input_model not in MODEL_MAP:
-            raise ValueError('input_model not exists!')
+    if os.path.exists(input_model):
+        return
+    if input_model not in MODEL_MAP:
+        raise ValueError('input_model not exists!')
 
-        resource_file_urls = MODEL_MAP[input_model]['resource_file_urls']
-        logger.info("Downloading resource files...")
+    resource_file_urls = MODEL_MAP[input_model]['resource_file_urls']
+    logger.info("Downloading resource files...")
 
-        for key, val in resource_file_urls.items():
-            file_path = os.path.join(input_model, key)
-            if not os.path.exists(file_path):
-                if val.startswith('base64:'):
-                    base64data = b64decode(val.replace(
-                        'base64:', '').encode('utf-8'))
-                    with open(file_path, 'wb') as f:
-                        f.write(base64data)
-                else:
-                    download_path = get_path_from_url(val, input_model)
-                    if download_path != file_path:
-                        shutil.move(download_path, file_path)
+    for key, val in resource_file_urls.items():
+        file_path = os.path.join(input_model, key)
+        if not os.path.exists(file_path):
+            if val.startswith('base64:'):
+                base64data = b64decode(val.replace(
+                    'base64:', '').encode('utf-8'))
+                with open(file_path, 'wb') as f:
+                    f.write(base64data)
+            else:
+                download_path = get_path_from_url(val, input_model)
+                if download_path != file_path:
+                    shutil.move(download_path, file_path)
 
 
 def convert_model(input_model_path, output_model_math):

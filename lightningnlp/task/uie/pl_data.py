@@ -30,10 +30,7 @@ class UIEDataModule(TransformerDataModule):
 
         dataset = dataset.map(
             convert_to_features,
-            batched=True,
             remove_columns=dataset["train"].column_names,
-            desc="Running tokenizer on uie datasets",
-            new_fingerprint=f"{self.max_length}-{self.task_name}",
             num_proc=self.preprocessing_num_workers,
             load_from_cache_file=self.load_from_cache_file,
         )
@@ -57,7 +54,6 @@ class UIEDataModule(TransformerDataModule):
             max_length=max_seq_len,
             add_special_tokens=True,
             return_offsets_mapping=True)
-
         offset_mapping = [list(x) for x in encoded_inputs["offset_mapping"][0]]
         bias = 0
         for index in range(1, len(offset_mapping)):
@@ -70,8 +66,8 @@ class UIEDataModule(TransformerDataModule):
             offset_mapping[index][0] += bias
             offset_mapping[index][1] += bias
 
-        start_ids = [0 for _ in range(max_seq_len)]
-        end_ids = [0 for _ in range(max_seq_len)]
+        start_ids = np.zeros((max_seq_len,))
+        end_ids = np.zeros((max_seq_len,))
 
         def map_offset(ori_offset, offset_mapping):
             """
@@ -86,7 +82,7 @@ class UIEDataModule(TransformerDataModule):
             end_ids[end] = 1.0
 
         input_ids = np.array(encoded_inputs["input_ids"][0], dtype="int64")
-        attention_mask = np.asarray(["attention_mask"][0], dtype="int64")
+        attention_mask = np.asarray(encoded_inputs["attention_mask"][0], dtype="int64")
         token_type_ids = np.asarray(encoded_inputs["token_type_ids"][0], dtype="int64")
 
         if multilingual:

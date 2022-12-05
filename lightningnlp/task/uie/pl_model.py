@@ -17,15 +17,9 @@ class UIEModel(TaskTransformer):
         **kwargs: :class:`llightningblocks.core.model.TaskTransformer` arguments.
     """
 
-    def __init__(
-        self,
-        downstream_model_type: str,
-        downstream_model_name: str,
-        multilingual: bool = False,
-        **kwargs,
-    ) -> None:
-        super().__init__(downstream_model_type, downstream_model_name, **kwargs)
+    def __init__(self, *args, multilingual: bool = False, **kwargs):
         self.multilingual = multilingual
+        super(UIEModel, self).__init__(*args, **kwargs)
 
     def get_auto_model(self, downstream_model_type, downstream_model_name):
         return UIEM if self.multilingual else UIE

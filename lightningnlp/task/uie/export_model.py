@@ -53,9 +53,7 @@ def validate_onnx(
     session = InferenceSession(str(onnx_path), options, providers=["CPUExecutionProvider"])
 
     # We flatten potential collection of inputs (i.e. past_keys)
-    onnx_inputs = {}
-    for name, value in ref_inputs.items():
-        onnx_inputs[name] = value.numpy()
+    onnx_inputs = {name: value.numpy() for name, value in ref_inputs.items()}
     onnx_named_outputs = ['start_prob', 'end_prob']
     # Compute outputs from the ONNX model
     onnx_outputs = session.run(onnx_named_outputs, onnx_inputs)
@@ -83,7 +81,7 @@ def validate_onnx(
         logger.info(f'\t- Validating ONNX Model output "{name}":')
 
         # Shape
-        if not ort_value.shape == ref_value.shape:
+        if ort_value.shape != ref_value.shape:
             logger.info(
                 f"\t\t-[x] shape {ort_value.shape} doesn't match {ref_value.shape}")
             raise ValueError(
@@ -146,7 +144,7 @@ def export_onnx(output_path: Union[Path, str], tokenizer: PreTrainedTokenizerBas
         )
 
     if not os.path.exists(save_path):
-        logger.error(f'Export Failed!')
+        logger.error('Export Failed!')
 
     return save_path
 

@@ -89,7 +89,7 @@ def convert_data(args):
             examples = _create_cls_examples(
                 raw_examples, args.prompt_prefix, args.options, args.is_shuffle
             )
-        _save_examples(args.save_dir, "train.txt", examples)
+        _save_examples(args.save_dir, "train.json", examples)
     else:
         index_list = list(range(len(raw_examples)))
         if args.is_shuffle:
@@ -152,14 +152,14 @@ def convert_data(args):
                 raw_examples[p2:], args.prompt_prefix, args.options
             )
 
-        _save_examples(args.save_dir, "train.txt", train_examples)
-        _save_examples(args.save_dir, "dev.txt", dev_examples)
-        _save_examples(args.save_dir, "test.txt", test_examples)
+        _save_examples(args.save_dir, "train.json", train_examples)
+        _save_examples(args.save_dir, "dev.json", dev_examples)
+        _save_examples(args.save_dir, "test.json", test_examples)
 
     logger.info('Finished! It takes %.2f seconds' % (time.time() - tic_time))
+    
 
-
-if __name__ == "__main__":
+def parse_doccano_args():
     import argparse
 
     # yapf: disable
@@ -188,7 +188,9 @@ if __name__ == "__main__":
     parser.add_argument("--schema_lang", choices=["ch", "en"], default="ch",
                         help="Select the language type for schema.")
 
-    args = parser.parse_args()
-    # yapf: enable
+    return parser.parse_args()
+    
 
+if __name__ == "__main__":
+    args = parse_doccano_args()
     convert_data(args)

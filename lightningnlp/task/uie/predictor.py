@@ -204,8 +204,7 @@ class UIEPredictor(object):
 
                 save_path = export_onnx(
                     self._model_name_or_path, self._tokenizer, model, 'cpu', input_names, output_names)
-                logger.info(
-                    "The inference model save in the path:{}".format(save_path))
+                logger.info(f"The inference model save in the path:{save_path}")
                 del model
 
             self.inference_backend = ONNXInferBackend(self._model_name_or_path,

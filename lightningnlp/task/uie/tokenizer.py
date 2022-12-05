@@ -236,8 +236,7 @@ class ErnieMTokenizer(PreTrainedTokenizer):
 
     def convert_tokens_to_string(self, tokens):
         """Converts a sequence of tokens (strings for sub-words) in a single string."""
-        out_string = "".join(tokens).replace(SPIECE_UNDERLINE, " ").strip()
-        return out_string
+        return "".join(tokens).replace(SPIECE_UNDERLINE, " ").strip()
 
     def build_inputs_with_special_tokens(
         self, token_ids_0: List[int], token_ids_1: Optional[List[int]] = None
@@ -322,11 +321,10 @@ class ErnieMTokenizer(PreTrainedTokenizer):
                 f"Vocabulary path ({save_directory}) should be a directory")
             return
         sentencepiece_model_file = os.path.join(
-            save_directory, (filename_prefix + "-" if filename_prefix else "") +
-            VOCAB_FILES_NAMES["sentencepiece_model_file"]
+            save_directory, ((f"{filename_prefix}-" if filename_prefix else "") + VOCAB_FILES_NAMES["sentencepiece_model_file"])
         )
-        vocab_file = (filename_prefix +
-                      "-" if filename_prefix else "") + save_directory
+
+        vocab_file = (f"{filename_prefix}-" if filename_prefix else "") + save_directory
 
         if os.path.abspath(self.vocab_file) != os.path.abspath(sentencepiece_model_file) and os.path.isfile(self.vocab_file):
             copyfile(self.vocab_file, sentencepiece_model_file)
@@ -352,33 +350,25 @@ class ErnieMTokenizer(PreTrainedTokenizer):
         """
         is_ch_char
         """
-        if u'\u4e00' <= char <= u'\u9fff':
-            return True
-        return False
+        return u'\u4e00' <= char <= u'\u9fff'
 
     def is_alpha(self, char):
         """
         is_alpha
         """
-        if 'a' <= char <= 'z':
-            return True
-        if 'A' <= char <= 'Z':
-            return True
-        return False
+        return True if 'a' <= char <= 'z' else 'A' <= char <= 'Z'
 
     def is_punct(self, char):
         """
         is_punct
         """
-        if char in u",;:.?!~，；：。？！《》【】":
-            return True
-        return False
+        return char in u",;:.?!~，；：。？！《》【】"
 
     def is_whitespace(self, char):
         """
         is whitespace
         """
-        if char == " " or char == "\t" or char == "\n" or char == "\r":
+        if char in [" ", "\t", "\n", "\r"]:
             return True
         if len(char) == 1:
             cat = unicodedata.category(char)
@@ -555,9 +545,7 @@ class ErnieMConverter(Converter):
         self.proto = m
 
     def vocab(self, proto):
-        word_score_dict = {}
-        for piece in proto.pieces:
-            word_score_dict[piece.piece] = piece.score
+        word_score_dict = {piece.piece: piece.score for piece in proto.pieces}
         vocab_list = [None] * len(self.original_tokenizer.ids_to_tokens)
         original_vocab = self.original_tokenizer.vocab
         for _token, _id in original_vocab.items():
@@ -585,10 +573,8 @@ class ErnieMConverter(Converter):
         )
 
     def normalizer(self, proto):
-        list_normalizers = []
         precompiled_charsmap = proto.normalizer_spec.precompiled_charsmap
-        list_normalizers.append(
-            normalizers.PrecompiledNormalizer(precompiled_charsmap))
+        list_normalizers = [normalizers.PrecompiledNormalizer(precompiled_charsmap)]
         return normalizers.SequenceNormalizer(list_normalizers)
 
     def unk_id(self, proto):
