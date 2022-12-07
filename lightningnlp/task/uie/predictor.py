@@ -8,6 +8,9 @@ import numpy as np
 import six
 import torch
 
+from transformers import BertTokenizerFast
+from lightningnlp.task.uie.tokenizer import ErnieMTokenizerFast
+
 from lightningnlp.callbacks import Logger, tqdm
 from lightningnlp.task.uie.utils import get_bool_ids_greater_than, get_span, get_id_and_prob
 from lightningnlp.utils.common import cut_chinese_sent, dbc2sbc
@@ -155,22 +158,22 @@ class UIEPredictor(object):
 
     def _prepare_predictor(self):
         assert self._engine in ['pytorch', 'onnx'], "engine must be pytorch or onnx!"
+        tokenizer_class = ErnieMTokenizerFast if self._multilingual else BertTokenizerFast
 
-        if not os.path.exists(self._model_name_or_path):
-            input_path = self._model_name_or_path
-            self._model_name_or_path = self._model_name_or_path.replace('-', '_') + '_pytorch'
+        try:
+            tokenizer_class.from_pretrained(f"xusenlin/{self._model_name_or_path}")
+            self._model_name_or_path = f"xusenlin/{self._model_name_or_path}"
+        except OSError:
             if not os.path.exists(self._model_name_or_path):
-                from lightningnlp.task.uie.convert import check_model, extract_and_convert
+                input_path = self._model_name_or_path
+                self._model_name_or_path = self._model_name_or_path.replace('-', '_') + '_pytorch'
+                if not os.path.exists(self._model_name_or_path):
+                    from lightningnlp.task.uie.convert import check_model, extract_and_convert
 
-                check_model(input_path)
-                extract_and_convert(input_path, self._model_name_or_path)
+                    check_model(input_path)
+                    extract_and_convert(input_path, self._model_name_or_path)
 
-        if self._multilingual:
-            from lightningnlp.task.uie.tokenizer import ErnieMTokenizerFast
-            self._tokenizer = ErnieMTokenizerFast.from_pretrained(self._model_name_or_path)
-        else:
-            from transformers import BertTokenizerFast
-            self._tokenizer = BertTokenizerFast.from_pretrained(self._model_name_or_path)
+        self._tokenizer = tokenizer_class.from_pretrained(self._model_name_or_path)
 
         if self._engine == 'pytorch':
             self.inference_backend = PyTorchInferBackend(self._model_name_or_path,

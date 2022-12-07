@@ -13,7 +13,9 @@ from transformers.convert_slow_tokenizer import Converter, SentencePieceExtracto
 from transformers.tokenization_utils import AddedToken, PreTrainedTokenizer
 from transformers.utils import SPIECE_UNDERLINE
 
-from utils import logger
+from lightningnlp.callbacks import Logger
+
+logger = Logger("UIE")
 
 VOCAB_FILES_NAMES = {
     "sentencepiece_model_file": "sentencepiece.bpe.model",
