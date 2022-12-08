@@ -15,10 +15,18 @@ class TokenClassificationDataModule(TransformerDataModule):
         **kwargs: ``HFDataModule`` specific arguments.
     """
 
-    def __init__(self, *args, task_name: str = "crf", is_chinese: bool = True, **kwargs) -> None:
+    def __init__(
+        self,
+        *args,
+        task_name: str = "crf",
+        is_chinese: bool = True,
+        with_indices: bool = False,  # 不连续实体
+        **kwargs,
+    ) -> None:
         super().__init__(*args, **kwargs)
         self.task_name = task_name
         self.is_chinese = is_chinese
+        self.with_indices = with_indices
 
     def get_process_fct(self, text_column_name, label_column_name, mode):
         convert_to_features = partial(
@@ -30,6 +38,7 @@ class TokenClassificationDataModule(TransformerDataModule):
             label_column_name=label_column_name,
             mode=mode,
             is_chinese=self.is_chinese,
+            with_indices=self.with_indices,
         )
         return convert_to_features
 
@@ -52,6 +61,13 @@ class TokenClassificationDataModule(TransformerDataModule):
         )
 
         def process_dev(example):
+            if self.with_indices:
+                return {
+                    "target": {
+                        (ent['label'], str(ent['indices'][0]), str(ent['indices'][-1] + 1), ent['entity'])
+                        for ent in example[label_column_name]
+                    }
+                }
             return {
                 "target": {
                     (ent['label'], str(ent['start_offset']), str(ent['end_offset']), ent['entity'])
@@ -84,7 +100,7 @@ class TokenClassificationDataModule(TransformerDataModule):
                 load_from_cache_file=self.load_from_cache_file,
             )
 
-            all_dataset.update({"test": test_dataset})
+            all_dataset["test"] = test_dataset
 
         return all_dataset
 
@@ -121,6 +137,7 @@ class TokenClassificationDataModule(TransformerDataModule):
         label_column_name: str = "entities",
         mode: str = "train",
         is_chinese: bool = True,
+        with_indices: bool = False,
     ):
 
         # 英文文本使用空格分隔单词，BertTokenizer不对空格tokenize
@@ -143,9 +160,13 @@ class TokenClassificationDataModule(TransformerDataModule):
             for i, entity_list in enumerate(examples[label_column_name]):
                 res = []
                 for _ent in entity_list:
+                    if with_indices:
+                        start_pos, end_pos = _ent["indices"][0], _ent["indices"][-1]
+                    else:
+                        start_pos, end_pos = _ent["start_offset"], _ent["end_offset"] - 1
                     try:
-                        start = tokenized_inputs.char_to_token(i, _ent['start_offset'])
-                        end = tokenized_inputs.char_to_token(i, _ent['end_offset'] - 1)
+                        start = tokenized_inputs.char_to_token(i, start_pos)
+                        end = tokenized_inputs.char_to_token(i, end_pos)
                     except Exception:
                         continue
                     if start is None or end is None:

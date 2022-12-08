@@ -12,24 +12,29 @@ from lightningnlp.task.relation_extraction import (
 )
 
 
-# datasets args
+# datasets hyperparameters
 pretrained_model_name_or_path = "hfl/chinese-roberta-wwm-ext"  # 预训练模型
 train_batch_size = 16  # 训练集batch_size
 validation_batch_size = 16  # 验证集batch_size
 max_length = 128  # 序列最大长度
-num_workers = 16  # 多进程加载数据
+num_workers = 4  # 多进程加载数据
 
-dataset_name = "datasets/duie"  # 训练数据所在目录
-train_file = "train.json"  # 训练集文件名
-validation_file = "dev.json"  # 验证集文件名
+# 方式1：从huggingface下载数据集
+dataset_name = "xusenlin/duie"
+
+# # 方式2：使用自定义数据集
+# dataset_name = "datasets/duie"  # 训练数据所在目录
+# train_file = "train.json"  # 训练集文件名
+# validation_file = "dev.json"  # 验证集文件名
+
 cache_dir = "datasets/duie"  # 数据缓存路径
 task_name = "duie-bert-gplinker"  # 自定义任务名称
 
-# model args
+# model hyperparameters
 downstream_model_name = "gplinker"  # 模型名称
 downstream_model_type = "bert"  # 预训练模型类型
 
-# training args
+# training hyperparameters
 learning_rate = 2e-5  # 学习率
 output_dir = "outputs/duie/gplinker"  # 模型保存路径
 
@@ -43,10 +48,10 @@ def main():
         tokenizer=tokenizer,
         train_batch_size=train_batch_size,
         validation_batch_size=validation_batch_size,
-        num_workers=num_workers,
         dataset_name=dataset_name,
-        train_file=train_file,
-        validation_file=validation_file,
+        num_workers=num_workers,
+        # train_file=train_file,  # 自定义数据集最好指定训练集和验证集文件名
+        # validation_file=validation_file,
         max_length=max_length,
         cache_dir=cache_dir,
         task_name=task_name,

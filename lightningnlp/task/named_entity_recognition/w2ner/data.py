@@ -97,6 +97,7 @@ class W2NerDataModule(TokenClassificationDataModule):
                 text_column_name=text_column_name,
                 label_column_name=label_column_name,
                 is_chinese=self.is_chinese,
+                with_indices=self.with_indices,
             )
         else:
             convert_to_features = partial(
@@ -117,6 +118,7 @@ class W2NerDataModule(TokenClassificationDataModule):
         text_column_name,
         label_column_name,
         is_chinese,
+        with_indices: bool = False,
     ):
 
         # 英文文本使用空格分隔单词，BertTokenizer不对空格tokenize
@@ -163,20 +165,21 @@ class W2NerDataModule(TokenClassificationDataModule):
             _grid_mask = np.ones((length, length), dtype=np.bool)
 
             for entity in label:
-                if "index" in entity:
-                    index = entity["index"]
+                _type = entity["label"]
+                if with_indices:
+                    indices = entity["indices"]
                 else:
-                    _start, _end, _type = entity["start_offset"], entity["end_offset"], entity["label"]
-                    index = list(range(_start, _end))
+                    _start, _end,  = entity["start_offset"], entity["end_offset"]
+                    indices = list(range(_start, _end))
 
-                if index[-1] >= max_length - 2:
+                if indices[-1] >= max_length - 2:
                     continue
 
-                for i in range(len(index)):
-                    if i + 1 >= len(index):
+                for i in range(len(indices)):
+                    if i + 1 >= len(indices):
                         break
-                    _grid_labels[index[i], index[i + 1]] = 1
-                _grid_labels[index[-1], index[0]] = label_to_id[_type] + 2
+                    _grid_labels[indices[i], indices[i + 1]] = 1
+                _grid_labels[indices[-1], indices[0]] = label_to_id[_type] + 2
 
             for k, v in zip(input_keys, [_input_ids, _pieces2word, _dist_inputs, _grid_mask, _grid_labels]):
                 encoded_inputs[k].append(v)
@@ -204,6 +207,7 @@ class W2NerDataModule(TokenClassificationDataModule):
         for sentence in sentences:
             tokens = [tokenizer.tokenize(word) for word in sentence[:max_length - 2]]
             pieces = [piece for pieces in tokens for piece in pieces]
+
             _input_ids = tokenizer.convert_tokens_to_ids(pieces)
             _input_ids = np.array([tokenizer.cls_token_id] + _input_ids + [tokenizer.sep_token_id])
 

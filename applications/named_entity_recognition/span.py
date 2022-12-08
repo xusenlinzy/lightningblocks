@@ -10,30 +10,32 @@ from lightningnlp.task.named_entity_recognition import (
     SpanNerDataModule,
     NamedEntityRecognitionTransformer,
 )
-from lightningnlp.task.utils import MODEL_MAP
 
 
-# datasets args
+# datasets hyperparameters
 pretrained_model_name_or_path = "hfl/chinese-roberta-wwm-ext"  # 预训练模型
 train_batch_size = 32  # 训练集batch_size
 validation_batch_size = 32  # 验证集batch_size
 max_length = 256  # 序列最大长度
-num_workers = 16  # 多进程加载数据
+num_workers = 4  # 多进程加载数据
 
-dataset_name = "datasets/cmeee"  # 训练数据所在目录
-train_file = "train.json"  # 训练集文件名
-validation_file = "dev.json"  # 验证集文件名
+# 方式1：从huggingface下载数据集
+dataset_name = "xusenlin/cmeee"
+
+# # 方式2：使用自定义数据集
+# dataset_name = "datasets/cmeee"  # 训练数据所在目录
+# train_file = "train.json"  # 训练集文件名
+# validation_file = "dev.json"  # 验证集文件名
+
 cache_dir = "datasets/cmeee"  # 数据缓存路径
 task_name = "cmeee-bert-span"  # 自定义任务名称
 
-# model args
+# model hyperparameters
 downstream_model_name = "span"  # 模型名称
 downstream_model_type = "bert"  # 预训练模型类型
 
-# training args
+# training hyperparameters
 learning_rate = 2e-5  # 学习率
-# base_model_name = MODEL_MAP[downstream_model_type][-1]  # 模型主干名称
-# other_learning_rate = 1e-4  # 除bert之外其他层的学习率
 output_dir = "outputs/cmeee/span"  # 模型保存路径
 
 
@@ -46,10 +48,10 @@ def main():
         tokenizer=tokenizer,
         train_batch_size=train_batch_size,
         validation_batch_size=validation_batch_size,
-        num_workers=num_workers,
         dataset_name=dataset_name,
-        train_file=train_file,
-        validation_file=validation_file,
+        num_workers=num_workers,
+        # train_file=train_file,  # 自定义数据集最好指定训练集和验证集文件名
+        # validation_file=validation_file,
         max_length=max_length,
         cache_dir=cache_dir,
         task_name=task_name,
@@ -64,8 +66,6 @@ def main():
         labels=dm.label_list,
         average="micro",
         learning_rate=learning_rate,
-        # base_model_name=base_model_name,
-        # other_learning_rate=other_learning_rate,
         output_dir=output_dir,
     )
 

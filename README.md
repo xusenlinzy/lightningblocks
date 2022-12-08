@@ -212,9 +212,7 @@ dm = CRFNerDataModule(
     train_batch_size=16,  # 训练集batch_size
     validation_batch_size=16,  # 验证集batch_size
     num_workers=16,  # 多进程加载数据
-    dataset_name="datasets/cmeee",  # 训练数据所在目录
-    train_file="train.json",  # 训练集文件名
-    validation_file="dev.json",  # 验证集文件名
+    dataset_name="xusenlin/cmeee",  # huggingface数据集
     max_length=128,  # 序列最大长度
     cache_dir="datasets/cmeee",  # 数据缓存路径
     task_name="cmeee-bert-crf",  # 自定义任务名称
@@ -346,9 +344,7 @@ dm = GPLinkerDataModule(
     train_batch_size=16,  # 训练集batch_size
     validation_batch_size=16,  # 验证集batch_size
     num_workers=16,  # 多进程加载数据
-    dataset_name="datasets/duie",  # 训练数据所在目录
-    train_file="train.json",  # 训练集文件名
-    validation_file="dev.json",  # 验证集文件名
+    dataset_name="xusenlin/duie",  # huggingface数据集
     max_length=128,  # 序列最大长度
     cache_dir="datasets/duie",  # 数据缓存路径
     task_name="duie-bert-gplinker",  # 自定义任务名称
@@ -430,7 +426,8 @@ from lightningnlp.task.uie import UIEPredictor
 
 # 实体识别
 schema = ['时间', '选手', '赛事名称'] 
-uie = UIEPredictor("uie-base", schema=schema)
+# uie-base模型已上传至huggingface，可自动下载，其他模型只需提供模型名称将自动进行转换
+uie = UIEPredictor("xusenlin/uie-base", schema=schema)
 pprint(uie("2月8日上午北京冬奥会自由式滑雪女子大跳台决赛中中国选手谷爱凌以188.25分获得金牌！")) # Better print results using pprint
 ```
 输出：
@@ -458,8 +455,9 @@ from pprint import pprint
 from lightningnlp.task.uie import UIEPredictor
 
 # 关系抽取
-schema = {'竞赛名称': ['主办方', '承办方', '已举办次数']} 
-uie = UIEPredictor("uie-base", schema=schema)
+schema = {'竞赛名称': ['主办方', '承办方', '已举办次数']}
+# uie-base模型已上传至huggingface，可自动下载，其他模型只需提供模型名称将自动进行转换
+uie = UIEPredictor("xusenlin/uie-base", schema=schema)
 pprint(uie("2022语言与智能技术竞赛由中国中文信息学会和中国计算机学会联合主办，百度公司、中国中文信息学会评测工作委员会和中国计算机学会自然语言处理专委会承办，已连续举办4届，成为全球最热门的中文NLP赛事之一。")) # Better print results using pprint
 ```
 输出：
@@ -505,7 +503,8 @@ from lightningnlp.task.uie import UIEPredictor
 
 # 事件抽取
 schema = {"地震触发词": ["地震强度", "时间", "震中位置", "震源深度"]}
-uie = UIEPredictor("uie-base", schema=schema)
+# uie-base模型已上传至huggingface，可自动下载，其他模型只需提供模型名称将自动进行转换
+uie = UIEPredictor("xusenlin/uie-base", schema=schema)
 pprint(uie("中国地震台网正式测定：5月16日06时08分在云南临沧市凤庆县(北纬24.34度，东经99.98度)发生3.5级地震，震源深度10千米。")) # Better print results using pprint
 ```
 输出：
@@ -542,7 +541,8 @@ from lightningnlp.task.uie import UIEPredictor
 
 # 事件抽取
 schema = {'评价维度': ['观点词', '情感倾向[正向，负向]']}
-uie = UIEPredictor("uie-base", schema=schema)
+# uie-base模型已上传至huggingface，可自动下载，其他模型只需提供模型名称将自动进行转换
+uie = UIEPredictor("xusenlin/uie-base", schema=schema)
 pprint(uie("店面干净，很清静，服务员服务热情，性价比很高，发现收银台有排队")) # Better print results using pprint
 ```
 输出：
@@ -581,7 +581,8 @@ from lightningnlp.task.uie import UIEPredictor
 
 # 事件抽取
 schema = '情感倾向[正向，负向]'
-uie = UIEPredictor("uie-base", schema=schema)
+# uie-base模型已上传至huggingface，可自动下载，其他模型只需提供模型名称将自动进行转换
+uie = UIEPredictor("xusenlin/uie-base", schema=schema)
 pprint(uie("这个产品用起来真的很流畅，我非常喜欢")) # Better print results using pprint
 ```
 输出：

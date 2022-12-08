@@ -58,6 +58,7 @@ class CNNNerDataModule(TokenClassificationDataModule):
             label_column_name=label_column_name,
             is_chinese=self.is_chinese,
             mode=mode,
+            with_indices=self.with_indices,
         )
         return convert_to_features
 
@@ -71,6 +72,7 @@ class CNNNerDataModule(TokenClassificationDataModule):
         label_column_name,
         is_chinese,
         mode,
+        with_indices: bool = False,
     ):
 
         # 英文文本使用空格分隔单词，BertTokenizer不对空格tokenize
@@ -118,7 +120,10 @@ class CNNNerDataModule(TokenClassificationDataModule):
 
             if mode == "train":
                 label = examples[label_column_name][i]
-                spans = [(ent["start_offset"], ent["end_offset"] - 1, label_to_id.get(ent["label"]),) for ent in label]
+                if with_indices:
+                    spans = [(ent["indices"][0], ent["indices"][-1], label_to_id.get(ent["label"])) for ent in label]
+                else:
+                    spans = [(ent["start_offset"], ent["end_offset"] - 1, label_to_id.get(ent["label"])) for ent in label]
 
             for k, v in zip(input_keys, get_new_ins(bpes, spans, indexes)):
                 encoded_inputs[k].append(v)

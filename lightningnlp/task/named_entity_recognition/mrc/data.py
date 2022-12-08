@@ -74,6 +74,7 @@ class MRCNerDataModule(TokenClassificationDataModule):
             label_column_name=label_column_name,
             mode=mode,
             is_chinese=self.is_chinese,
+            with_indices=self.with_indices,
         )
         return convert_to_features
 
@@ -87,6 +88,7 @@ class MRCNerDataModule(TokenClassificationDataModule):
         label_column_name,
         mode,
         is_chinese,
+        with_indices: bool = False,
     ):
 
         first_sentences = [list(schema2prompt.values()) for _ in examples[text_column_name]]
@@ -111,7 +113,11 @@ class MRCNerDataModule(TokenClassificationDataModule):
             for entity_list in examples[label_column_name]:
                 label_dict = {k: [] for k in schema2prompt.keys()}
                 for _ent in entity_list:
-                    label_dict[_ent['label']].append((_ent['start_offset'], _ent['end_offset']))
+                    if with_indices:
+                        start_pos, end_pos = _ent["indices"][0], _ent["indices"][-1] + 1
+                    else:
+                        start_pos, end_pos = _ent["start_offset"], _ent["end_offset"]
+                    label_dict[_ent['label']].append((start_pos, end_pos))
                 all_label_dict.extend(list(label_dict.values()))
 
             labels = []
