@@ -250,7 +250,7 @@ class CRF(nn.Module):
 
             # Set score to the next score if this timestep is valid (mask == 1)
             # shape: (batch_size, num_tags)
-            score = torch.where(mask[i].unsqueeze(1), next_score, score)
+            score = torch.where(mask[i].unsqueeze(1).bool(), next_score, score)
 
         # End transition score
         # shape: (batch_size, num_tags)
@@ -315,8 +315,8 @@ class CRF(nn.Module):
             # Set score to the next score if this timestep is valid (mask == 1)
             # and save the index that produces the next score
             # shape: (batch_size, num_tags)
-            score = torch.where(mask[i].unsqueeze(-1), next_score, score)
-            indices = torch.where(mask[i].unsqueeze(-1), indices, oor_idx)
+            score = torch.where(mask[i].unsqueeze(-1).bool(), next_score, score)
+            indices = torch.where(mask[i].unsqueeze(-1).bool(), indices, oor_idx)
             history_idx[i - 1] = indices
 
         # End transition score
@@ -343,7 +343,7 @@ class CRF(nn.Module):
             best_tags = torch.gather(history_idx[idx], 1, best_tags)
             best_tags_arr[idx] = best_tags.data.view(batch_size)
 
-        return torch.where(mask, best_tags_arr, oor_tag).transpose(0, 1)
+        return torch.where(mask.bool(), best_tags_arr, oor_tag).transpose(0, 1)
 
     def _viterbi_decode_nbest(
         self,
@@ -406,8 +406,8 @@ class CRF(nn.Module):
             # Set score to the next score if this timestep is valid (mask == 1)
             # and save the index that produces the next score
             # shape: (batch_size, num_tags, nbest)
-            score = torch.where(mask[i].unsqueeze(-1).unsqueeze(-1), next_score, score)
-            indices = torch.where(mask[i].unsqueeze(-1).unsqueeze(-1), indices, oor_idx)
+            score = torch.where(mask[i].unsqueeze(-1).unsqueeze(-1).bool(), next_score, score)
+            indices = torch.where(mask[i].unsqueeze(-1).unsqueeze(-1).bool(), indices, oor_idx)
             history_idx[i - 1] = indices
 
         # End transition score shape: (batch_size, num_tags, nbest)
@@ -434,4 +434,4 @@ class CRF(nn.Module):
             best_tags = torch.gather(history_idx[idx].view(batch_size, -1), 1, best_tags)
             best_tags_arr[idx] = best_tags.data.view(batch_size, -1) // nbest
 
-        return torch.where(mask.unsqueeze(-1), best_tags_arr, oor_tag).permute(2, 1, 0)
+        return torch.where(mask.unsqueeze(-1).bool(), best_tags_arr, oor_tag).permute(2, 1, 0)
