@@ -34,6 +34,8 @@ wget https://data.pyg.org/whl/torch-1.12.0%2Bcu113/torch_scatter-2.1.0%2Bpt112cu
 pip install torch_scatter-2.1.0+pt112cu113-cp38-cp38-linux_x86_64.whl
 ```
 
+本项目也提供了[docker安装方式](./docker)
+
 ## 文本分类
 
 ### 1. 数据转换
