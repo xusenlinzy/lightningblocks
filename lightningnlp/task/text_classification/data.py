@@ -41,6 +41,13 @@ class TextClassificationDataModule(TransformerDataModule):
             self.setup("fit")
         return self.labels.num_classes
 
+    @property
+    def label_map(self) -> dict:
+        if self.labels is None:
+            rank_zero_warn("Labels has not been set, calling `setup('fit')`.")
+            self.setup("fit")
+        return {l: i for i, l in enumerate(self.labels.names)}
+
     @staticmethod
     def convert_to_features(
         example_batch: Any, _, tokenizer: PreTrainedTokenizerBase, input_feature_fields: List[str], **tokenizer_kwargs

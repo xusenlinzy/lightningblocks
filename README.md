@@ -4,7 +4,7 @@
 
 </div>
 
-## 安装
+## 🔨 安装
 
 1. 搭建好 `pytorch GPU` 深度学习环境
 
@@ -36,9 +36,9 @@ pip install torch_scatter-2.1.0+pt112cu113-cp38-cp38-linux_x86_64.whl
 
 本项目也提供了[docker安装方式](./docker)
 
-## 文本分类
+## 🧾 文本分类
 
-### 1. 数据转换
+### 1. 数据格式
 
 <details>
 <summary>训练数据示例</summary>
@@ -50,11 +50,9 @@ pip install torch_scatter-2.1.0+pt112cu113-cp38-cp38-linux_x86_64.whl
 }
 ```
 
-
 </details>
 
 ### 2. 模型
-
 
 | 模型                                                        | 论文                                                                                                           | 备注                              |
 |-----------------------------------------------------------|--------------------------------------------------------------------------------------------------------------|---------------------------------|
@@ -92,7 +90,6 @@ dm = TextClassificationDataModule(
     validation_file="dev.json",  # 验证集文件名
     max_length=256,  # 序列最大长度
     cache_dir="datasets/sentiment",  # 数据缓存路径
-    is_chinese=True,
 )
 
 model = TextClassificationTransformer(
@@ -100,7 +97,7 @@ model = TextClassificationTransformer(
     downstream_model_type="bert",  # 预训练模型类型
     pretrained_model_name_or_path=pretrained_model_name_or_path,
     tokenizer=tokenizer,
-    label_map=dm.num_classes,
+    label_map=dm.label_map,
     learning_rate=2e-5,
     output_dir="outputs/sentiment/fc",  # 模型保存路径
 )
@@ -141,9 +138,9 @@ print(model.predict(text))
 ```
 
 
-## 命名实体识别
+## 📄 命名实体识别
 
-### 1. 数据转换
+### 1. 数据格式
 
 <details>
 <summary>训练数据示例</summary>
@@ -275,9 +272,9 @@ pprint(pipline(text))
 ![ner](./images/ner.png)
 
 
-## 实体关系抽取
+## 🔖 实体关系抽取
 
-### 1. 数据转换
+### 1. 数据格式
 
 <details>
 <summary>训练数据示例</summary>
@@ -407,7 +404,7 @@ pprint(pipline(text))
 ![re](./images/re.png)
 
 
-## 通用信息抽取
+## 🍭 通用信息抽取
 
 + [UIE(Universal Information Extraction)](https://arxiv.org/pdf/2203.12277.pdf)：Yaojie Lu等人在ACL-2022中提出了通用信息抽取统一框架 `UIE`。
 
@@ -417,10 +414,10 @@ pprint(pipline(text))
 
 + 该模型可以支持不限定行业领域和抽取目标的关键信息抽取，实现零样本快速冷启动，并具备优秀的小样本微调能力，快速适配特定的抽取目标。
 
-![](./images/uie.png)
+![uie](./images/uie.png)
 
 <details>
-<summary>命名实体识别</summary>
+<summary>👉 命名实体识别</summary>
 
 ```python
 from pprint import pprint
@@ -450,7 +447,7 @@ pprint(uie("2月8日上午北京冬奥会自由式滑雪女子大跳台决赛中
 </details>
 
 <details>
-<summary>实体关系抽取</summary>
+<summary>👉 实体关系抽取</summary>
 
 ```python
 from pprint import pprint
@@ -497,7 +494,7 @@ pprint(uie("2022语言与智能技术竞赛由中国中文信息学会和中国�
 
 
 <details>
-<summary>事件抽取</summary>
+<summary>👉  事件抽取</summary>
 
 ```python
 from pprint import pprint
@@ -535,7 +532,7 @@ pprint(uie("中国地震台网正式测定：5月16日06时08分在云南临沧�
 </details>
 
 <details>
-<summary>评论观点抽取</summary>
+<summary>👉 评论观点抽取</summary>
 
 ```python
 from pprint import pprint
@@ -574,7 +571,7 @@ pprint(uie("店面干净，很清静，服务员服务热情，性价比很高�
 
 
 <details>
-<summary>情感分类</summary>
+<summary>👉 情感分类</summary>
 
 
 ```python

@@ -68,7 +68,11 @@ class TextClassificationTransformer(TaskTransformer):
         self.prec = Precision(num_classes=self.num_classes, average="macro")
         self.recall = Recall(num_classes=self.num_classes, average="macro")
         self.acc = Accuracy()
-        self.metrics = {"precision": self.prec, "recall": self.recall, "accuracy": self.acc}
+        self.metrics = {
+            "precision": self.prec,
+            "recall": self.recall,
+            "accuracy": self.acc,
+        }
 
     def compute_metrics(self, preds, labels, mode="val") -> Dict[str, torch.Tensor]:
         # Not required by all models. Only required for classification
