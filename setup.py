@@ -29,7 +29,7 @@ install_requires = [
 
 setup(
     name="lightningnlp",
-    version="1.0.0",
+    version="1.0.1",
     description="Pytorch-lightning Code Blocks for NLP",
     long_description=long_description,
     long_description_content_type="text/markdown",
