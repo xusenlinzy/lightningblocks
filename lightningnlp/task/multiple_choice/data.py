@@ -4,7 +4,7 @@ from typing import Optional, Union
 import torch
 from transformers.tokenization_utils_base import PaddingStrategy, PreTrainedTokenizerBase
 
-from lightningnlp.core import TransformerDataModule
+from ...core import TransformerDataModule
 
 
 # noinspection PyUnresolvedReferences

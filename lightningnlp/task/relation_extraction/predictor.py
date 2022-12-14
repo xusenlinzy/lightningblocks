@@ -3,8 +3,8 @@ from typing import List, Union, Dict, Set
 
 import torch
 
-from lightningnlp.callbacks import tqdm
-from lightningnlp.core import PredictorBase
+from ...core import PredictorBase
+from ...utils.logger import tqdm
 
 
 def set2json(labels: Set) -> Dict:

@@ -6,10 +6,10 @@ import torch
 import torch.nn as nn
 from transformers import PreTrainedModel
 
-from lightningnlp.layers.global_pointer import EfficientGlobalPointer
-from lightningnlp.losses import SparseMultilabelCategoricalCrossentropy
-from lightningnlp.task.utils import RelationExtractionOutput, MODEL_MAP
-from lightningnlp.utils.tensor import tensor_to_numpy
+from ...utils import RelationExtractionOutput, MODEL_MAP
+from ....layers.global_pointer import EfficientGlobalPointer
+from ....losses import SparseMultilabelCategoricalCrossentropy
+from ....utils.tensor import tensor_to_numpy
 
 
 def get_auto_gplinker_re_model(

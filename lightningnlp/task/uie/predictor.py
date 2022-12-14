@@ -7,15 +7,12 @@ from pprint import pprint
 import numpy as np
 import six
 import torch
-
 from transformers import BertTokenizerFast
-from lightningnlp.task.uie.tokenizer import ErnieMTokenizerFast
 
-from lightningnlp.callbacks import Logger, tqdm
-from lightningnlp.task.uie.utils import get_bool_ids_greater_than, get_span, get_id_and_prob
-from lightningnlp.utils.common import cut_chinese_sent, dbc2sbc
-
-logger = Logger("UIE")
+from .tokenizer import ErnieMTokenizerFast
+from .utils import get_bool_ids_greater_than, get_span, get_id_and_prob
+from ...utils.common import cut_chinese_sent, dbc2sbc
+from ...utils.logger import logger, tqdm
 
 
 class ONNXInferBackend(object):
@@ -68,7 +65,7 @@ class ONNXInferBackend(object):
 
 class PyTorchInferBackend:
     def __init__(self, model_name_or_path, device='cpu', use_fp16=False, multilingual=False):
-        from lightningnlp.task.uie.model import UIE, UIEM
+        from .model import UIE, UIEM
 
         logger.info(">>> [PyTorchInferBackend] Creating Engine ...")
 
@@ -167,7 +164,7 @@ class UIEPredictor(object):
                 input_path = self._model_name_or_path
                 self._model_name_or_path = self._model_name_or_path.replace('-', '_') + '_pytorch'
                 if not os.path.exists(self._model_name_or_path):
-                    from lightningnlp.task.uie.convert import check_model, extract_and_convert
+                    from .convert import check_model, extract_and_convert
 
                     check_model(input_path)
                     extract_and_convert(input_path, self._model_name_or_path)

@@ -4,10 +4,10 @@ import torch
 import torch.nn as nn
 from transformers import PreTrainedModel
 
-from lightningnlp.layers.layer_norm import LayerNorm
-from lightningnlp.losses.span_loss import SpanLoss
-from lightningnlp.task.utils import SpanOutput, MODEL_MAP
-from lightningnlp.utils.tensor import tensor_to_cpu
+from ...utils import SpanOutput, MODEL_MAP
+from ....layers.layer_norm import LayerNorm
+from ....losses.span_loss import SpanLoss
+from ....utils.tensor import tensor_to_cpu
 
 
 def get_auto_mrc_ner_model(

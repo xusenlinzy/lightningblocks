@@ -4,11 +4,12 @@ import torch
 import torch.nn as nn
 from transformers import PreTrainedModel
 
-from lightningnlp.layers.crf import CRF
-from lightningnlp.losses.focal_loss import FocalLoss
-from lightningnlp.losses.label_smoothing import LabelSmoothingCE
-from lightningnlp.task.utils import get_entities, SequenceLabelingOutput, MODEL_MAP
-from lightningnlp.utils.tensor import sequence_padding, tensor_to_cpu
+from ...utils import SequenceLabelingOutput, MODEL_MAP
+from ....layers.crf import CRF
+from ....losses.focal_loss import FocalLoss
+from ....losses.label_smoothing import LabelSmoothingCE
+from ...utils import get_entities
+from ....utils.tensor import sequence_padding, tensor_to_cpu
 
 
 def get_auto_crf_ner_model(
@@ -16,6 +17,7 @@ def get_auto_crf_ner_model(
     output_attentions: Optional[bool] = None,
     output_hidden_states: Optional[bool] = None,
 ) -> PreTrainedModel:
+    
     base_model, parent_model, base_model_name = MODEL_MAP[model_type]
 
     class CRFForNer(parent_model):

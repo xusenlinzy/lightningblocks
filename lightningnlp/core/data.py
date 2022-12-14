@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 from torch.utils.data.sampler import RandomSampler, SequentialSampler
 from transformers import PreTrainedTokenizerBase
 
-from lightningnlp.core.iterable import IterableDataLoader
+from .iterable import IterableDataLoader
 
 
 class TransformerDataModule(pl.LightningDataModule):
@@ -28,6 +28,9 @@ class TransformerDataModule(pl.LightningDataModule):
         validation_batch_size: int = 32,
         test_batch_size: int = 32,
         num_workers: int = 0,
+        train_max_length: int = 128,
+        validation_max_length: int = 128,
+        test_max_length: int = 128,
         dataset_name: Optional[str] = None,
         dataset_config_name: Optional[str] = None,
         revision: Optional[Union[str, Version]] = None,
@@ -35,14 +38,11 @@ class TransformerDataModule(pl.LightningDataModule):
         train_file: Optional[str] = None,
         test_file: Optional[str] = None,
         validation_file: Optional[str] = None,
-        max_length: int = 128,
-        preprocessing_num_workers: int = 1,
-        load_from_cache_file: bool = True,
         cache_dir: Optional[Union[Path, str]] = None,
         limit_train_samples: Optional[int] = None,
         limit_val_samples: Optional[int] = None,
         limit_test_samples: Optional[int] = None,
-        streaming: bool = False,
+        streaming: Optional[bool] = False,
     ) -> None:
         super().__init__()
         self.tokenizer = tokenizer
@@ -62,9 +62,9 @@ class TransformerDataModule(pl.LightningDataModule):
         self.test_file = test_file
         self.validation_file = validation_file
 
-        self.max_length = max_length
-        self.preprocessing_num_workers = preprocessing_num_workers
-        self.load_from_cache_file = load_from_cache_file
+        self.train_max_length = train_max_length
+        self.validation_max_length = validation_max_length
+        self.test_max_length = test_max_length
         self.cache_dir = cache_dir
 
         self.limit_train_samples = limit_train_samples
@@ -75,12 +75,6 @@ class TransformerDataModule(pl.LightningDataModule):
         os.environ["TOKENIZERS_PARALLELISM"] = "TRUE"  # TODO: smarter handling of this env variable
 
         self.setup_stages_run = []
-
-    # def setup(self, stage: Optional[str] = None):
-    #     dataset = self.load_dataset()
-    #     dataset = self.split_dataset(dataset)
-    #     dataset = self.process_data(dataset, stage=stage)
-    #     self.ds = dataset
 
     def setup(self, stage: Optional[str] = None):
         # Load and split dataset only if setup has not been run before

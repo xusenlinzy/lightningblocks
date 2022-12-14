@@ -1,29 +1,27 @@
 from collections import defaultdict
 from typing import List, Union
 
-from lightningnlp.callbacks import Logger
-from lightningnlp.task.named_entity_recognition.auto.predictor import get_auto_ner_predictor
-from lightningnlp.task.named_entity_recognition.predictor import set2json
-from lightningnlp.utils.common import auto_splitter
-
-logger = Logger("AUTO NER")
+from .predictor import get_auto_ner_predictor
+from ..predictor import set2json
+from ....utils.common import auto_splitter
+from ....utils.logger import logger
 
 
 class NerPipeline(object):
     def __init__(
-            self,
-            model_name="crf",
-            model_type="bert",
-            model=None,
-            model_name_or_path=None,
-            tokenizer=None,
-            device="cpu",
-            use_fp16=False,
-            max_seq_len=512,
-            batch_size=64,
-            split_sentence=False,
-            schema2prompt=None,
-            load_weights=True,
+        self,
+        model_name="crf",
+        model_type="bert",
+        model=None,
+        model_name_or_path=None,
+        tokenizer=None,
+        device="cpu",
+        use_fp16=False,
+        max_seq_len=512,
+        batch_size=64,
+        split_sentence=False,
+        schema2prompt=None,
+        load_weights=True,
     ) -> None:
 
         self._model_name = model_name

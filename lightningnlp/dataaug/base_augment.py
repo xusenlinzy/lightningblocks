@@ -3,9 +3,9 @@ import os
 import re
 from typing import Iterable
 
-from lightningnlp.data import Vocab, JiebaTokenizer
-from lightningnlp.utils.common import md5file
-from lightningnlp.utils.download import get_path_from_url
+from ..data import Vocab, JiebaTokenizer
+from ..utils.common import md5file
+from ..utils.download import get_path_from_url
 
 
 class BaseAugment(object):

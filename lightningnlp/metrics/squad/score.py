@@ -2,7 +2,7 @@ import torch
 from datasets import load_metric
 from torchmetrics import Metric
 
-from lightningnlp.utils.tensor import tensor_to_numpy
+from ...utils.tensor import tensor_to_numpy
 
 
 class SquadMetric(Metric):

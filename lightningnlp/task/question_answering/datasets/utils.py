@@ -6,9 +6,7 @@ from typing import Any, Dict, Optional, Tuple
 import numpy as np
 from transformers import EvalPrediction, PreTrainedTokenizerBase
 
-from lightningnlp.callbacks import Logger, tqdm
-
-logger = Logger("Question Answering")
+from ....utils.logger import logger, tqdm
 
 
 def prepare_train_features(

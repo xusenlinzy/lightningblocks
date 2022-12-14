@@ -3,10 +3,8 @@ from typing import List, Union, Dict, Any
 import numpy as np
 import torch
 
-from lightningnlp.callbacks import Logger, tqdm
 from lightningnlp.core import PredictorBase
-
-logger = Logger("Text Classification")
+from ...utils.logger import Logger, tqdm
 
 
 class TextClassificationPredictor(PredictorBase):

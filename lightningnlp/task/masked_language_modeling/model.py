@@ -1,6 +1,6 @@
 from transformers import AutoModelForMaskedLM
 
-from lightningnlp.core import TaskTransformer
+from ...core import TaskTransformer
 
 
 class MaskedLanguageModelingTransformer(TaskTransformer):

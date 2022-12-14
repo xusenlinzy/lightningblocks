@@ -4,10 +4,9 @@ from typing import List, Union, Dict, Set
 import numpy as np
 import torch
 
-from lightningnlp.callbacks import tqdm
-from lightningnlp.task.named_entity_recognition.predictor import NerPredictor, set2json
-from lightningnlp.task.named_entity_recognition.w2ner.data import DIST_TO_IDX
-from lightningnlp.task.named_entity_recognition.w2ner.data import DataCollatorForW2Ner
+from .data import DIST_TO_IDX, DataCollatorForW2Ner
+from ..predictor import NerPredictor, set2json
+from ....utils.logger import tqdm
 
 
 class W2NerPredictor(NerPredictor):

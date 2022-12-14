@@ -5,11 +5,10 @@ import torch
 import torch.nn as nn
 from transformers import PreTrainedModel
 
-from lightningnlp.layers.global_pointer import GlobalPointer, EfficientGlobalPointer, Biaffine, UnlabeledEntity
-from lightningnlp.losses import MultiLabelCategoricalCrossEntropy
-from lightningnlp.losses import SparseMultilabelCategoricalCrossentropy
-from lightningnlp.task.utils import SequenceLabelingOutput, MODEL_MAP
-from lightningnlp.utils.tensor import tensor_to_cpu
+from ...utils import SequenceLabelingOutput, MODEL_MAP
+from ....layers.global_pointer import GlobalPointer, EfficientGlobalPointer, Biaffine, UnlabeledEntity
+from ....losses import MultiLabelCategoricalCrossEntropy, SparseMultilabelCategoricalCrossentropy
+from ....utils.tensor import tensor_to_cpu
 
 
 def get_auto_gp_ner_model(

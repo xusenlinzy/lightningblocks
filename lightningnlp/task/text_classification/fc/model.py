@@ -6,8 +6,8 @@ from torch.nn import CrossEntropyLoss
 from transformers import PreTrainedModel
 from transformers.modeling_outputs import SequenceClassifierOutput
 
-from lightningnlp.layers.pooling import Pooler
-from lightningnlp.task.utils import MODEL_MAP
+from ...utils import MODEL_MAP
+from ....layers.pooling import Pooler
 
 
 def get_auto_fc_tc_model(

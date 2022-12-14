@@ -4,9 +4,8 @@ import torch
 import torch.nn as nn
 from transformers import PreTrainedModel
 
-from lightningnlp.task.utils import RelationExtractionOutput, MODEL_MAP
-from lightningnlp.task.utils import get_entities
-from lightningnlp.utils.tensor import tensor_to_numpy
+from ...utils import RelationExtractionOutput, MODEL_MAP, get_entities
+from ....utils.tensor import tensor_to_numpy
 
 
 class MultiNonLinearClassifier(nn.Module):

@@ -2,10 +2,10 @@ from typing import Any, Dict
 
 import torch
 
-from lightningnlp.core import TaskTransformer
-from lightningnlp.metrics.extraction import SpanEvaluator
-from lightningnlp.task.uie.model import UIE, UIEM
-from lightningnlp.utils.tensor import tensor_to_numpy
+from .model import UIE, UIEM
+from ...core import TaskTransformer
+from ...metrics.extraction import SpanEvaluator
+from ...utils.tensor import tensor_to_numpy
 
 
 class UIEModel(TaskTransformer):

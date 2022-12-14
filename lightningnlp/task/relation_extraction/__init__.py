@@ -1,10 +1,17 @@
-from lightningnlp.task.relation_extraction.auto import *
-from lightningnlp.task.relation_extraction.casrel import *
-from lightningnlp.task.relation_extraction.gplinker import *
-from lightningnlp.task.relation_extraction.grte import *
-from lightningnlp.task.relation_extraction.model import RelationExtractionTransformer
-from lightningnlp.task.relation_extraction.pfn import *
-from lightningnlp.task.relation_extraction.predictor import RelationExtractionPredictor
-from lightningnlp.task.relation_extraction.prgc import *
-from lightningnlp.task.relation_extraction.spn import *
-from lightningnlp.task.relation_extraction.tplinker import *
+from .auto import (
+    get_auto_re_collator,
+    get_auto_re_model,
+    get_auto_re_predictor,
+    get_auto_re_model_config,
+    RelationExtractionPipeline,
+    EnsembleRelationExtractionPipeline,
+)
+from .casrel import CasRelDataModule
+from .data import RelationExtractionDataModule
+from .gplinker import GPLinkerDataModule
+from .grte import GRTEDataModule
+from .model import RelationExtractionTransformer
+from .pfn import PFNDataModule
+from .prgc import PRGCDataModule
+from .spn import SPNDataModule
+from .tplinker import TPlinkerREDataModule

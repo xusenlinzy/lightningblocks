@@ -29,16 +29,19 @@ class TokenClassificationDataModule(TransformerDataModule):
         self.with_indices = with_indices
 
     def get_process_fct(self, text_column_name, label_column_name, mode):
+        max_length = self.train_max_length
+        if mode in ["val", "test"]:
+            max_length = self.validation_max_length if mode == "val" else self.test_max_length
+            
         convert_to_features = partial(
             TokenClassificationDataModule.convert_to_features,
             tokenizer=self.tokenizer,
-            max_length=self.max_length,
+            max_length=max_length,
             label_to_id=self.label_to_id,
             text_column_name=text_column_name,
             label_column_name=label_column_name,
             mode=mode,
             is_chinese=self.is_chinese,
-            with_indices=self.with_indices,
         )
         return convert_to_features
 
@@ -90,8 +93,9 @@ class TokenClassificationDataModule(TransformerDataModule):
 
         if "test" in dataset:
             test_dataset = dataset["test"].map(process_dev)
+            convert_to_features_test = self.get_process_fct(text_column_name, label_column_name, "test")
             test_dataset = test_dataset.map(
-                convert_to_features_val,
+                convert_to_features_test,
                 batched=True,
                 remove_columns=[label_column_name],
                 desc="Running tokenizer on test datasets",
@@ -137,7 +141,6 @@ class TokenClassificationDataModule(TransformerDataModule):
         label_column_name: str = "entities",
         mode: str = "train",
         is_chinese: bool = True,
-        with_indices: bool = False,
     ):
 
         # 英文文本使用空格分隔单词，BertTokenizer不对空格tokenize
@@ -160,13 +163,9 @@ class TokenClassificationDataModule(TransformerDataModule):
             for i, entity_list in enumerate(examples[label_column_name]):
                 res = []
                 for _ent in entity_list:
-                    if with_indices:
-                        start_pos, end_pos = _ent["indices"][0], _ent["indices"][-1]
-                    else:
-                        start_pos, end_pos = _ent["start_offset"], _ent["end_offset"] - 1
                     try:
-                        start = tokenized_inputs.char_to_token(i, start_pos)
-                        end = tokenized_inputs.char_to_token(i, end_pos)
+                        start = tokenized_inputs.char_to_token(i, _ent['start_offset'])
+                        end = tokenized_inputs.char_to_token(i, _ent['end_offset'] - 1)
                     except Exception:
                         continue
                     if start is None or end is None:

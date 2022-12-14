@@ -1,2 +1,1 @@
-from lightningnlp.task.text_classification.fc.model import get_auto_fc_tc_model
-from lightningnlp.task.text_classification.fc.model import get_fc_model_config
+from .model import get_auto_fc_tc_model, get_fc_model_config

@@ -1,6 +1,5 @@
-from lightningnlp.metrics.base import Metric
-from lightningnlp.metrics.extraction.precision_recall_fscore import _precision_recall_fscore
-from lightningnlp.metrics.extraction.precision_recall_fscore import extract_tp_actual_correct
+from .precision_recall_fscore import _precision_recall_fscore, extract_tp_actual_correct
+from ..base import Metric
 
 
 class ExtractionScore(Metric):

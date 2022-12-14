@@ -9,10 +9,8 @@ import numpy as np
 import torch
 from transformers import BertTokenizer, PreTrainedModel, PreTrainedTokenizerBase
 
-from lightningnlp.callbacks import Logger
-from lightningnlp.task.uie.model import UIE
-
-logger = Logger("UIE")
+from .model import UIE
+from ...utils.logger import logger
 
 
 def validate_onnx(

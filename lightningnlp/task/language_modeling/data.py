@@ -4,10 +4,8 @@ from typing import Callable, Optional
 from datasets import Dataset, IterableDataset
 from transformers import PreTrainedTokenizerBase, default_data_collator
 
-from lightningnlp.callbacks import Logger
-from lightningnlp.core import TransformerDataModule
-
-logger = Logger("Language Modeling")
+from ...core import TransformerDataModule
+from ...utils.logger import logger
 
 
 # noinspection PyUnresolvedReferences,PyUnusedLocal

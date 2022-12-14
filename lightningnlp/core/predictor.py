@@ -5,9 +5,7 @@ import torch
 from transformers.modeling_utils import PreTrainedModel
 from transformers.tokenization_utils_base import PreTrainedTokenizerBase
 
-from lightningnlp.callbacks import Logger
-
-logger = Logger("PredictorBase")
+from ..utils.logger import logger
 
 
 class PredictorBase(object):

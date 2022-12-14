@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional
 from datasets import Dataset
 from transformers import PreTrainedTokenizerBase
 
-from lightningnlp.task.multiple_choice import MultipleChoiceDataModule
+from ..data import MultipleChoiceDataModule
 
 
 # noinspection PyUnresolvedReferences

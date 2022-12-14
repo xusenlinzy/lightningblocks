@@ -1,7 +1,7 @@
 import torch
 from torchmetrics import Accuracy, Precision, Recall
 
-from lightningnlp.core import TaskTransformer
+from ...core import TaskTransformer
 
 
 # noinspection PyUnresolvedReferences,PyUnusedLocal

@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from lightningnlp.utils.common import check_object_type
+from .common import check_object_type
 
 
 def convert_to_tensor(obj):

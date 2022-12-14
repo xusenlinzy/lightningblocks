@@ -2,8 +2,8 @@ from typing import Any, List, Optional
 
 import torch
 
-from lightningnlp.core import TaskTransformer
-from lightningnlp.core.seq2seq.utils import _pad_tensors_to_max_len
+from .utils import _pad_tensors_to_max_len
+from ..model import TaskTransformer
 
 
 class Seq2SeqTransformer(TaskTransformer):

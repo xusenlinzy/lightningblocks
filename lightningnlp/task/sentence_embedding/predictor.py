@@ -7,10 +7,6 @@ from torch import Tensor
 from tqdm import tqdm
 from transformers import PreTrainedModel, PreTrainedTokenizerBase
 
-from lightningnlp.callbacks import Logger
-
-logger = Logger("Sentence Embeddings")
-
 
 class SentenceEmbeddings(object):
     """

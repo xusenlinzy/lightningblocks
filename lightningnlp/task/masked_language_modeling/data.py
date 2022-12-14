@@ -4,7 +4,7 @@ from typing import Callable, Optional, Union
 from datasets import Dataset
 from transformers import DataCollatorForLanguageModeling, DataCollatorForWholeWordMask, PreTrainedTokenizerBase
 
-from lightningnlp.core import TransformerDataModule
+from ...core import TransformerDataModule
 
 
 # noinspection PyUnusedLocal

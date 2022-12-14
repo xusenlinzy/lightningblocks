@@ -4,10 +4,10 @@ import torch
 import torch.nn as nn
 from transformers import PreTrainedModel
 
-from lightningnlp.layers.set_decoder import SetDecoder
-from lightningnlp.losses.set_loss import SetCriterion
-from lightningnlp.task.utils import RelationExtractionOutput, MODEL_MAP
-from lightningnlp.utils.tensor import tensor_to_list
+from ...utils import RelationExtractionOutput, MODEL_MAP
+from ....layers.set_decoder import SetDecoder
+from ....losses.set_loss import SetCriterion
+from ....utils.tensor import tensor_to_list
 
 
 def _get_best_indexes(logits, n_best_size):

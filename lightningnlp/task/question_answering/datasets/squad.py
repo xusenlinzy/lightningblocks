@@ -3,8 +3,8 @@ from typing import Any, Dict
 import torch
 from datasets import Dataset
 
-from lightningnlp.task.question_answering.data import QuestionAnsweringDataModule
-from lightningnlp.task.question_answering.datasets.utils import (
+from ..data import QuestionAnsweringDataModule
+from .utils import (
     prepare_train_features,
     prepare_validation_features,
     post_processing_function,

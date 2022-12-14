@@ -1,8 +1,8 @@
 from torchmetrics.text.bleu import BLEUScore
 from transformers import MBartTokenizer, AutoModelForSeq2SeqLM
 
-from lightningnlp.core.seq2seq.model import Seq2SeqTransformer
-from lightningnlp.task.translation.data import TranslationDataModule
+from .data import TranslationDataModule
+from ...core.seq2seq.model import Seq2SeqTransformer
 
 
 # noinspection PyUnresolvedReferences

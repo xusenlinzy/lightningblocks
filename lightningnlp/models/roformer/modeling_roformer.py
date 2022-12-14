@@ -50,7 +50,7 @@ from transformers.modeling_utils import (
 )
 from transformers.utils import logging
 
-from lightningnlp.models.roformer.configuration_roformer import RoFormerConfig
+from .configuration_roformer import RoFormerConfig
 
 logger = logging.get_logger(__name__)
 
@@ -91,10 +91,7 @@ def initializer(tensor, num_hidden_layers=12, order=2, gain=1.0):
     """使用截断正态分布初始化
     """
     shape = tensor.shape
-    if shape[0] > 10000 or shape[0] < 10:
-        hidden_size = shape[1]
-    else:
-        hidden_size = shape[0]
+    hidden_size = shape[1] if shape[0] > 10000 or shape[0] < 10 else shape[0]
     gain *= num_hidden_layers ** (-1. / order)
     std = 1.13684723 / hidden_size ** 0.5 * gain
     return nn.init.trunc_normal_(tensor, std=std)
@@ -237,9 +234,9 @@ def load_tf_weights_in_roformer(model, config, tf_checkpoint_path):
                 scope_names = re.split(r"_(\d+)", m_name)
             else:
                 scope_names = [m_name]
-            if scope_names[0] == "kernel" or scope_names[0] == "gamma":
+            if scope_names[0] in ["kernel", "gamma"]:
                 pointer = getattr(pointer, "weight")
-            elif scope_names[0] == "output_bias" or scope_names[0] == "beta":
+            elif scope_names[0] in ["output_bias", "beta"]:
                 pointer = getattr(pointer, "bias")
             elif scope_names[0] == "output_weights":
                 pointer = getattr(pointer, "weight")
@@ -260,7 +257,7 @@ def load_tf_weights_in_roformer(model, config, tf_checkpoint_path):
         elif m_name == "kernel":
             array = np.transpose(array)
         try:
-            if not pointer.shape == array.shape:
+            if pointer.shape != array.shape:
                 raise ValueError(
                     f"Pointer shape {pointer.shape} and array shape {array.shape} mismatched"
                 )
@@ -516,10 +513,7 @@ class RoFormerAttention(nn.Module):
             output_attentions,
         )
         attention_output = self.output(self_outputs[0], hidden_states)
-        outputs = (attention_output,) + self_outputs[
-                                        1:
-                                        ]  # add attentions if we output them
-        return outputs
+        return (attention_output,) + self_outputs[1:]
 
 
 # Copied from transformers.models.bert.modeling_bert.BertIntermediate with Bert->RoFormer
@@ -656,8 +650,7 @@ class RoFormerLayer(nn.Module):
 
     def feed_forward_chunk(self, attention_output):
         intermediate_output = self.intermediate(attention_output)
-        layer_output = self.output(intermediate_output, attention_output)
-        return layer_output
+        return self.output(intermediate_output, attention_output)
 
 
 class RoFormerEncoder(nn.Module):
@@ -829,8 +822,7 @@ class RoFormerOnlyMLMHead(nn.Module):
             config) if config.norm_type == "layer_norm" else RoFormerV2LMPredictionHead(config)
 
     def forward(self, sequence_output):
-        prediction_scores = self.predictions(sequence_output)
-        return prediction_scores
+        return self.predictions(sequence_output)
 
 
 # Copied from transformers.models.bert.modeling_bert.BertPooler with Bert->RoFormer
@@ -1539,9 +1531,7 @@ class RoFormerForSequenceClassification(RoFormerPreTrainedModel):
             if self.config.problem_type is None:
                 if self.num_labels == 1:
                     self.config.problem_type = "regression"
-                elif self.num_labels > 1 and (
-                        labels.dtype == torch.long or labels.dtype == torch.int
-                ):
+                elif self.num_labels > 1 and labels.dtype in [torch.long, torch.int]:
                     self.config.problem_type = "single_label_classification"
                 else:
                     self.config.problem_type = "multi_label_classification"

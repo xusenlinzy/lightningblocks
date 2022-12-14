@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import *
+from typing import Optional, List, Any, Tuple
 
 import torch
 from transformers import BertModel, BertPreTrainedModel

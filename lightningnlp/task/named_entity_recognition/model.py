@@ -3,10 +3,9 @@ from typing import Any, Dict, List, Optional, Union
 
 import torch
 
-from lightningnlp.core import TaskTransformer
-from lightningnlp.metrics import ExtractionScore
-from lightningnlp.task.named_entity_recognition.auto import NerPipeline
-from lightningnlp.task.named_entity_recognition.auto import get_auto_ner_model, get_auto_ner_model_config
+from .auto import NerPipeline, get_auto_ner_model, get_auto_ner_model_config
+from ...core import TaskTransformer
+from ...metrics import ExtractionScore
 
 
 class NamedEntityRecognitionTransformer(TaskTransformer):

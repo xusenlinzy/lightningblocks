@@ -5,7 +5,7 @@ from datasets import Dataset
 from pytorch_lightning.utilities import rank_zero_warn
 from transformers import PreTrainedTokenizerBase
 
-from lightningnlp.core import TransformerDataModule
+from ...core import TransformerDataModule
 
 
 class RelationExtractionDataModule(TransformerDataModule):
@@ -16,16 +16,19 @@ class RelationExtractionDataModule(TransformerDataModule):
     """
 
     def __init__(self, *args, task_name: str = "casrel", is_chinese: bool = True, **kwargs) -> None:
-        self.predicates = None
         super().__init__(*args, **kwargs)
         self.task_name = task_name
         self.is_chinese = is_chinese
 
     def get_process_fct(self, text_column_name, label_column_name, mode):
+        max_length = self.train_max_length
+        if mode in ["val", "test"]:
+            max_length = self.validation_max_length if mode == "val" else self.test_max_length
+            
         convert_to_features = partial(
             RelationExtractionDataModule.convert_to_features,
             tokenizer=self.tokenizer,
-            max_length=self.max_length,
+            max_length=max_length,
             text_column_name=text_column_name,
             label_column_name=label_column_name,
             mode=mode,
@@ -71,8 +74,9 @@ class RelationExtractionDataModule(TransformerDataModule):
 
         if "test" in dataset:
             test_dataset = dataset["test"].map(process_dev)
+            convert_to_features_test = self.get_process_fct(text_column_name, label_column_name, "test")
             test_dataset = test_dataset.map(
-                convert_to_features_val,
+                convert_to_features_test,
                 batched=True,
                 remove_columns=[label_column_name],
                 desc="Running tokenizer on test datasets",
@@ -81,7 +85,7 @@ class RelationExtractionDataModule(TransformerDataModule):
                 load_from_cache_file=self.load_from_cache_file,
             )
 
-            all_dataset.update({"test": test_dataset})
+            all_dataset["test"] = test_dataset
 
         return all_dataset
 
@@ -94,18 +98,18 @@ class RelationExtractionDataModule(TransformerDataModule):
 
     # noinspection PyPropertyAccess
     def _prepare_labels(self, dataset, label_column_name):
-        # Create unique label set from train datasets.
-        label_list = sorted({label["predicate"] for column in dataset["train"][label_column_name] for label in column})
-        label_to_id = {l: i for i, l in enumerate(label_list)}
-        self.predicates = label_list
-        self.predicate_to_id = label_to_id
+        if self.labels is None:
+            # Create unique label set from train datasets.
+            self.labels = sorted({label["predicate"] for column in dataset["train"][label_column_name] for label in column})
+        labels = self.labels.keys() if isinstance(self.labels, dict) else self.labels
+        self.predicate_to_id = {l: i for i, l in enumerate(labels)}
 
     @property
-    def predicate_list(self) -> int:
-        if self.predicates is None:
+    def predicate_list(self):
+        if self.labels is None:
             rank_zero_warn("Labels has not been set, calling `setup('fit')`.")
             self.setup("fit")
-        return self.predicates
+        return self.labels
 
     @staticmethod
     def search(pattern, sequence):

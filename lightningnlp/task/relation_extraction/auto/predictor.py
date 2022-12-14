@@ -1,5 +1,5 @@
-from lightningnlp.task.relation_extraction.auto.model import get_auto_re_model
-from lightningnlp.task.relation_extraction.predictor import RelationExtractionPredictor
+from .model import get_auto_re_model
+from ..predictor import RelationExtractionPredictor
 
 
 def get_auto_re_predictor(
@@ -12,9 +12,14 @@ def get_auto_re_predictor(
     use_fp16=False,
     load_weights=True,
 ) -> RelationExtractionPredictor:
-
     if model is None:
         model = get_auto_re_model(model_name=model_name, model_type=model_type)
 
-    return RelationExtractionPredictor(model=model, model_name_or_path=model_name_or_path, tokenizer=tokenizer,
-                                       device=device, load_weights=load_weights, use_fp16=use_fp16)
+    return RelationExtractionPredictor(
+        model=model,
+        model_name_or_path=model_name_or_path,
+        tokenizer=tokenizer,
+        device=device,
+        load_weights=load_weights,
+        use_fp16=use_fp16
+    )

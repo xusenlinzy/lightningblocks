@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from lightningnlp.core.seq2seq.data import Seq2SeqDataModule
+from ...core.seq2seq.data import Seq2SeqDataModule
 
 
 class TranslationDataModule(Seq2SeqDataModule):

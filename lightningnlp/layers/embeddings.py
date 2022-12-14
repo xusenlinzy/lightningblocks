@@ -24,36 +24,34 @@ class BertEmbeddings(nn.Module):
     """
 
     def __init__(
-            self,
-            vocab_size,
-            embedding_size,
-            hidden_size,
-            max_position,
-            segment_vocab_size,
-            shared_segment_embeddings,
-            drop_rate,
-            conditional_size=False,
-            **kwargs
+        self,
+        vocab_size,
+        embedding_size,
+        hidden_size,
+        max_position,
+        segment_vocab_size,
+        shared_segment_embeddings,
+        drop_rate,
+        conditional_size=False,
+        **kwargs,
     ):
         super(BertEmbeddings, self).__init__()
         self.shared_segment_embeddings = shared_segment_embeddings
         self.word_embeddings = nn.Embedding(vocab_size, embedding_size, padding_idx=0)
-        if (kwargs.get('p_bias') not in {'rotary', 'typical_relative',
-                                         't5_relative'}) and max_position > 0:  # Embeddings时候包含位置编码
+
+        if (kwargs.get('p_bias') not in {'rotary', 'typical_relative', 't5_relative'}) and max_position > 0:
             self.position_embeddings = nn.Embedding(max_position, embedding_size)
         if (segment_vocab_size > 0) and (not shared_segment_embeddings):
             self.segment_embeddings = nn.Embedding(segment_vocab_size, embedding_size)
 
         self.layerNorm = LayerNorm(embedding_size, eps=1e-12, conditional_size=conditional_size)
         self.dropout = nn.Dropout(drop_rate)
+
         # 如果embedding_size != hidden_size，则再有一个linear(适用于albert矩阵分解)
         if embedding_size != hidden_size:
             self.embedding_hidden_mapping_in = nn.Linear(embedding_size, hidden_size)
 
-    def forward(self,
-                token_ids,
-                segment_ids=None,
-                conditional_emb=None):
+    def forward(self, token_ids, segment_ids=None, conditional_emb=None):
         words_embeddings = self.word_embeddings(token_ids)
 
         if hasattr(self, 'segment_embeddings'):

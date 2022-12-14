@@ -1,12 +1,11 @@
-from lightningnlp.task.named_entity_recognition.cnn import DataCollatorForCNNNer
-from lightningnlp.task.named_entity_recognition.crf import DataCollatorForCRFNer
-from lightningnlp.task.named_entity_recognition.crf import DataCollatorForCascadeCRFNer
-from lightningnlp.task.named_entity_recognition.global_pointer import DataCollatorForGlobalPointer
-from lightningnlp.task.named_entity_recognition.lear import DataCollatorForLEARNer
-from lightningnlp.task.named_entity_recognition.mrc import DataCollatorForMRCNer
-from lightningnlp.task.named_entity_recognition.span import DataCollatorForSpanNer
-from lightningnlp.task.named_entity_recognition.tplinker import DataCollatorForTPLinkerPlusNer
-from lightningnlp.task.named_entity_recognition.w2ner import DataCollatorForW2Ner
+from ..cnn import DataCollatorForCNNNer
+from ..crf import DataCollatorForCRFNer, DataCollatorForCascadeCRFNer
+from ..global_pointer import DataCollatorForGlobalPointer
+from ..lear import DataCollatorForLEARNer
+from ..mrc import DataCollatorForMRCNer
+from ..span import DataCollatorForSpanNer
+from ..tplinker import DataCollatorForTPLinkerPlusNer
+from ..w2ner import DataCollatorForW2Ner
 
 NER_COLLATOR_MAP = {
     "crf": DataCollatorForCRFNer,
@@ -23,4 +22,7 @@ NER_COLLATOR_MAP = {
 
 
 def get_auto_ner_collator(model_name: str = "crf"):
-    return NER_COLLATOR_MAP[model_name]
+    try:
+        return NER_COLLATOR_MAP[model_name]
+    except KeyError as e:
+        raise ValueError(f"Model name must in {NER_COLLATOR_MAP.keys()}.") from e

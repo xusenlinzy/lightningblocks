@@ -6,7 +6,7 @@ import torch
 from datasets import Dataset
 from transformers import DataCollatorWithPadding, PreTrainedTokenizerBase
 
-from lightningnlp.core import TransformerDataModule
+from ...core import TransformerDataModule
 
 
 # noinspection PyUnresolvedReferences

@@ -1,1 +1,1 @@
-from lightningnlp.task.sentence_embedding.predictor import SentenceEmbeddings
+from .predictor import SentenceEmbeddings

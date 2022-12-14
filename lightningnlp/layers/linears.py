@@ -5,13 +5,15 @@ from .activations import get_activation
 
 
 class PositionWiseFeedForward(nn.Module):
-    def __init__(self,
-                 hidden_size,
-                 intermediate_size,
-                 dropout_rate=0.5,
-                 hidden_act='gelu',
-                 is_dropout=False,
-                 **kwargs):
+    def __init__(
+        self,
+        hidden_size,
+        intermediate_size,
+        dropout_rate=0.5,
+        hidden_act='gelu',
+        is_dropout=False,
+        **kwargs,
+    ):
         # 原生的tf版本的bert在激活函数后，没有添加dropout层，但是在google AI的bert-pytorch开源项目中，多了一层dropout；
         # 并且在pytorch官方的TransformerEncoderLayer的实现中，也有一层dropout层，就像这样：self.linear2(self.dropout(self.activation(self.linear1(src))))；
         # 这样不统一做法的原因不得而知，不过有没有这一层，差别可能不会很大；
@@ -43,6 +45,7 @@ class PositionWiseFeedForward(nn.Module):
 class T5PositionWiseFeedForward(PositionWiseFeedForward):
     def __init__(self, hidden_size, intermediate_size, **kwargs):
         super().__init__(hidden_size, intermediate_size, **kwargs)
+
         self.intermediateDense = nn.Linear(hidden_size, intermediate_size, bias=False)
         self.intermediateDense1 = nn.Linear(hidden_size, intermediate_size, bias=False)
         self.outputDense = nn.Linear(intermediate_size, hidden_size, bias=False)

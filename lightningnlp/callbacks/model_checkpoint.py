@@ -4,9 +4,8 @@ import os
 import numpy as np
 import torch
 
+from ..utils.logger import logger
 from ..utils.paths import save_model, json_to_text
-
-logger = logging.getLogger(__name__)
 
 CHECKPOINT_DIR_PREFIX = 'checkpoint'
 WEIGHTS_NAME = 'pytorch_model.bin'

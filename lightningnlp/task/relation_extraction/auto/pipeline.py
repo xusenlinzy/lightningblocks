@@ -1,12 +1,10 @@
 from collections import defaultdict
 from typing import List, Union
 
-from lightningnlp.callbacks import Logger
-from lightningnlp.task.relation_extraction.auto.predictor import get_auto_re_predictor
-from lightningnlp.task.relation_extraction.predictor import set2json
-from lightningnlp.utils.common import auto_splitter
-
-logger = Logger("AUTO Relation Extraction Pipeline")
+from .predictor import get_auto_re_predictor
+from ..predictor import set2json
+from ....utils.common import auto_splitter
+from ....utils.logger import logger
 
 
 class RelationExtractionPipeline(object):
@@ -41,14 +39,16 @@ class RelationExtractionPipeline(object):
 
     def _prepare_predictor(self):
         logger.info(f">>> [Pytorch InferBackend of {self._model_type}-{self._model_name}] Creating Engine ...")
-        self.inference_backend = get_auto_re_predictor(self._model_name,
-                                                       self._model_type,
-                                                       model=self._model,
-                                                       model_name_or_path=self._model_name_or_path,
-                                                       tokenizer=self._tokenizer,
-                                                       device=self._device,
-                                                       use_fp16=self._use_fp16,
-                                                       load_weights=self._load_weights)
+        self.inference_backend = get_auto_re_predictor(
+            self._model_name,
+            self._model_type,
+            model=self._model,
+            model_name_or_path=self._model_name_or_path,
+            tokenizer=self._tokenizer,
+            device=self._device,
+            use_fp16=self._use_fp16,
+            load_weights=self._load_weights,
+        )
 
     def __call__(self, inputs):
 
@@ -57,11 +57,13 @@ class RelationExtractionPipeline(object):
             texts = [texts]
 
         max_predict_len = self._max_seq_len - 2
-        short_input_texts, self.input_mapping = auto_splitter(texts, max_predict_len,
-                                                              split_sentence=self._split_sentence)
+        short_input_texts, self.input_mapping = auto_splitter(
+            texts, max_predict_len, split_sentence=self._split_sentence
+        )
 
-        results = self.inference_backend.predict(short_input_texts, batch_size=self._batch_size,
-                                                 max_length=self._max_seq_len, return_dict=False)
+        results = self.inference_backend.predict(
+            short_input_texts, batch_size=self._batch_size, max_length=self._max_seq_len, return_dict=False
+        )
         results = self._auto_joiner(results, self.input_mapping)
 
         return results

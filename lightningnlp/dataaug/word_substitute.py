@@ -8,7 +8,7 @@ import numpy as np
 import torch
 from transformers import BertForMaskedLM, BertTokenizer
 
-from lightningnlp.dataaug.base_augment import BaseAugment
+from .base_augment import BaseAugment
 
 __all__ = ['WordSubstitute']
 

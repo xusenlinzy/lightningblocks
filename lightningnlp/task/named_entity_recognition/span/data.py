@@ -5,7 +5,7 @@ import torch
 from transformers import PreTrainedTokenizerBase
 from transformers.file_utils import PaddingStrategy
 
-from lightningnlp.task.named_entity_recognition.data import TokenClassificationDataModule
+from ..data import TokenClassificationDataModule
 
 
 @dataclass

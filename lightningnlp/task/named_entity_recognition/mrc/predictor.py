@@ -2,7 +2,7 @@ from typing import List, Union, Dict, Set
 
 import torch
 
-from lightningnlp.task.named_entity_recognition.predictor import NerPredictor, set2json
+from ..predictor import NerPredictor, set2json
 
 
 class PromptNerPredictor(NerPredictor):

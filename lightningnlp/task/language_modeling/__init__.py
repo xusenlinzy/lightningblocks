@@ -1,2 +1,2 @@
-from lightningnlp.task.language_modeling.data import LanguageModelingDataModule
-from lightningnlp.task.language_modeling.model import LanguageModelingTransformer
+from .data import LanguageModelingDataModule
+from .model import LanguageModelingTransformer

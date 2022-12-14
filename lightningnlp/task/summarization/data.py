@@ -1,4 +1,4 @@
-from lightningnlp.core.seq2seq.data import Seq2SeqDataModule
+from ...core.seq2seq.data import Seq2SeqDataModule
 
 
 class SummarizationDataModule(Seq2SeqDataModule):

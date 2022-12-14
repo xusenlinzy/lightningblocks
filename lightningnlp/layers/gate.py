@@ -18,7 +18,6 @@ class Gate(nn.Module):
         """
         Args:
             x: batch * len * dim
-            x_mask: batch * len (1 for padding, 0 for true)
         Output:
             res: batch * len * dim
         """

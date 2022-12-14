@@ -11,28 +11,27 @@ class Conv1D(nn.Module):
         super().__init__()
         self.out_channels = out_channels
         w = torch.empty(in_channels, out_channels)
+
         nn.init.normal_(w, std=0.02)
+
         self.weight = nn.Parameter(w)
         self.bias = nn.Parameter(torch.zeros(out_channels))
 
     def forward(self, x):
         size_out = x.size()[:-1] + (self.out_channels,)
         x = torch.addmm(self.bias, x.view(-1, x.size(-1)), self.weight)
-        x = x.view(*size_out)
-        return x
+        return x.view(*size_out)
 
 
 class MaskedConv1d(nn.Conv1d):
 
-    def __init__(self, in_channels, out_channels, kernel_size, dilation=1,
-                 groups=1, bias=True, causal=True):
+    def __init__(self, in_channels, out_channels, kernel_size, dilation=1, groups=1, bias=True, causal=True):
         if causal:
             padding = (kernel_size - 1) * dilation
         else:
             padding = (kernel_size - 1) * dilation // 2
         super(MaskedConv1d, self).__init__(in_channels, out_channels, kernel_size,
-                                           stride=1, padding=padding, dilation=dilation,
-                                           groups=groups, bias=bias)
+                                           stride=1, padding=padding, dilation=dilation, groups=groups, bias=bias)
 
     def forward(self, inputs):
         output = super(MaskedConv1d, self).forward(inputs)
@@ -41,10 +40,8 @@ class MaskedConv1d(nn.Conv1d):
 
 class GatedConv1d(MaskedConv1d):
 
-    def __init__(self, in_channels, out_channels, kernel_size, dilation=1,
-                 groups=1, bias=True, causal=True):
-        super(GatedConv1d, self).__init__(in_channels, 2 * out_channels,
-                                          kernel_size, dilation, groups, bias, causal)
+    def __init__(self, in_channels, out_channels, kernel_size, dilation=1, groups=1, bias=True, causal=True):
+        super(GatedConv1d, self).__init__(in_channels, 2 * out_channels, kernel_size, dilation, groups, bias, causal)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, inputs):
@@ -65,7 +62,8 @@ class DilateConvLayer(nn.Module):
         )
 
         self.convs = nn.ModuleList(
-            [nn.Conv2d(channels, channels, kernel_size=3, groups=channels, dilation=d, padding=d) for d in dilation])
+            [nn.Conv2d(channels, channels, kernel_size=3, groups=channels, dilation=d, padding=d) for d in dilation]
+        )
 
     def forward(self, x):
         x = x.permute(0, 3, 1, 2).contiguous()
@@ -76,5 +74,5 @@ class DilateConvLayer(nn.Module):
             x = F.gelu(x)
             outputs.append(x)
         outputs = torch.cat(outputs, dim=1)
-        outputs = outputs.permute(0, 2, 3, 1).contiguous()
-        return outputs
+
+        return outputs.permute(0, 2, 3, 1).contiguous()

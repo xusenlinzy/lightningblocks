@@ -1,1 +1,2 @@
-from lightningnlp.metrics.extraction.span import SpanEvaluator
+from .score import ExtractionScore
+from .span import SpanEvaluator

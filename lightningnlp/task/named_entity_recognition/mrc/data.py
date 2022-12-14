@@ -6,7 +6,7 @@ import torch
 from transformers import PreTrainedTokenizerBase
 from transformers.file_utils import PaddingStrategy
 
-from lightningnlp.task.named_entity_recognition.data import TokenClassificationDataModule
+from ..data import TokenClassificationDataModule
 
 
 @dataclass
@@ -65,11 +65,15 @@ class MRCNerDataModule(TokenClassificationDataModule):
         self.schema2prompt = schema2prompt
 
     def get_process_fct(self, text_column_name, label_column_name, mode):
+        max_length = self.train_max_length
+        if mode in ["val", "test"]:
+            max_length = self.validation_max_length if mode == "val" else self.test_max_length
+            
         convert_to_features = partial(
             MRCNerDataModule.convert_to_features,
             schema2prompt=self.schema2prompt,
             tokenizer=self.tokenizer,
-            max_length=self.max_length,
+            max_length=max_length,
             text_column_name=text_column_name,
             label_column_name=label_column_name,
             mode=mode,

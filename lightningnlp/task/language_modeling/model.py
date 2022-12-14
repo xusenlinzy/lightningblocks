@@ -4,7 +4,7 @@ import torch
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
 from transformers import AutoModelForCausalLM
 
-from lightningnlp.core import TaskTransformer
+from ...core import TaskTransformer
 
 
 class LanguageModelingTransformer(TaskTransformer):

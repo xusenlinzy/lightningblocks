@@ -3,12 +3,13 @@ from typing import IO, Any, Callable, Dict, Optional, Tuple, Union
 
 import pytorch_lightning as pl
 import torch
+from pytorch_lightning.utilities import rank_zero_only
 from transformers import BertConfig, PreTrainedTokenizerBase, get_scheduler, Adafactor
 from transformers import PretrainedConfig, PreTrainedModel, Pipeline
 from transformers import pipeline as hf_transformers_pipeline
 
-from lightningnlp.utils.deepspeed import enable_transformers_pretrained_deepspeed_sharding
-from lightningnlp.utils.imports import _ACCELERATE_AVAILABLE
+from ..utils.deepspeed import enable_transformers_pretrained_deepspeed_sharding
+from ..utils.imports import _ACCELERATE_AVAILABLE
 
 if _ACCELERATE_AVAILABLE:
     from accelerate import load_checkpoint_and_dispatch
@@ -273,7 +274,7 @@ class TaskTransformer(pl.LightningModule):
         """
         return self.model.hf_device_map
 
-    @pl.utilities.rank_zero_only
+    @rank_zero_only
     def on_save_checkpoint(self, checkpoint: Dict[str, Any]) -> None:
         output_dir = Path(self.train_kwargs.get("output_dir", "outputs"))
         save_path = output_dir.joinpath(f"{self.downstream_model_type}-{self.downstream_model_name}")

@@ -6,7 +6,7 @@ if __name__ == '__main__':
     # 实体识别
     schema = ['时间', '选手', '赛事名称']
     # uie-base模型已上传至huggingface，可自动下载，其他模型只需提供模型名称将自动进行转换
-    uie = UIEPredictor("xusenlin/uie-base", schema=schema)
+    uie = UIEPredictor("uie-base", schema=schema)
     pprint(uie("2月8日上午北京冬奥会自由式滑雪女子大跳台决赛中中国选手谷爱凌以188.25分获得金牌！"))
 
     schema = ['肿瘤的大小', '肿瘤的个数', '肝癌级别', '脉管内癌栓分级']

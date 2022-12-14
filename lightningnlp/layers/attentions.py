@@ -1,4 +1,13 @@
-from .position import *
+import math
+
+import torch
+import torch.nn as nn
+
+from .position import (
+    RelativePositionsEncoding,
+    RoPEPositionEncoding,
+    T5RelativePositionsEncoding,
+)
 
 
 class CosAttention(nn.Module):
@@ -19,13 +28,15 @@ class CosAttention(nn.Module):
 
 
 class MultiHeadAttentionLayer(nn.Module):
-    def __init__(self,
-                 hidden_size,
-                 num_attention_heads,
-                 attention_probs_dropout_prob,
-                 attention_scale=True,
-                 return_attention_scores=False,
-                 **kwargs):
+    def __init__(
+        self,
+        hidden_size,
+        num_attention_heads,
+        attention_probs_dropout_prob,
+        attention_scale=True,
+        return_attention_scores=False,
+        **kwargs,
+    ):
         super(MultiHeadAttentionLayer, self).__init__()
 
         assert hidden_size % num_attention_heads == 0
@@ -45,33 +56,40 @@ class MultiHeadAttentionLayer(nn.Module):
         self.a_bias, self.p_bias = kwargs.get('a_bias'), kwargs.get('p_bias')
 
         if self.p_bias == 'typical_relative':  # nezha
-            self.relative_positions_encoding = RelativePositionsEncoding(qlen=kwargs.get('max_position'),
-                                                                         klen=kwargs.get('max_position'),
-                                                                         embedding_size=self.attention_head_size,
-                                                                         max_relative_position=kwargs.get(
-                                                                             'max_relative_position'))
+            self.relative_positions_encoding = RelativePositionsEncoding(
+                qlen=kwargs.get('max_position'),
+                klen=kwargs.get('max_position'),
+                embedding_size=self.attention_head_size,
+                max_relative_position=kwargs.get('max_relative_position'),
+            )
         elif self.p_bias == 'rotary':  # roformer
-            self.relative_positions_encoding = RoPEPositionEncoding(max_position=kwargs.get('max_position'),
-                                                                    embedding_size=self.attention_head_size)
+            self.relative_positions_encoding = RoPEPositionEncoding(
+                max_position=kwargs.get('max_position'),
+                embedding_size=self.attention_head_size,
+            )
         elif self.p_bias == 't5_relative':  # t5
-            self.relative_positions = T5RelativePositionsEncoding(qlen=kwargs.get('max_position'),
-                                                                  klen=kwargs.get('max_position'),
-                                                                  relative_attention_num_buckets=kwargs.get(
-                                                                      'relative_attention_num_buckets'),
-                                                                  is_decoder=kwargs.get('is_decoder'))
-            self.relative_positions_encoding = nn.Embedding(kwargs.get('relative_attention_num_buckets'),
-                                                            self.num_attention_heads)
+            self.relative_positions = T5RelativePositionsEncoding(
+                qlen=kwargs.get('max_position'),
+                klen=kwargs.get('max_position'),
+                relative_attention_num_buckets=kwargs.get('relative_attention_num_buckets'),
+                is_decoder=kwargs.get('is_decoder')
+            )
+            self.relative_positions_encoding = nn.Embedding(
+                kwargs.get('relative_attention_num_buckets'), self.num_attention_heads
+            )
 
     def transpose_for_scores(self, x):
         new_x_shape = x.size()[:-1] + (self.num_attention_heads, self.attention_head_size)
         x = x.view(*new_x_shape)
         return x.permute(0, 2, 1, 3)
 
-    def forward(self,
-                hidden_states,
-                attention_mask=None,
-                encoder_hidden_states=None,
-                encoder_attention_mask=None):
+    def forward(
+        self,
+        hidden_states,
+        attention_mask=None,
+        encoder_hidden_states=None,
+        encoder_attention_mask=None,
+    ):
         # hidden_states shape: [batch_size, seq_q, hidden_size]
         # attention_mask shape: [batch_size, 1, 1, seq_q] 或者 [batch_size, 1, seq_q, seq_q]
         # encoder_hidden_states shape: [batch_size, seq_k, hidden_size]
@@ -85,6 +103,7 @@ class MultiHeadAttentionLayer(nn.Module):
         else:
             mixed_key_layer = self.k(hidden_states)
             mixed_value_layer = self.v(hidden_states)
+
         # mixed_query_layer shape: [batch_size, query_len, hidden_size]
         # mixed_query_layer shape: [batch_size, key_len, hidden_size]
         # mixed_query_layer shape: [batch_size, value_len, hidden_size]
@@ -92,6 +111,7 @@ class MultiHeadAttentionLayer(nn.Module):
         query_layer = self.transpose_for_scores(mixed_query_layer)
         key_layer = self.transpose_for_scores(mixed_key_layer)
         value_layer = self.transpose_for_scores(mixed_value_layer)
+
         # query_layer shape: [batch_size, num_attention_heads, query_len, attention_head_size]
         # key_layer shape: [batch_size, num_attention_heads, key_len, attention_head_size]
         # value_layer shape: [batch_size, num_attention_heads, value_len, attention_head_size]
@@ -105,14 +125,17 @@ class MultiHeadAttentionLayer(nn.Module):
 
         # attention_scores shape: [batch_size, num_attention_heads, query_len, key_len]
         if (self.p_bias == 'typical_relative') and hasattr(self, 'relative_positions_encoding'):
-            relations_keys = self.relative_positions_encoding(attention_scores.shape[-1], attention_scores.shape[
-                -1])  # [to_seq_len, to_seq_len, d_hid]
+            relations_keys = self.relative_positions_encoding(
+                attention_scores.shape[-1], attention_scores.shape[-1]
+            )  # [to_seq_len, to_seq_len, d_hid]
+
             # 旧实现，方便读者理解维度转换
             # query_layer_t = query_layer.permute(2, 0, 1, 3)
             # query_layer_r = query_layer_t.contiguous().view(from_seq_length, batch_size * num_attention_heads, self.attention_head_size)
             # key_position_scores = torch.matmul(query_layer_r, relations_keys.permute(0, 2, 1))
             # key_position_scores_r = key_position_scores.view(from_seq_length, batch_size, num_attention_heads, from_seq_length)
             # key_position_scores_r_t = key_position_scores_r.permute(1, 2, 0, 3)
+
             # 新实现
             key_position_scores_r_t = torch.einsum('bnih,ijh->bnij', query_layer, relations_keys)
             attention_scores = attention_scores + key_position_scores_r_t
@@ -134,17 +157,19 @@ class MultiHeadAttentionLayer(nn.Module):
         # 将attention score 归一化到0-1
         attention_probs = nn.Softmax(dim=-1)(attention_scores)
         attention_probs = self.dropout(attention_probs)
-        context_layer = torch.matmul(attention_probs,
-                                     value_layer)  # [batch_size, num_attention_heads, query_len, attention_head_size]
+        # [batch_size, num_attention_heads, query_len, attention_head_size]
+        context_layer = torch.matmul(attention_probs, value_layer)
 
         if (self.p_bias == 'typical_relative') and hasattr(self, 'relative_positions_encoding'):
             relations_values = self.relative_positions_encoding(attention_scores.shape[-1], attention_scores.shape[-1])
+
             # 旧实现，方便读者理解维度转换
             # attention_probs_t = attention_probs.permute(2, 0, 1, 3)
             # attentions_probs_r = attention_probs_t.contiguous().view(from_seq_length, batch_size * num_attention_heads, to_seq_length)
             # value_position_scores = torch.matmul(attentions_probs_r, relations_values)
             # value_position_scores_r = value_position_scores.view(from_seq_length, batch_size, num_attention_heads, self.attention_head_size)
             # value_position_scores_r_t = value_position_scores_r.permute(1, 2, 0, 3)
+
             # 新实现
             value_position_scores_r_t = torch.einsum('bnij,ijh->bnih', attention_probs, relations_values)
             context_layer = context_layer + value_position_scores_r_t

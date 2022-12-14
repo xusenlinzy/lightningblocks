@@ -27,13 +27,16 @@ class ConditionalLayerNorm(nn.Module):
     def forward(self, inputs, cond=None):
         assert cond is not None, 'Conditional tensor need to input when use conditional layers norm'
         cond = torch.unsqueeze(cond, 1)  # (b, 1, h*2)
+
         weight = self.weight_dense(cond) + self.weight  # (b, 1, h)
         bias = self.bias_dense(cond) + self.bias  # (b, 1, h)
-        mean = torch.mean(inputs, dim=-1, keepdim=True)  # (b, s, 1)
 
+        mean = torch.mean(inputs, dim=-1, keepdim=True)  # (b, s, 1)
         outputs = inputs - mean  # (b, s, h)
+
         variance = torch.mean(outputs ** 2, dim=-1, keepdim=True)
         std = torch.sqrt(variance + self.eps)  # (b, s, 1)
+
         outputs = outputs / std  # (b, s, h)
         outputs = outputs * weight + bias
         return outputs

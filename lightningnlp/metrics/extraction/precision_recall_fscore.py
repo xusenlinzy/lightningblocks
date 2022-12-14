@@ -2,7 +2,7 @@ from typing import List
 
 import numpy as np
 
-from lightningnlp.metrics.extraction.utils import _prf_divide, _warn_prf
+from .utils import _prf_divide, _warn_prf
 
 
 def _precision_recall_fscore(

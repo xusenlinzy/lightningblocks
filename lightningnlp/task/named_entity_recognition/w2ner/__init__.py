@@ -1,6 +1,3 @@
-from lightningnlp.task.named_entity_recognition.w2ner.data import DIST_TO_IDX
-from lightningnlp.task.named_entity_recognition.w2ner.data import DataCollatorForW2Ner
-from lightningnlp.task.named_entity_recognition.w2ner.data import W2NerDataModule
-from lightningnlp.task.named_entity_recognition.w2ner.model import get_auto_w2ner_ner_model
-from lightningnlp.task.named_entity_recognition.w2ner.model import get_w2ner_model_config
-from lightningnlp.task.named_entity_recognition.w2ner.predictor import W2NerPredictor
+from .data import DIST_TO_IDX, DataCollatorForW2Ner, W2NerDataModule
+from .model import get_auto_w2ner_ner_model, get_w2ner_model_config
+from .predictor import W2NerPredictor

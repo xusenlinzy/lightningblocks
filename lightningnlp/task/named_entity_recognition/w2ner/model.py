@@ -5,11 +5,11 @@ import torch.nn as nn
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 from transformers import PreTrainedModel
 
-from lightningnlp.layers.conv import DilateConvLayer
-from lightningnlp.layers.layer_norm import LayerNorm
-from lightningnlp.layers.mlp import MLP
-from lightningnlp.task.utils import SequenceLabelingOutput, MODEL_MAP
-from lightningnlp.utils.tensor import tensor_to_cpu
+from ...utils import SequenceLabelingOutput, MODEL_MAP
+from ....layers.conv import DilateConvLayer
+from ....layers.layer_norm import LayerNorm
+from ....layers.mlp import MLP
+from ....utils.tensor import tensor_to_cpu
 
 
 class Biaffine(nn.Module):

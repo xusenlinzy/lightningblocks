@@ -1,14 +1,12 @@
-import logging
-
 import numpy as np
 import torch
 
-logger = logging.getLogger(__name__)
+from ..utils.logger import logger
 
 
 class EarlyStopping(object):
     """
-    Monitor a validation metrics and stop training when it stops improving.
+    Monitor a validation metric and stop training when it stops improving.
 
     Args:
         monitor: quantity to be monitored. Default: ``'eval_loss'``.
@@ -28,15 +26,16 @@ class EarlyStopping(object):
 
     mode_dict = {'min': torch.lt, 'max': torch.gt}
 
-    def __init__(self,
-                 min_delta=0,
-                 patience=10,
-                 verbose=True,
-                 mode='min',
-                 monitor='eval_loss',
-                 save_state_path=None,
-                 load_state_path=None
-                 ):
+    def __init__(
+        self,
+        min_delta=0,
+        patience=10,
+        verbose=True,
+        mode='min',
+        monitor='eval_loss',
+        save_state_path=None,
+        load_state_path=None,
+    ):
 
         self.patience = patience
         self.verbose = verbose
@@ -49,8 +48,10 @@ class EarlyStopping(object):
 
         if mode not in self.mode_dict:
             raise ValueError(f"mode: expected one of {', '.join(self.mode_dict.keys())}")
+
         self.monitor_op = self.mode_dict[mode]
         self.min_delta *= 1 if self.monitor_op == torch.gt else -1
+
         torch_inf = torch.tensor(np.inf)
         self.best_score = torch_inf if self.monitor_op == torch.lt else -torch_inf
 
@@ -88,7 +89,7 @@ class EarlyStopping(object):
             if self.wait_count >= self.patience:
                 self.stop_training = True
                 if self.verbose:
-                    msg = (f"Monitored metrics {self.monitor} did not improve in the last {self.wait_count} records."
+                    msg = (f"Monitored metric {self.monitor} did not improve in the last {self.wait_count} records."
                            f" Best score: {self.best_score:.3f}. Signaling Trainer to stop.")
                     logger.info(msg)
                 if self.save_state_path is not None:

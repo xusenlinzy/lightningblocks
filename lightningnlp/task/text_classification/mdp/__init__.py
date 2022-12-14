@@ -1,2 +1,1 @@
-from lightningnlp.task.text_classification.mdp.model import get_auto_mdp_tc_model
-from lightningnlp.task.text_classification.mdp.model import get_mdp_model_config
+from .model import get_auto_mdp_tc_model, get_mdp_model_config

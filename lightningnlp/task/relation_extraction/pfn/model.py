@@ -6,9 +6,9 @@ import torch
 import torch.nn as nn
 from transformers import PreTrainedModel
 
-from lightningnlp.layers.pfn import encoder, ner_unit, re_unit
-from lightningnlp.task.utils import RelationExtractionOutput, MODEL_MAP
-from lightningnlp.utils.tensor import tensor_to_numpy
+from ...utils import RelationExtractionOutput, MODEL_MAP
+from ....layers.pfn import encoder, ner_unit, re_unit
+from ....utils.tensor import tensor_to_numpy
 
 
 def get_auto_pfn_re_model(
@@ -155,7 +155,6 @@ def get_auto_pfn_re_model(
 
 def get_pfn_model_config(predicates, **kwargs):
     predicate2id = {v: i for i, v in enumerate(predicates)}
-
     model_config = {
         "num_predicates": len(predicates), "predicate2id": predicate2id,
         "pfn_hidden_size": 300, "decode_thresh": 0.5,

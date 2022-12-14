@@ -6,7 +6,7 @@ import torch.nn as nn
 from transformers import ErnieModel, ErniePreTrainedModel, PretrainedConfig
 from transformers.utils import ModelOutput
 
-from lightningnlp.task.uie.erniem import ErnieMModel, ErnieMPreTrainedModel
+from .erniem import ErnieMModel, ErnieMPreTrainedModel
 
 
 @dataclass

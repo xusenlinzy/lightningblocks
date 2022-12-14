@@ -5,7 +5,7 @@ from pytorch_lightning.utilities import rank_zero_warn
 from transformers import PreTrainedTokenizerBase
 from transformers.data import DataCollatorWithPadding
 
-from lightningnlp.core import TransformerDataModule
+from ...core import TransformerDataModule
 
 
 class TextClassificationDataModule(TransformerDataModule):
@@ -23,7 +23,7 @@ class TextClassificationDataModule(TransformerDataModule):
             input_feature_fields=input_feature_fields,
             padding=False,
             truncation=True,
-            max_length=self.max_length,
+            max_length=self.train_max_length,
         )
         cols_to_keep = [
             x for x in ["input_ids", "attention_mask", "token_type_ids", "labels"] if x in dataset["train"].features

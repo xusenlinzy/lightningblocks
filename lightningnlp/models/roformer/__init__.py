@@ -1,5 +1,5 @@
-from lightningnlp.models.roformer.configuration_roformer import RoFormerConfig
-from lightningnlp.models.roformer.modeling_roformer import (
+from .configuration_roformer import RoFormerConfig
+from .modeling_roformer import (
     ROFORMER_PRETRAINED_MODEL_ARCHIVE_LIST,
     RoFormerForCausalLM,
     RoFormerForMaskedLM,

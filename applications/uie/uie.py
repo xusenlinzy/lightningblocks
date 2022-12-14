@@ -16,7 +16,7 @@ from lightningnlp.task.uie import (
 pretrained_model_name_or_path = "uie_base_pytorch"  # 预训练模型
 train_batch_size = 8  # 训练集batch_size
 validation_batch_size = 8  # 验证集batch_size
-max_length = 512  # 序列最大长度
+train_max_length = 512  # 序列最大长度
 num_workers = 16  # 多进程加载数据
 
 dataset_name = "datasets/medical"
@@ -48,7 +48,7 @@ def main():
         train_file=train_file,
         validation_file=validation_file,
         cache_dir=cache_dir,
-        max_length=max_length,
+        train_max_length=train_max_length,
         task_name=task_name,
     )
 

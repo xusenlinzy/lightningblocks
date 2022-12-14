@@ -4,9 +4,9 @@ import torch
 import torch.nn as nn
 from transformers import PreTrainedModel
 
-from lightningnlp.losses import SpanLoss
-from lightningnlp.task.utils import SpanOutput, MODEL_MAP
-from lightningnlp.utils.tensor import tensor_to_cpu
+from ...utils import SpanOutput, MODEL_MAP
+from ....losses import SpanLoss
+from ....utils.tensor import tensor_to_cpu
 
 
 def get_auto_span_ner_model(

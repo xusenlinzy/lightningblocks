@@ -1,4 +1,2 @@
-from lightningnlp.task.named_entity_recognition.tplinker.data import DataCollatorForTPLinkerPlusNer
-from lightningnlp.task.named_entity_recognition.tplinker.data import TPlinkerNerDataModule
-from lightningnlp.task.named_entity_recognition.tplinker.model import get_auto_tplinker_ner_model
-from lightningnlp.task.named_entity_recognition.tplinker.model import get_tplinker_model_config
+from .data import DataCollatorForTPLinkerPlusNer, TPlinkerNerDataModule
+from .model import get_auto_tplinker_ner_model, get_tplinker_model_config

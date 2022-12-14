@@ -6,9 +6,9 @@ from torch import nn
 from torch_scatter import scatter_max
 from transformers import PreTrainedModel
 
-from lightningnlp.task.utils import SequenceLabelingOutput, MODEL_MAP
-from lightningnlp.task.utils.decode_utils import filter_clashed_by_priority
-from lightningnlp.utils.tensor import tensor_to_cpu, seq_len_to_mask, tensor_to_list
+from ...utils.decode_utils import filter_clashed_by_priority
+from ...utils.model_utils import SequenceLabelingOutput, MODEL_MAP
+from ....utils.tensor import tensor_to_cpu, seq_len_to_mask, tensor_to_list
 
 
 class LayerNorm(nn.Module):
@@ -29,12 +29,14 @@ class LayerNorm(nn.Module):
 class MaskedConv2d(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size=3, padding=1, groups=1):
         super(MaskedConv2d, self).__init__()
-        self.conv2d = nn.Conv2d(in_channels,
-                                out_channels,
-                                kernel_size=kernel_size,
-                                padding=padding,
-                                bias=False,
-                                groups=groups)
+        self.conv2d = nn.Conv2d(
+            in_channels,
+            out_channels,
+            kernel_size=kernel_size,
+            padding=padding,
+            bias=False,
+            groups=groups
+        )
 
     def forward(self, x, mask):
         x = x.masked_fill(mask, 0)
@@ -98,6 +100,8 @@ def get_auto_cnn_ner_model(
 ) -> PreTrainedModel:
 
     base_model, parent_model, base_model_name = MODEL_MAP[model_type]
+
+
 
     class CNNForNer(parent_model):
         """
@@ -252,7 +256,7 @@ def get_auto_cnn_ner_model(
                 tmp_scores = _scores[:l, :l][curr_non_mask]
 
                 confidences, label_ids = tmp_scores, tmp_scores >= thresh
-                labels = [i for i in label_ids]
+                labels = list(label_ids)
                 chunks = [(label, start, end) for label, (start, end) in
                           zip(labels, self.spans_from_upper_triangular(l)) if label != 0]
                 confidences = [conf for label, conf in zip(labels, confidences) if label != 0]
@@ -287,6 +291,7 @@ def get_auto_cnn_ner_model(
                 all_entity_list.append(entity_set)
 
             return all_entity_list
+
 
     return CNNForNer
 

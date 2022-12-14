@@ -5,7 +5,7 @@ import torch
 from transformers import PreTrainedTokenizerBase
 from transformers.file_utils import PaddingStrategy
 
-from lightningnlp.task.relation_extraction.data import RelationExtractionDataModule
+from ..data import RelationExtractionDataModule
 
 
 @dataclass

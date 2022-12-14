@@ -7,11 +7,8 @@ from base64 import b64decode
 
 import torch
 
-from lightningnlp.callbacks import Logger
-from lightningnlp.utils.download import get_path_from_url
-
-logger = Logger("UIE")
-
+from ...utils.download import get_path_from_url
+from ...utils.logger import logger
 
 MODEL_MAP = {
     # vocab.txt/special_tokens_map.json/tokenizer_config.json are common to the default model.

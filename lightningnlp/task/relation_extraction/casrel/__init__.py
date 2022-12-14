@@ -1,4 +1,2 @@
-from lightningnlp.task.relation_extraction.casrel.data import CasRelDataModule
-from lightningnlp.task.relation_extraction.casrel.data import DataCollatorForCasRel
-from lightningnlp.task.relation_extraction.casrel.model import get_auto_casrel_re_model
-from lightningnlp.task.relation_extraction.casrel.model import get_casrel_model_config
+from .data import CasRelDataModule, DataCollatorForCasRel
+from .model import get_auto_casrel_re_model, get_casrel_model_config

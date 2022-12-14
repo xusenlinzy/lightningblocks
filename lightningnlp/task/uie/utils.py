@@ -5,9 +5,7 @@ import re
 
 import numpy as np
 
-from lightningnlp.callbacks import Logger, tqdm
-
-logger = Logger("UIE")
+from ...utils.logger import logger, tqdm
 
 
 def get_span(start_ids, end_ids, with_prob=False):

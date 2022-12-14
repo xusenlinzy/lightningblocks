@@ -1,4 +1,2 @@
-from lightningnlp.task.named_entity_recognition.cnn.data import CNNNerDataModule
-from lightningnlp.task.named_entity_recognition.cnn.data import DataCollatorForCNNNer
-from lightningnlp.task.named_entity_recognition.cnn.model import get_auto_cnn_ner_model
-from lightningnlp.task.named_entity_recognition.cnn.model import get_cnn_model_config
+from .data import CNNNerDataModule, DataCollatorForCNNNer
+from .model import get_auto_cnn_ner_model, get_cnn_model_config

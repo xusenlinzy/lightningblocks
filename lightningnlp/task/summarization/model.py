@@ -1,7 +1,7 @@
 from torchmetrics.text.rouge import ROUGEScore
 from transformers import AutoModelForSeq2SeqLM
 
-from lightningnlp.core.seq2seq.model import Seq2SeqTransformer
+from ...core.seq2seq.model import Seq2SeqTransformer
 
 
 class SummarizationTransformer(Seq2SeqTransformer):

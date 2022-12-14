@@ -1,4 +1,2 @@
-from lightningnlp.task.relation_extraction.tplinker.data import DataCollatorForTPLinkerPlus
-from lightningnlp.task.relation_extraction.tplinker.data import TPlinkerNerDataModule
-from lightningnlp.task.relation_extraction.tplinker.model import get_auto_tplinker_re_model
-from lightningnlp.task.relation_extraction.tplinker.model import get_tplinker_model_config
+from .data import DataCollatorForTPLinkerPlus, TPlinkerREDataModule
+from .model import get_auto_tplinker_re_model, get_tplinker_model_config

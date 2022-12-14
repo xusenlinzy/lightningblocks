@@ -4,8 +4,8 @@ import torch
 import torch.nn as nn
 from transformers import PreTrainedModel
 
-from lightningnlp.layers.layer_norm import LayerNorm
-from lightningnlp.task.utils import RelationExtractionOutput, MODEL_MAP
+from ...utils import RelationExtractionOutput, MODEL_MAP
+from ....layers.layer_norm import LayerNorm
 
 
 def get_auto_casrel_re_model(

@@ -4,10 +4,10 @@ import torch
 import torch.nn as nn
 from transformers import PreTrainedModel
 
-from lightningnlp.layers.global_pointer import HandshakingKernel
-from lightningnlp.losses import MultiLabelCategoricalCrossEntropy
-from lightningnlp.task.utils import SequenceLabelingOutput, MODEL_MAP
-from lightningnlp.utils.tensor import tensor_to_cpu
+from ...utils import SequenceLabelingOutput, MODEL_MAP
+from ....layers.global_pointer import HandshakingKernel
+from ....losses import MultiLabelCategoricalCrossEntropy
+from ....utils.tensor import tensor_to_cpu
 
 
 def get_auto_tplinker_ner_model(

@@ -1,4 +1,2 @@
-from lightningnlp.task.named_entity_recognition.span.data import DataCollatorForSpanNer
-from lightningnlp.task.named_entity_recognition.span.data import SpanNerDataModule
-from lightningnlp.task.named_entity_recognition.span.model import get_auto_span_ner_model
-from lightningnlp.task.named_entity_recognition.span.model import get_span_model_config
+from .data import DataCollatorForSpanNer, SpanNerDataModule
+from .model import get_auto_span_ner_model, get_span_model_config

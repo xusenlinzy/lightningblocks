@@ -1,9 +1,11 @@
 import torch.nn as nn
 import torch.nn.functional as F
 
-DISTANCE2METRIC = {'cosine': lambda x, y: 1 - F.cosine_similarity(x, y),
-                   'educlidean': lambda x, y: F.pairwise_distance(x, y, p=2),
-                   'manhattan': lambda x, y: F.pairwise_distance(x, y, p=1)}
+DISTANCE2METRIC = {
+    'cosine': lambda x, y: 1 - F.cosine_similarity(x, y),
+    'educlidean': lambda x, y: F.pairwise_distance(x, y, p=2),
+    'manhattan': lambda x, y: F.pairwise_distance(x, y, p=1)
+}
 
 
 class TripletLoss(nn.Module):

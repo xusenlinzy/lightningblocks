@@ -5,11 +5,9 @@ from decimal import Decimal
 
 import numpy as np
 
-from lightningnlp.callbacks import Logger
-from lightningnlp.task.uie.utils import convert_ext_examples, convert_cls_examples
-from lightningnlp.utils.seed import seed_everything
-
-logger = Logger("UIE")
+from .utils import convert_ext_examples, convert_cls_examples
+from ...utils.logger import logger
+from ...utils.seed import seed_everything
 
 
 def convert_data(args):

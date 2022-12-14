@@ -1,6 +1,6 @@
 import pytorch_lightning as pl
 
-from lightningnlp.core import TransformersBaseFinetuning
+from ..finetuning import TransformersBaseFinetuning
 
 
 class FreezeEmbeddings(TransformersBaseFinetuning):

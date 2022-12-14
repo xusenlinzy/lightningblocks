@@ -5,7 +5,7 @@ import torch
 from transformers import PreTrainedTokenizerBase
 from transformers.file_utils import PaddingStrategy
 
-from lightningnlp.task.relation_extraction.data import RelationExtractionDataModule
+from ..data import RelationExtractionDataModule
 
 
 @dataclass
@@ -63,4 +63,4 @@ class PFNDataModule(RelationExtractionDataModule):
     @property
     def collate_fn(self) -> Optional[Callable]:
         ignore_list = ["offset_mapping", "text", "target"]
-        return DataCollatorForPFN(tokenizer=self.tokenizer, num_predicates=len(self.predicates), ignore_list=ignore_list)
+        return DataCollatorForPFN(tokenizer=self.tokenizer, num_predicates=len(self.labels), ignore_list=ignore_list)

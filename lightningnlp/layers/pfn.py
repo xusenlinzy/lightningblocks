@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 
 def cumsoftmax(x):
-    return torch.cumsum(F.softmax(x,-1),dim=-1)
+    return torch.cumsum(F.softmax(x, -1), dim=-1)
 
 
 class LinearDropConnect(nn.Linear):
@@ -48,7 +48,6 @@ class pfn_unit(nn.Module):
         for m in self.drop_weight_modules:
             m.sample_mask()
 
-
     def forward(self, x, hidden):
         h_in, c_in = hidden
 
@@ -67,7 +66,7 @@ class pfn_unit(nn.Module):
         upper_c = rg_c - overlap_c
         downer_c = eg_c - overlap_c
 
-        overlap_cin =rg_cin * eg_cin
+        overlap_cin = rg_cin * eg_cin
         upper_cin = rg_cin - overlap_cin
         downer_cin = eg_cin - overlap_cin
 
@@ -80,7 +79,7 @@ class pfn_unit(nn.Module):
         h_re = torch.tanh(c_re)
         h_ner = torch.tanh(c_ner)
         h_share = torch.tanh(c_share)
-        
+
         c_out = torch.cat((c_re, c_ner, c_share), dim=-1)
         c_out = self.transform(c_out)
         h_out = torch.tanh(c_out)
@@ -98,7 +97,7 @@ class encoder(nn.Module):
         batch_size = features.size(1)
         h0 = torch.zeros(batch_size, self.hidden_size).requires_grad_(False).to(features.device)
         c0 = torch.zeros(batch_size, self.hidden_size).requires_grad_(False).to(features.device)
-        return (h0, c0)
+        return h0, c0
 
     def forward(self, features):
         seq_len = features.size(0)
@@ -202,4 +201,3 @@ class re_unit(nn.Module):
         re = re * mask_re
 
         return re
-    

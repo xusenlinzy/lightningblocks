@@ -1,2 +1,2 @@
-from lightningnlp.task.translation.data import TranslationDataModule
-from lightningnlp.task.translation.model import TranslationTransformer
+from .data import TranslationDataModule
+from .model import TranslationTransformer

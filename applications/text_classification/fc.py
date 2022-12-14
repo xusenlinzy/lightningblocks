@@ -16,7 +16,7 @@ from lightningnlp.task.text_classification import (
 pretrained_model_name_or_path = "hfl/chinese-roberta-wwm-ext"  # 预训练模型
 train_batch_size = 16  # 训练集batch_size
 validation_batch_size = 32  # 验证集batch_size
-max_length = 256  # 序列最大长度
+train_max_length = 256  # 序列最大长度
 num_workers = 4  # 多进程加载数据
 
 # 方式1：从huggingface下载数据集
@@ -52,7 +52,7 @@ def main():
         num_workers=num_workers,
         # train_file=train_file,  # 自定义数据集最好指定训练集和验证集文件名
         # validation_file=validation_file,
-        max_length=max_length,
+        train_max_length=train_max_length,
         cache_dir=cache_dir,
     )
 

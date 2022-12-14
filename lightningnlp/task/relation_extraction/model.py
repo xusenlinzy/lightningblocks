@@ -3,10 +3,9 @@ from typing import Any, Dict, List, Optional, Union
 
 import torch
 
-from lightningnlp.core import TaskTransformer
-from lightningnlp.metrics import ExtractionScore
-from lightningnlp.task.relation_extraction.auto import RelationExtractionPipeline
-from lightningnlp.task.relation_extraction.auto import get_auto_re_model, get_auto_re_model_config
+from .auto import RelationExtractionPipeline, get_auto_re_model, get_auto_re_model_config
+from ...core import TaskTransformer
+from ...metrics import ExtractionScore
 
 
 class RelationExtractionTransformer(TaskTransformer):

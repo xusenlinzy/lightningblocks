@@ -4,9 +4,8 @@ import os
 
 import torch
 
+from .logger import logger
 from ..utils.paths import create_dir, save_model, find_all_checkpoints
-
-logger = logging.getLogger(__name__)
 
 
 # TODO 待优化
@@ -20,14 +19,17 @@ class SWA:
     monitor_list = ['metrics', 'step']
     mode_list = ['max', 'min']
 
-    def __init__(self, checkpoint_dir,
-                 monitor='step',
-                 sort_mode='max',
-                 device='cpu',
-                 k_best_checkpoints=0,
-                 checkpoint_weights=None,
-                 checkpoint_dir_prefix='checkpoint',
-                 checkpoint_name='pytorch_model.bin'):
+    def __init__(
+        self, 
+        checkpoint_dir,
+        monitor='step',
+        sort_mode='max',
+        device='cpu',
+        k_best_checkpoints=0,
+        checkpoint_weights=None,
+        checkpoint_dir_prefix='checkpoint',
+        checkpoint_name='pytorch_model.bin'
+    ):
         self.checkpoint_dir = checkpoint_dir
         self.checkpoint_name = checkpoint_name
         self.sort_mode = sort_mode
@@ -50,17 +52,18 @@ class SWA:
 
     def get_model_path_list(self):
         try:
-            model_lists = find_all_checkpoints(checkpoint_dir=self.checkpoint_dir,
-                                               checkpoint_prefix=self.checkpoint_dir_prefix,
-                                               checkpoint_name=self.checkpoint_name)
+            model_lists = find_all_checkpoints(
+                checkpoint_dir=self.checkpoint_dir,
+                checkpoint_prefix=self.checkpoint_dir_prefix,
+                checkpoint_name=self.checkpoint_name,
+            )
             if self.monitor == 'step':
-                model_lists = sorted(model_lists,
-                                     key=lambda x: int(x.split("/")[-2].split("-")[-1]))
+                model_lists = sorted(model_lists, key=lambda x: int(x.split("/")[-2].split("-")[-1]))
             elif self.monitor == 'metrics':
                 is_reverse = self.sort_mode == 'min'
-                model_lists = sorted(model_lists,
-                                     key=lambda x: float(x.split("/")[-2].split("-")[-1][2]),
-                                     reverse=is_reverse)
+                model_lists = sorted(
+                    model_lists, key=lambda x: float(x.split("/")[-2].split("-")[-1][2]), reverse=is_reverse
+                )
             model_lists = model_lists[-self.k_best_checkpoints:]
             logger.info(f"Averaging checkpoints: {[f.split('/')[-2] for f in model_lists]}")
             return model_lists

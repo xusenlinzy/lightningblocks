@@ -1,1 +1,1 @@
-from lightningnlp.metrics.squad.score import SquadMetric
+from .score import SquadMetric

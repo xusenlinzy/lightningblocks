@@ -1,6 +1,4 @@
-from lightningnlp.task.relation_extraction.auto.data import get_auto_re_collator
-from lightningnlp.task.relation_extraction.auto.model import get_auto_re_model
-from lightningnlp.task.relation_extraction.auto.model import get_auto_re_model_config
-from lightningnlp.task.relation_extraction.auto.pipeline import EnsembleRelationExtractionPipeline
-from lightningnlp.task.relation_extraction.auto.pipeline import RelationExtractionPipeline
-from lightningnlp.task.relation_extraction.auto.predictor import get_auto_re_predictor
+from .data import get_auto_re_collator
+from .model import get_auto_re_model, get_auto_re_model_config
+from .pipeline import EnsembleRelationExtractionPipeline, RelationExtractionPipeline
+from .predictor import get_auto_re_predictor

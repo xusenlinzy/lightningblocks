@@ -22,3 +22,5 @@ __pycache__/
 /knowledge_graph/medical/dict/
 /lightningnlp/task/uie/uie-base/
 /lightningnlp/task/uie/uie_base_pytorch/
+/docker/uie-base/
+/docker/uie_base_pytorch/

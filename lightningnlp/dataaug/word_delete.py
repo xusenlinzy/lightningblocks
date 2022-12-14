@@ -1,6 +1,6 @@
 import random
 
-from lightningnlp.dataaug.base_augment import BaseAugment
+from .base_augment import BaseAugment
 
 __all__ = ['WordDelete']
 

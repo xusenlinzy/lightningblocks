@@ -4,7 +4,7 @@ from typing import Optional
 import numpy as np
 from datasets import Dataset
 
-from lightningnlp.core import TransformerDataModule
+from ...core import TransformerDataModule
 
 
 class UIEDataModule(TransformerDataModule):
@@ -24,7 +24,7 @@ class UIEDataModule(TransformerDataModule):
         convert_to_features = partial(
             UIEDataModule.convert_example,
             tokenizer=self.tokenizer,
-            max_seq_len=self.max_length,
+            max_seq_len=self.train_max_length,
             multilingual=self.multilingual,
         )
 

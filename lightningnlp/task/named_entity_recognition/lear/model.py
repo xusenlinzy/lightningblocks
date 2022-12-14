@@ -4,10 +4,10 @@ import torch
 import torch.nn as nn
 from transformers import PreTrainedModel
 
-from lightningnlp.layers.lear import LabelFusionForToken, Classifier, MLPForMultiLabel
-from lightningnlp.losses.span_loss import SpanLossForMultiLabel
-from lightningnlp.task.utils import SpanOutput, MODEL_MAP
-from lightningnlp.utils.tensor import tensor_to_cpu
+from ...utils import SpanOutput, MODEL_MAP
+from ....layers.lear import LabelFusionForToken, Classifier, MLPForMultiLabel
+from ....losses.span_loss import SpanLossForMultiLabel
+from ....utils.tensor import tensor_to_cpu
 
 
 def get_auto_lear_ner_model(
@@ -188,17 +188,10 @@ def get_auto_lear_ner_model(
 
             if not self.config.nested:
                 start_logits, end_logits, start_labels, end_labels, mask = inputs[:5]
-                loss = loss_fct(
-                    (start_logits, end_logits),
-                    (start_labels, end_labels), mask
-                )
-                return loss
+                return loss_fct((start_logits, end_logits), (start_labels, end_labels), mask)
+
             start_logits, end_logits, span_logits, start_labels, end_labels, span_labels, mask = inputs[:7]
-            loss = loss_fct(
-                (start_logits, end_logits, span_logits),
-                (start_labels, end_labels, span_labels), mask, nested=True
-            )
-            return loss
+            return loss_fct((start_logits, end_logits, span_logits), (start_labels, end_labels, span_labels), mask, nested=True)
 
     return LEARForNer
 

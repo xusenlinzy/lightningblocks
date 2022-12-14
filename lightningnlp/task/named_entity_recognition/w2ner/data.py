@@ -7,8 +7,8 @@ import numpy as np
 import torch
 from transformers import PreTrainedTokenizerBase
 
-from lightningnlp.task.named_entity_recognition.data import TokenClassificationDataModule
-from lightningnlp.utils.tensor import sequence_padding
+from ..data import TokenClassificationDataModule
+from ....utils.tensor import sequence_padding
 
 # dist_inputs
 # https://github.com/ljynlp/W2NER/issues/17
@@ -92,7 +92,7 @@ class W2NerDataModule(TokenClassificationDataModule):
             convert_to_features = partial(
                 W2NerDataModule.convert_to_features_train,
                 tokenizer=self.tokenizer,
-                max_length=self.max_length,
+                max_length=self.train_max_length,
                 label_to_id=self.label_to_id,
                 text_column_name=text_column_name,
                 label_column_name=label_column_name,
@@ -103,7 +103,7 @@ class W2NerDataModule(TokenClassificationDataModule):
             convert_to_features = partial(
                 W2NerDataModule.convert_to_features_valid,
                 tokenizer=self.tokenizer,
-                max_length=self.max_length,
+                max_length=self.validation_max_length if mode == "val" else self.test_max_length,
                 text_column_name=text_column_name,
                 is_chinese=self.is_chinese,
             )

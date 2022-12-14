@@ -1,9 +1,7 @@
 import shutil
 import time
 
-from lightningnlp.callbacks import Logger, tqdm
-
-logger = Logger("Downloading")
+from .logger import logger, tqdm
 
 
 def get_path_from_url(url, root_dir, check_exist=True, decompress=True):

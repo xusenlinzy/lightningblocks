@@ -47,8 +47,9 @@ class GlobalPointer(nn.Module):
         """
         # hidden_states:  (b, l, h)
         sequence_output = self.linear(hidden_state)  # (b, l, c * d * 2)
-        sequence_output = torch.stack(torch.chunk(sequence_output, self.heads, dim=-1),
-                                      dim=-2)  # [..., heads, head_size*2]
+        sequence_output = torch.stack(
+            torch.chunk(sequence_output, self.heads, dim=-1), dim=-2
+        )  # [..., heads, head_size*2]
         qw, kw = sequence_output[..., :self.head_size], sequence_output[..., self.head_size:]  # [..., heads, head_size]
 
         # RoPE编码 (乘性编码) 
@@ -63,6 +64,7 @@ class GlobalPointer(nn.Module):
         if mask is not None:
             mask1 = 1 - mask[:, None, :, None]  # [btz, 1, seq_len, 1]
             mask2 = 1 - mask[:, None, None, :]  # [btz, 1, 1, seq_len]
+
             logits = logits.masked_fill(mask1.bool(), value=-float('inf'))
             logits = logits.masked_fill(mask2.bool(), value=-float('inf'))
 
@@ -115,15 +117,17 @@ class EfficientGlobalPointer(nn.Module):
         logits /= self.head_size ** 0.5
 
         bias_input = self.linear2(sequence_output)  # [..., heads*2]
-        bias = torch.stack(torch.chunk(bias_input, self.heads, dim=-1), dim=-2).transpose(1,
-                                                                                          2)  # [btz, head_size, seq_len,2]
-        logits = logits.unsqueeze(1) + bias[..., :1] + bias[..., 1:].transpose(2,
-                                                                               3)  # [btz, head_size, seq_len, seq_len]
+        bias = torch.stack(
+            torch.chunk(bias_input, self.heads, dim=-1), dim=-2
+        ).transpose(1, 2)  # [btz, head_size, seq_len,2]
+        # [btz, head_size, seq_len, seq_len]
+        logits = logits.unsqueeze(1) + bias[..., :1] + bias[..., 1:].transpose(2, 3)
 
         # 排除padding: method2
         if mask is not None:
             mask1 = 1 - mask[:, None, :, None]  # [btz, 1, seq_len, 1]
             mask2 = 1 - mask[:, None, None, :]  # [btz, 1, 1, seq_len]
+
             logits = logits.masked_fill(mask1.bool(), value=-float('inf'))
             logits = logits.masked_fill(mask2.bool(), value=-float('inf'))
 
@@ -149,11 +153,13 @@ class Biaffine(nn.Module):
             self.position_encoding = SinusoidalPositionEncoding(max_len, hidden_size)
 
         # add lstm layers
-        self.lstm = torch.nn.LSTM(hidden_size, hidden_size,
-                                  num_layers=1,
-                                  batch_first=True,
-                                  dropout=0.2,
-                                  bidirectional=True)
+        self.lstm = torch.nn.LSTM(
+            hidden_size, hidden_size,
+            num_layers=1,
+            batch_first=True,
+            dropout=0.2,
+            bidirectional=True,
+        )
 
         # 头预测层
         self.start_layer = nn.Sequential(nn.Linear(2 * hidden_size, head_size), nn.ReLU())
@@ -211,6 +217,7 @@ class Biaffine(nn.Module):
         if mask is not None:
             mask1 = 1 - mask[:, None, :, None]  # [btz, 1, seq_len, 1]
             mask2 = 1 - mask[:, None, None, :]  # [btz, 1, 1, seq_len]
+
             logits = logits.masked_fill(mask1.bool(), value=-float('inf'))
             logits = logits.masked_fill(mask2.bool(), value=-float('inf'))
 
@@ -225,8 +232,7 @@ class UnlabeledEntity(nn.Module):
     """ https://arxiv.org/pdf/2012.05426.pdf
     """
 
-    def __init__(self, hidden_size, num_labels, max_len=512, position_type='relative',
-                 tri_mask=True):  # [None, 'absolute', 'relative']
+    def __init__(self, hidden_size, num_labels, max_len=512, position_type='relative', tri_mask=True):
         super(UnlabeledEntity, self).__init__()
         self.hidden_size = hidden_size
         self.num_labels = num_labels
@@ -240,9 +246,11 @@ class UnlabeledEntity(nn.Module):
         if self.position_type == 'absolute':
             self.position_encoding = SinusoidalPositionEncoding(max_len, hidden_size)
         elif self.position_type == 'relative':
-            self.relative_positions_encoding = RelativePositionsEncoding(qlen=max_len,
-                                                                         klen=max_len,
-                                                                         embedding_size=hidden_size * 4)
+            self.relative_positions_encoding = RelativePositionsEncoding(
+                qlen=max_len,
+                klen=max_len,
+                embedding_size=hidden_size * 4,
+            )
 
     def forward(self, hidden_state, mask=None):
         seq_len = hidden_state.shape[1]
@@ -259,9 +267,9 @@ class UnlabeledEntity(nn.Module):
         start_logits = start_logits.repeat(1, seq_len, 1, 1)  # [b, l, l, h]
         end_logits = end_logits.repeat(1, 1, seq_len, 1)
 
-        concat_inputs = torch.cat([end_logits, start_logits,
-                                   end_logits - start_logits,
-                                   end_logits.mul(start_logits)], dim=-1)
+        concat_inputs = torch.cat(
+            [end_logits, start_logits, end_logits - start_logits, end_logits.mul(start_logits)], dim=-1
+        )
 
         if self.position_type == 'relative':
             relations_keys = self.relative_positions_encoding(seq_len, seq_len)
@@ -276,6 +284,7 @@ class UnlabeledEntity(nn.Module):
         if mask is not None:
             mask1 = 1 - mask[:, None, :, None]  # [btz, 1, seq_len, 1]
             mask2 = 1 - mask[:, None, None, :]  # [btz, 1, 1, seq_len]
+
             logits = logits.masked_fill(mask1.bool(), value=-float('inf'))
             logits = logits.masked_fill(mask2.bool(), value=-float('inf'))
 
