@@ -85,11 +85,11 @@ dm = TextClassificationDataModule(
     train_batch_size=16,  # 训练集batch_size
     validation_batch_size=16,  # 验证集batch_size
     num_workers=16,  # 多进程加载数据
-    dataset_name="datasets/sentiment",  # 训练数据所在目录
+    dataset_name="datasets/tnews",  # 训练数据所在目录
     train_file="train.json",  # 训练集文件名
     validation_file="dev.json",  # 验证集文件名
     train_max_length=256,
-    cache_dir="datasets/sentiment",  # 数据缓存路径
+    cache_dir="datasets/tnews",  # 数据缓存路径
 )
 
 model = TextClassificationTransformer(
@@ -97,13 +97,13 @@ model = TextClassificationTransformer(
     downstream_model_type="bert",  # 预训练模型类型
     pretrained_model_name_or_path=pretrained_model_name_or_path,
     tokenizer=tokenizer,
-    label_map=dm.label_map,
+    label_map=dm.id2label,
     learning_rate=2e-5,
-    output_dir="outputs/sentiment/fc",  # 模型保存路径
+    output_dir="outputs/tnews/fc",  # 模型保存路径
 )
 
 model_ckpt = pl.callbacks.ModelCheckpoint(
-    dirpath="outputs/sentiment/fc",
+    dirpath="outputs/tnews/fc",
     filename="best_model",
     monitor="val_accuracy",
     save_top_k=1,
@@ -130,12 +130,15 @@ trainer.fit(model, dm)
 ### 3. 预测
 
 ```python
-from lightningnlp.task.text_classification import TextClassificationTransformer
+from lightningnlp.task.text_classification import TextClassificationPipeline
 
-model = TextClassificationTransformer.load_from_checkpoint("my_bert_model_path")
+pipeline = TextClassificationPipeline(model_name_or_path="outputs/tnews/fc", model_name="fc", model_type="bert")
 text = "以色列大规模空袭开始！伊朗多个军事目标遭遇打击，誓言对等反击"
-print(model.predict(text))
+print(pipeline(text))
 ```
+
+### 4. APP应用
+![tc](./image/tc.png)
 
 
 ## 📄 命名实体识别

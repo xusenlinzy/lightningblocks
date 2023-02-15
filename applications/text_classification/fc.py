@@ -23,7 +23,7 @@ num_workers = 4  # 多进程加载数据
 dataset_name = "xusenlin/tnews"
 
 # # 方式2：使用自定义数据集
-# dataset_name = "datasets/cmeee"  # 训练数据所在目录
+# dataset_name = "datasets/tnews"  # 训练数据所在目录
 # train_file = "train.json"  # 训练集文件名
 # validation_file = "dev.json"  # 验证集文件名
 
@@ -50,7 +50,7 @@ def main():
         validation_batch_size=validation_batch_size,
         dataset_name=dataset_name,
         num_workers=num_workers,
-        # train_file=train_file,  # 自定义数据集最好指定训练集和验证集文件名
+        # train_file=train_file,  # 自定义数据集指定训练集和验证集文件名
         # validation_file=validation_file,
         train_max_length=train_max_length,
         cache_dir=cache_dir,
@@ -61,7 +61,7 @@ def main():
         downstream_model_type=downstream_model_type,
         pretrained_model_name_or_path=pretrained_model_name_or_path,
         tokenizer=tokenizer,
-        labels=dm.label_map,
+        id2label=dm.id2label,
         learning_rate=learning_rate,
         output_dir=output_dir,
     )
@@ -80,7 +80,7 @@ def main():
         logger=wandb_logger,
         accelerator="gpu",
         devices=1,
-        max_epochs=12,
+        max_epochs=4,
         val_check_interval=0.5,
         gradient_clip_val=1.0,
         callbacks=[model_ckpt, LoggingCallback()]

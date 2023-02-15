@@ -4,18 +4,18 @@ import numpy as np
 import torch
 
 from lightningnlp.core import PredictorBase
-from ...utils.logger import Logger, tqdm
+from ...utils.logger import tqdm
 
 
 class TextClassificationPredictor(PredictorBase):
     """
     A class for Text Classification task predictor.
     """
-    def __init__(self, *args,  label_map: Dict[int, Any] = None, **kwargs):
-        self.label_map = label_map
+    def __init__(self, *args,  id2label: Dict[int, Any] = None, **kwargs):
+        self.id2label = id2label
         super().__init__(*args, **kwargs)
-        if label_map is not None:
-            self.model.config.label_map = label_map
+        if id2label is not None:
+            self.model.config.id2label = id2label
 
     @torch.no_grad()
     def predict(
@@ -62,7 +62,7 @@ class TextClassificationPredictor(PredictorBase):
             outputs = np.asarray(outputs['logits']).argmax(-1)
             output_list.extend(outputs)
 
-        if hasattr(self.model.config, "label_map"):
-            output_list = [self.model.config.label_map[o] for o in output_list]
+        if hasattr(self.model.config, "id2label"):
+            output_list = [self.model.config.id2label[o] for o in output_list]
 
         return output_list[0] if single_sentence else output_list

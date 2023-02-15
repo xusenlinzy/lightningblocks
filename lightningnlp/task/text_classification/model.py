@@ -20,15 +20,18 @@ class TextClassificationTransformer(TaskTransformer):
         self,
         downstream_model_type: str,
         downstream_model_name: str,
-        label_map: Dict[Any, int],
+        id2label: Dict[Any, int],
         model_config_kwargs: Optional[dict] = None,
         **kwargs,
     ) -> None:
         model_config_kwargs = model_config_kwargs or {}
-        model_config_kwargs = get_auto_tc_model_config(label_map, model_config_kwargs)
+        model_config_kwargs = get_auto_tc_model_config(
+            id2label, model_name=downstream_model_name, **model_config_kwargs
+        )
         super().__init__(downstream_model_type, downstream_model_name,
                          model_config_kwargs=model_config_kwargs, **kwargs)
         self.metrics = {}
+        self.num_classes = len(id2label)
 
     def get_auto_model(self, downstream_model_type, downstream_model_name):
         return get_auto_tc_model(model_name=downstream_model_name, model_type=downstream_model_type)

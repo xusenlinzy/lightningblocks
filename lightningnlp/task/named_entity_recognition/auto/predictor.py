@@ -1,4 +1,4 @@
-from ..auto import get_auto_ner_model
+from .model import get_auto_ner_model
 from ..lear import LearNerPredictor
 from ..mrc import PromptNerPredictor
 from ..predictor import NerPredictor

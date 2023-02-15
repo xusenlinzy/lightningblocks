@@ -13,7 +13,6 @@ class TextClassificationDataModule(TransformerDataModule):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.labels = None
 
     def process_data(self, dataset: Dataset, stage: Optional[str] = None) -> Dataset:
         input_feature_fields = [k for k, v in dataset["train"].features.items() if k not in ["label", "idx"]]
@@ -28,10 +27,12 @@ class TextClassificationDataModule(TransformerDataModule):
         cols_to_keep = [
             x for x in ["input_ids", "attention_mask", "token_type_ids", "labels"] if x in dataset["train"].features
         ]
+
         if not isinstance(dataset["train"].features["labels"], ClassLabel):
             dataset = dataset.class_encode_column("labels")
         dataset.set_format("torch", columns=cols_to_keep)
         self.labels = dataset["train"].features["labels"]
+
         return dataset
 
     @property
@@ -42,11 +43,11 @@ class TextClassificationDataModule(TransformerDataModule):
         return self.labels.num_classes
 
     @property
-    def label_map(self) -> dict:
+    def id2label(self) -> dict:
         if self.labels is None:
             rank_zero_warn("Labels has not been set, calling `setup('fit')`.")
             self.setup("fit")
-        return {l: i for i, l in enumerate(self.labels.names)}
+        return {i: l for i, l in enumerate(self.labels.names)}
 
     @staticmethod
     def convert_to_features(

@@ -82,9 +82,9 @@ def get_auto_fc_tc_model(
     return SequenceClassification
 
 
-def get_fc_model_config(label_map, **kwargs):
+def get_fc_model_config(id2label, **kwargs):
     model_config = {
-        "num_labels": len(label_map), "pooler_type": "cls", "classifier_dropout": 0.3, "label_map": label_map,
+        "num_labels": len(id2label), "pooler_type": "cls", "classifier_dropout": 0.3, "id2label": id2label,
     }
     model_config.update(kwargs)
     return model_config

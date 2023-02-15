@@ -1,10 +1,9 @@
 import copy
-import logging
 import os
 
 import torch
 
-from .logger import logger
+from ..utils.logger import logger
 from ..utils.paths import create_dir, save_model, find_all_checkpoints
 
 
