@@ -138,7 +138,7 @@ print(pipeline(text))
 ```
 
 ### 4. APP应用
-![tc](./image/tc.png)
+![tc](images/tc.png)
 
 
 ## 📄 命名实体识别
