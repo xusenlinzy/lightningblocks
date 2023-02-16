@@ -3,6 +3,7 @@ from typing import Optional
 
 import numpy as np
 from datasets import Dataset
+from transformers import default_data_collator
 
 from ...core import TransformerDataModule
 
@@ -31,8 +32,7 @@ class UIEDataModule(TransformerDataModule):
         dataset = dataset.map(
             convert_to_features,
             remove_columns=dataset["train"].column_names,
-            num_proc=self.preprocessing_num_workers,
-            load_from_cache_file=self.load_from_cache_file,
+            num_proc=self.num_workers if self.num_workers else None,
         )
 
         return dataset
@@ -41,7 +41,6 @@ class UIEDataModule(TransformerDataModule):
     def convert_example(example, tokenizer, max_seq_len, multilingual=False):
         """
         example: {
-            title
             prompt
             content
             result_list
@@ -106,3 +105,7 @@ class UIEDataModule(TransformerDataModule):
             for k, v in tokenized_output.items()
         }
         return tokenized_output
+
+    @property
+    def collate_fn(self):
+        return default_data_collator

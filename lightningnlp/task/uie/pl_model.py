@@ -58,12 +58,12 @@ class UIEModel(TaskTransformer):
         return self.common_step(batch)
 
     def test_epoch_end(self, outputs):
-        return self.common_epoch_end("val")
+        return self.common_epoch_end("test")
 
     def configure_metrics(self, _) -> None:
-        self.metric = SpanEvaluator()
+        self.metrics = SpanEvaluator()
 
     def compute_metrics(self, mode="val") -> Dict[str, float]:
-        p, r, f = self.metric.accumulate()
+        p, r, f = self.metrics.accumulate()
         self.metrics.reset()
         return {f"{mode}_precision": p, f"{mode}_recall": r, f"{mode}_f1": f}

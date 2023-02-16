@@ -13,16 +13,16 @@ from lightningnlp.task.uie import (
 )
 
 # datasets args
-pretrained_model_name_or_path = "uie_base_pytorch"  # 预训练模型
+pretrained_model_name_or_path = "xusenlin/uie-base"  # 预训练模型
 train_batch_size = 8  # 训练集batch_size
 validation_batch_size = 8  # 验证集batch_size
-train_max_length = 512  # 序列最大长度
-num_workers = 16  # 多进程加载数据
+train_max_length = 256  # 序列最大长度
+num_workers = 16
 
-dataset_name = "datasets/medical"
-train_file = "train.json"  # 训练集文件名
-validation_file = "dev.json"  # 验证集文件名
-cache_dir = "datasets/medical"  # 数据缓存路径
+dataset_name = "xusenlin/uie-demo"
+# train_file = "train.json"  # 训练集文件名
+# validation_file = "dev.json"  # 验证集文件名
+cache_dir = "datasets/cmeee"  # 数据缓存路径
 task_name = "uie"  # 自定义任务名称
 
 # model args
@@ -43,12 +43,12 @@ def main():
         tokenizer=tokenizer,
         train_batch_size=train_batch_size,
         validation_batch_size=validation_batch_size,
-        num_workers=num_workers,
         dataset_name=dataset_name,
-        train_file=train_file,
-        validation_file=validation_file,
+        num_workers=num_workers,
+        # train_file=train_file,
+        # validation_file=validation_file,
         cache_dir=cache_dir,
-        train_max_length=train_max_length,
+        train_max_length=train_max_length,  # 序列最大长度
         task_name=task_name,
     )
 
@@ -75,8 +75,8 @@ def main():
         logger=wandb_logger,
         accelerator="gpu",
         devices=1,
-        max_epochs=10,
-        val_check_interval=0.5,
+        max_epochs=4,
+        val_check_interval=0.25,
         gradient_clip_val=1.0,
         num_sanity_val_steps=0,
         callbacks=[model_ckpt, LoggingCallback()]

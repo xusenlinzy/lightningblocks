@@ -283,10 +283,3 @@ class TaskTransformer(pl.LightningModule):
 
     def get_auto_model(self, downstream_model_type, downstream_model_name):
         pass
-
-    # noinspection PyRedeclaration
-    def configure_metrics(self, stage: str) -> Optional[Any]:
-        """Override to configure metrics for train/validation/test.
-        This is called on fit start to have access to the data module, and initialize any data specific metrics.
-        """
-        pass
