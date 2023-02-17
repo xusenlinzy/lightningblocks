@@ -18,9 +18,9 @@ __pycache__/
 /applications/sentence_embedding/docker-cpu/
 /applications/text_search/
 /commodity_classification/
-/knowledge_graph/ownthink/data/
-/knowledge_graph/medical/dict/
 /lightningnlp/task/uie/uie-base/
 /lightningnlp/task/uie/uie_base_pytorch/
 /docker/uie-base/
 /docker/uie_base_pytorch/
+/knowledge_graph/
+/prompt_clue/

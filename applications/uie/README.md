@@ -247,7 +247,7 @@ python doccano.py \
 
 ## 3.2. 模型微调
 
-参考训练示例[finetune](./finetune.py)
+参考训练示例 [finetune](./finetune.py)
 
 ```bash
 python finetune.py
@@ -255,7 +255,7 @@ python finetune.py
 
 ## 3.3. 模型预测
 
-参考预测示例[predict](./predict.py)
+参考预测示例 [predict](./predict.py)
 
 # Reference
 
